@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil - FitGang{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section text-center py-5">
+    <div class="container">
+        <h1 class="display-3 fw-bold text-danger mb-3">
+            <i class="bi bi-lightning-charge-fill"></i> FITGANG
+        </h1>
+        <p class="lead mb-4">
+            Transforme ton corps, dépasse tes limites, rejoins le gang!
+        </p>
+        {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('main.register') }}" class="btn btn-danger btn-lg me-2">Rejoindre FitGang</a>
+            <a href="{{ url_for('main.programmes') }}" class="btn btn-outline-light btn-lg">Voir les Programmes</a>
+        {% else %}
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-danger btn-lg">Mon Tableau de Bord</a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- About Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h2 class="fw-bold mb-4">Qui sommes-nous?</h2>
+                <p class="lead">
+                    FitGang est une communauté de passionnés de fitness qui repoussent leurs limites chaque jour.
+                </p>
+                <p>
+                    Nous proposons des programmes d'entraînement personnalisés, des ebooks complets et un suivi
+                    de progression pour t'aider à atteindre tes objectifs.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-check-circle-fill text-danger"></i> Programmes adaptés à tous niveaux</li>
+                    <li><i class="bi bi-check-circle-fill text-danger"></i> Suivi de progression détaillé</li>
+                    <li><i class="bi bi-check-circle-fill text-danger"></i> Ebooks nutrition et entraînement</li>
+                    <li><i class="bi bi-check-circle-fill text-danger"></i> Communauté motivante</li>
+                </ul>
+            </div>
+            <div class="col-md-6 text-center">
+                <i class="bi bi-trophy-fill text-danger" style="font-size: 200px;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Programmes Section -->
+<section class="py-5 bg-dark">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-5">Nos Programmes</h2>
+        <div class="row">
+            {% for programme in programmes %}
+            <div class="col-md-4 mb-4">
+                <div class="card card-custom h-100">
+                    {% if programme.image %}
+                        <img src="{{ programme.image }}" class="card-img-top" alt="{{ programme.titre }}">
+                    {% else %}
+                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-dumbbell text-white" style="font-size: 80px;"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <span class="badge bg-danger mb-2">{{ programme.niveau }}</span>
+                        <h5 class="card-title">{{ programme.titre }}</h5>
+                        <p class="card-text">{{ programme.description }}</p>
+                        <p class="text-muted">
+                            <i class="bi bi-clock"></i> {{ programme.duree }}
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0 text-danger">{{ programme.prix }}€</span>
+                            {% if current_user.is_authenticated %}
+                                {% if current_user.has_purchased(programme.id, 'programme') %}
+                                    <span class="badge bg-success">Acheté</span>
+                                {% else %}
+                                    <a href="{{ url_for('main.checkout', item_type='programme', item_id=programme.id) }}" class="btn btn-danger">Acheter</a>
+                                {% endif %}
+                            {% else %}
+                                <a href="{{ url_for('main.login') }}" class="btn btn-danger">Acheter</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('main.programmes') }}" class="btn btn-outline-danger">Voir tous les programmes</a>
+        </div>
+    </div>
+</section>
+
+<!-- Ebooks Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-5">Nos Ebooks</h2>
+        <div class="row">
+            {% for ebook in ebooks %}
+            <div class="col-md-4 mb-4">
+                <div class="card card-custom h-100">
+                    {% if ebook.image %}
+                        <img src="{{ ebook.image }}" class="card-img-top" alt="{{ ebook.titre }}">
+                    {% else %}
+                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 250px;">
+                            <i class="bi bi-book text-white" style="font-size: 80px;"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ ebook.titre }}</h5>
+                        <p class="card-text">{{ ebook.description[:100] }}...</p>
+                        {% if ebook.nombre_pages %}
+                            <p class="text-muted"><i class="bi bi-file-earmark-text"></i> {{ ebook.nombre_pages }} pages</p>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0 text-danger">{{ ebook.prix }}€</span>
+                            {% if current_user.is_authenticated %}
+                                {% if current_user.has_purchased(ebook.id, 'ebook') %}
+                                    <span class="badge bg-success">Acheté</span>
+                                {% else %}
+                                    <a href="{{ url_for('main.checkout', item_type='ebook', item_id=ebook.id) }}" class="btn btn-danger">Acheter</a>
+                                {% endif %}
+                            {% else %}
+                                <a href="{{ url_for('main.login') }}" class="btn btn-danger">Acheter</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('main.ebooks') }}" class="btn btn-outline-danger">Voir tous les ebooks</a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-danger text-white text-center">
+    <div class="container">
+        <h2 class="fw-bold mb-3">Prêt à transformer ton corps?</h2>
+        <p class="lead mb-4">Rejoins des milliers d'athlètes qui ont choisi FitGang</p>
+        {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('main.register') }}" class="btn btn-dark btn-lg">Commencer maintenant</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

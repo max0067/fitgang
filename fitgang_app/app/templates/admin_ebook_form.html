@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - FitGang Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h1 class="mb-4">
+            <i class="bi bi-book text-info"></i> {{ title }}
+        </h1>
+
+        <div class="card card-custom">
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.titre.label(class="form-label fw-bold") }}
+                        {{ form.titre(class="form-control", placeholder="Ex: Guide Complet de la Nutrition") }}
+                        {% if form.titre.errors %}
+                            {% for error in form.titre.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label fw-bold") }}
+                        {{ form.description(class="form-control", rows="4", placeholder="Description complète de l'ebook") }}
+                        {% if form.description.errors %}
+                            {% for error in form.description.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.prix.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                {{ form.prix(class="form-control", placeholder="19.99") }}
+                                <span class="input-group-text">€</span>
+                            </div>
+                            {% if form.prix.errors %}
+                                {% for error in form.prix.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ form.nombre_pages.label(class="form-label fw-bold") }}
+                            {{ form.nombre_pages(class="form-control", placeholder="Ex: 150") }}
+                            {% if form.nombre_pages.errors %}
+                                {% for error in form.nombre_pages.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.image.label(class="form-label fw-bold") }}
+                        {{ form.image(class="form-control", placeholder="https://example.com/cover.jpg") }}
+                        <small class="text-muted">URL de l'image de couverture</small>
+                        {% if form.image.errors %}
+                            {% for error in form.image.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.lien.label(class="form-label fw-bold") }}
+                        {{ form.lien(class="form-control", placeholder="https://drive.google.com/...") }}
+                        <small class="text-muted">Lien Google Drive, Dropbox, etc. pour le téléchargement</small>
+                        {% if form.lien.errors %}
+                            {% for error in form.lien.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ form.actif(class="form-check-input") }}
+                        {{ form.actif.label(class="form-check-label") }}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-info btn-lg") }}
+                        <a href="{{ url_for('main.admin_ebooks') }}" class="btn btn-outline-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

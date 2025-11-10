@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - FitGang Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h1 class="mb-4">
+            <i class="bi bi-dumbbell text-danger"></i> {{ title }}
+        </h1>
+
+        <div class="card card-custom">
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.titre.label(class="form-label fw-bold") }}
+                        {{ form.titre(class="form-control", placeholder="Ex: Programme Mass Extreme") }}
+                        {% if form.titre.errors %}
+                            {% for error in form.titre.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label fw-bold") }}
+                        {{ form.description(class="form-control", rows="3", placeholder="Description courte pour les cartes") }}
+                        {% if form.description.errors %}
+                            {% for error in form.description.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.contenu.label(class="form-label fw-bold") }}
+                        {{ form.contenu(class="form-control", rows="5", placeholder="Contenu détaillé du programme") }}
+                        {% if form.contenu.errors %}
+                            {% for error in form.contenu.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ form.prix.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                {{ form.prix(class="form-control", placeholder="29.99") }}
+                                <span class="input-group-text">€</span>
+                            </div>
+                            {% if form.prix.errors %}
+                                {% for error in form.prix.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            {{ form.niveau.label(class="form-label fw-bold") }}
+                            {{ form.niveau(class="form-select") }}
+                            {% if form.niveau.errors %}
+                                {% for error in form.niveau.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            {{ form.duree.label(class="form-label fw-bold") }}
+                            {{ form.duree(class="form-control", placeholder="Ex: 8 semaines") }}
+                            {% if form.duree.errors %}
+                                {% for error in form.duree.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.image.label(class="form-label fw-bold") }}
+                        {{ form.image(class="form-control", placeholder="https://example.com/image.jpg") }}
+                        <small class="text-muted">URL de l'image du programme</small>
+                        {% if form.image.errors %}
+                            {% for error in form.image.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ form.actif(class="form-check-input") }}
+                        {{ form.actif.label(class="form-check-label") }}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-danger btn-lg") }}
+                        <a href="{{ url_for('main.admin_programmes') }}" class="btn btn-outline-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

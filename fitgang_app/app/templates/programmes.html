@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Programmes - FitGang{% endblock %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-4 fw-bold">
+        <i class="bi bi-dumbbell text-danger"></i> Nos Programmes
+    </h1>
+    <p class="lead">Trouve le programme qui correspond à ton niveau et tes objectifs</p>
+</div>
+
+{% if programmes %}
+    <div class="row">
+        {% for programme in programmes %}
+        <div class="col-md-4 mb-4">
+            <div class="card card-custom h-100">
+                {% if programme.image %}
+                    <img src="{{ programme.image }}" class="card-img-top" alt="{{ programme.titre }}">
+                {% else %}
+                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 250px;">
+                        <i class="bi bi-dumbbell text-white" style="font-size: 100px;"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <div class="mb-2">
+                        <span class="badge bg-danger">{{ programme.niveau }}</span>
+                        <span class="badge bg-secondary">{{ programme.duree }}</span>
+                    </div>
+                    <h5 class="card-title fw-bold">{{ programme.titre }}</h5>
+                    <p class="card-text">{{ programme.description }}</p>
+
+                    {% if programme.contenu %}
+                        <div class="collapse" id="contenu{{ programme.id }}">
+                            <div class="card card-body bg-dark border-0 mb-2">
+                                <small>{{ programme.contenu }}</small>
+                            </div>
+                        </div>
+                        <a class="btn btn-sm btn-link text-danger p-0" data-bs-toggle="collapse" href="#contenu{{ programme.id }}">
+                            Voir le contenu détaillé <i class="bi bi-chevron-down"></i>
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="h4 mb-0 text-danger fw-bold">{{ programme.prix }}€</span>
+                        {% if current_user.is_authenticated %}
+                            {% if current_user.has_purchased(programme.id, 'programme') %}
+                                <button class="btn btn-success" disabled>
+                                    <i class="bi bi-check-circle"></i> Acheté
+                                </button>
+                            {% else %}
+                                <a href="{{ url_for('main.checkout', item_type='programme', item_id=programme.id) }}" class="btn btn-danger">
+                                    <i class="bi bi-cart-plus"></i> Acheter
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('main.login') }}" class="btn btn-danger">
+                                <i class="bi bi-cart-plus"></i> Acheter
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info text-center">
+        <i class="bi bi-info-circle"></i> Aucun programme disponible pour le moment.
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Ebooks - FitGang{% endblock %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-4 fw-bold">
+        <i class="bi bi-book text-danger"></i> Nos Ebooks
+    </h1>
+    <p class="lead">Guides complets sur la nutrition, l'entraînement et le mindset</p>
+</div>
+
+{% if ebooks %}
+    <div class="row">
+        {% for ebook in ebooks %}
+        <div class="col-md-3 mb-4">
+            <div class="card card-custom h-100">
+                {% if ebook.image %}
+                    <img src="{{ ebook.image }}" class="card-img-top" alt="{{ ebook.titre }}">
+                {% else %}
+                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 300px;">
+                        <i class="bi bi-book text-white" style="font-size: 100px;"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">{{ ebook.titre }}</h5>
+                    <p class="card-text small">{{ ebook.description[:120] }}{% if ebook.description|length > 120 %}...{% endif %}</p>
+
+                    {% if ebook.nombre_pages %}
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-file-earmark-text"></i> {{ ebook.nombre_pages }} pages
+                        </p>
+                    {% endif %}
+
+                    <div class="collapse" id="desc{{ ebook.id }}">
+                        <div class="card card-body bg-dark border-0 small">
+                            {{ ebook.description }}
+                        </div>
+                    </div>
+                    <a class="btn btn-sm btn-link text-danger p-0" data-bs-toggle="collapse" href="#desc{{ ebook.id }}">
+                        Lire plus <i class="bi bi-chevron-down"></i>
+                    </a>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="h5 mb-0 text-danger fw-bold">{{ ebook.prix }}€</span>
+                    </div>
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.has_purchased(ebook.id, 'ebook') %}
+                            {% if ebook.lien %}
+                                <a href="{{ ebook.lien }}" target="_blank" class="btn btn-success w-100">
+                                    <i class="bi bi-download"></i> Télécharger
+                                </a>
+                            {% else %}
+                                <button class="btn btn-success w-100" disabled>
+                                    <i class="bi bi-check-circle"></i> Acheté
+                                </button>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('main.checkout', item_type='ebook', item_id=ebook.id) }}" class="btn btn-danger w-100">
+                                <i class="bi bi-cart-plus"></i> Acheter
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('main.login') }}" class="btn btn-danger w-100">
+                            <i class="bi bi-cart-plus"></i> Acheter
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info text-center">
+        <i class="bi bi-info-circle"></i> Aucun ebook disponible pour le moment.
+    </div>
+{% endif %}
+{% endblock %}

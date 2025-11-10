@@ -1,0 +1,392 @@
+/*
+ * FitGang - Custom CSS
+ * Charte graphique: fond sombre, accents rouge/orange
+ */
+
+/* ===== VARIABLES CSS ===== */
+:root {
+    --fitgang-dark: #0a0a0a;
+    --fitgang-dark-secondary: #1a1a1a;
+    --fitgang-dark-card: #2a2a2a;
+    --fitgang-red: #ff4444;
+    --fitgang-red-hover: #ff6666;
+    --fitgang-orange: #ff6b35;
+    --fitgang-text-light: #e0e0e0;
+    --fitgang-text-white: #ffffff;
+    --fitgang-border: #444;
+}
+
+/* ===== BODY & GENERAL ===== */
+body {
+    background-color: var(--fitgang-dark);
+    color: var(--fitgang-text-light);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+    background-color: var(--fitgang-dark-secondary) !important;
+    border-bottom: 2px solid var(--fitgang-red);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.nav-link {
+    color: var(--fitgang-text-light) !important;
+    transition: color 0.3s ease;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: var(--fitgang-red) !important;
+}
+
+/* ===== CARDS ===== */
+.card-custom {
+    background-color: var(--fitgang-dark-card);
+    border: 1px solid var(--fitgang-border);
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.card-custom:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(255, 68, 68, 0.3);
+}
+
+.card-custom .card-body {
+    color: var(--fitgang-text-light);
+}
+
+.card-custom .card-title {
+    color: var(--fitgang-text-white);
+    font-weight: 600;
+}
+
+.card-custom .card-footer {
+    background-color: transparent;
+    border-top: 1px solid var(--fitgang-border);
+}
+
+/* ===== BUTTONS ===== */
+.btn-danger {
+    background: linear-gradient(135deg, var(--fitgang-red), var(--fitgang-orange));
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 10px 24px;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, var(--fitgang-orange), var(--fitgang-red));
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
+}
+
+.btn-outline-danger {
+    color: var(--fitgang-red);
+    border: 2px solid var(--fitgang-red);
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--fitgang-red);
+    color: white;
+    transform: scale(1.05);
+}
+
+.btn-outline-light {
+    border: 2px solid white;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-light:hover {
+    background-color: white;
+    color: var(--fitgang-dark);
+}
+
+/* ===== FORMS ===== */
+.form-control,
+.form-select {
+    background-color: var(--fitgang-dark-secondary);
+    border: 1px solid var(--fitgang-border);
+    color: var(--fitgang-text-white);
+    border-radius: 8px;
+    padding: 12px;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--fitgang-dark-secondary);
+    color: var(--fitgang-text-white);
+    border-color: var(--fitgang-red);
+    box-shadow: 0 0 0 0.2rem rgba(255, 68, 68, 0.25);
+}
+
+.form-control::placeholder {
+    color: #888;
+}
+
+.form-label {
+    color: var(--fitgang-text-white);
+    font-weight: 500;
+}
+
+.input-group-text {
+    background-color: var(--fitgang-dark-secondary);
+    border: 1px solid var(--fitgang-border);
+    color: var(--fitgang-text-light);
+}
+
+/* ===== HERO SECTION ===== */
+.hero-section {
+    background: linear-gradient(135deg, var(--fitgang-dark-secondary), var(--fitgang-dark));
+    border-radius: 12px;
+    padding: 60px 20px !important;
+    margin-bottom: 40px;
+    border: 2px solid var(--fitgang-red);
+    box-shadow: 0 10px 30px rgba(255, 68, 68, 0.2);
+}
+
+.hero-section h1 {
+    text-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
+}
+
+/* ===== TABLES ===== */
+.table {
+    color: var(--fitgang-text-light);
+}
+
+.table thead th {
+    background-color: var(--fitgang-dark-secondary);
+    color: var(--fitgang-text-white);
+    border-bottom: 2px solid var(--fitgang-red);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid var(--fitgang-border);
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: var(--fitgang-dark-secondary);
+}
+
+.table tbody td {
+    vertical-align: middle;
+    padding: 15px;
+}
+
+/* ===== BADGES ===== */
+.badge {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.bg-danger {
+    background-color: var(--fitgang-red) !important;
+}
+
+/* ===== ALERTS ===== */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.alert-danger {
+    background-color: rgba(255, 68, 68, 0.15);
+    color: var(--fitgang-red);
+    border-left: 4px solid var(--fitgang-red);
+}
+
+.alert-success {
+    background-color: rgba(40, 167, 69, 0.15);
+    color: #28a745;
+    border-left: 4px solid #28a745;
+}
+
+.alert-info {
+    background-color: rgba(23, 162, 184, 0.15);
+    color: #17a2b8;
+    border-left: 4px solid #17a2b8;
+}
+
+.alert-warning {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+    border-left: 4px solid #ffc107;
+}
+
+/* ===== FOOTER ===== */
+footer {
+    background-color: var(--fitgang-dark-secondary);
+    border-top: 2px solid var(--fitgang-red);
+    margin-top: auto;
+}
+
+footer a {
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+footer a:hover {
+    color: var(--fitgang-red) !important;
+}
+
+/* ===== LINKS ===== */
+a {
+    color: var(--fitgang-red);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--fitgang-orange);
+}
+
+/* ===== DROPDOWN MENU ===== */
+.dropdown-menu {
+    background-color: var(--fitgang-dark-card);
+    border: 1px solid var(--fitgang-border);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.dropdown-item {
+    color: var(--fitgang-text-light);
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: var(--fitgang-red);
+    color: white;
+}
+
+/* ===== TEXT UTILITIES ===== */
+.text-danger {
+    color: var(--fitgang-red) !important;
+}
+
+.text-muted {
+    color: #888 !important;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--fitgang-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--fitgang-red);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--fitgang-orange);
+}
+
+/* ===== CARD IMAGES ===== */
+.card-img-top {
+    height: 250px;
+    object-fit: cover;
+    border-bottom: 2px solid var(--fitgang-red);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 40px 15px !important;
+    }
+
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+
+    .card-img-top {
+        height: 200px;
+    }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.btn-danger:active {
+    animation: pulse 0.3s ease;
+}
+
+/* ===== CUSTOM UTILITIES ===== */
+.bg-dark {
+    background-color: var(--fitgang-dark-secondary) !important;
+}
+
+.border-danger {
+    border-color: var(--fitgang-red) !important;
+}
+
+/* ===== COLLAPSE TOGGLE ===== */
+.collapse .card {
+    margin-top: 10px;
+}
+
+/* ===== DISABLED STATE ===== */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ===== PROGRESS BARS (pour futures fonctionnalités) ===== */
+.progress {
+    background-color: var(--fitgang-dark-secondary);
+    border-radius: 8px;
+    height: 25px;
+}
+
+.progress-bar {
+    background: linear-gradient(135deg, var(--fitgang-red), var(--fitgang-orange));
+    border-radius: 8px;
+}
