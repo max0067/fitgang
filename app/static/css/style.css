@@ -689,19 +689,25 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ===== NAVBAR ADJUSTMENTS ===== */
 .navbar {
-    background: var(--black) !important;
+    background: var(--white) !important;
     padding: 1rem 0;
     box-shadow: var(--shadow-md);
     border-bottom: 3px solid var(--red);
 }
 
+.navbar-dark {
+    background: var(--white) !important;
+}
+
 .navbar-brand img {
     height: 65px;
     transition: var(--transition);
+    /* Invert logo colors for white background */
+    filter: invert(1);
 }
 
 .navbar-brand:hover img {
-    filter: brightness(1.2);
+    filter: invert(1) brightness(0.8);
 }
 
 .nav-link {
@@ -711,10 +717,38 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: 0.05em;
     font-size: 0.9375rem;
     transition: var(--transition);
-    color: var(--white) !important;
+    color: var(--black) !important;
 }
 
 .nav-link:hover {
+    color: var(--red) !important;
+}
+
+.navbar-toggler {
+    border-color: var(--black);
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0, 0, 0, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Dropdown menu styling for white navbar */
+.dropdown-menu {
+    border: 2px solid var(--gray-200);
+    box-shadow: var(--shadow-lg);
+}
+
+.dropdown-item {
+    color: var(--black);
+    font-weight: 600;
+}
+
+.dropdown-item:hover {
+    background: var(--red);
+    color: var(--white);
+}
+
+.text-warning {
     color: var(--red) !important;
 }
 
