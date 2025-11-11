@@ -148,3 +148,26 @@ class Progression(db.Model):
 
     def __repr__(self):
         return f'<Progression User #{self.user_id} - {self.date}>'
+
+
+class Photo(db.Model):
+    """
+    Modèle photo de transformation
+    Permet aux utilisateurs d'uploader des photos avant/après
+    """
+    __tablename__ = 'photos'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    fichier = db.Column(db.String(300), nullable=False)  # Nom du fichier
+    type = db.Column(db.String(20), nullable=False)  # 'avant' ou 'apres'
+    date_upload = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    poids = db.Column(db.Float)  # Poids au moment de la photo
+    notes = db.Column(db.Text)  # Notes optionnelles
+    visible_public = db.Column(db.Boolean, default=False)  # Si la photo est visible publiquement
+
+    # Relation
+    utilisateur = db.relationship('User', backref=db.backref('photos', lazy='dynamic', cascade='all, delete-orphan'))
+
+    def __repr__(self):
+        return f'<Photo {self.type} User #{self.user_id}>'

@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+
+{% block title %}Calculateurs Fitness - FitGang{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="bi bi-calculator text-danger"></i> Calculateurs Fitness
+    </h1>
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Retour Dashboard
+    </a>
+</div>
+
+<div class="alert alert-info mb-4">
+    <i class="bi bi-lightbulb-fill"></i>
+    <strong>Outils gratuits:</strong> Calculez votre IMC, vos besoins caloriques, macros et force maximale!
+</div>
+
+<div class="row">
+    <!-- IMC Calculator -->
+    <div class="col-lg-6 mb-4">
+        <div class="card card-custom h-100">
+            <div class="card-body">
+                <h4 class="card-title mb-4">
+                    <i class="bi bi-person-check text-primary"></i> Calculateur IMC
+                </h4>
+
+                <div class="mb-3">
+                    <label class="form-label">Poids (kg)</label>
+                    <input type="number" class="form-control" id="imcPoids" placeholder="75" step="0.1">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Taille (cm)</label>
+                    <input type="number" class="form-control" id="imcTaille" placeholder="180">
+                </div>
+                <button class="btn btn-primary w-100 mb-3" onclick="calculateIMC()">
+                    <i class="bi bi-calculator"></i> Calculer
+                </button>
+
+                <div id="imcResult" class="alert" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calories Calculator -->
+    <div class="col-lg-6 mb-4">
+        <div class="card card-custom h-100">
+            <div class="card-body">
+                <h4 class="card-title mb-4">
+                    <i class="bi bi-fire text-danger"></i> Besoins Caloriques
+                </h4>
+
+                <div class="mb-3">
+                    <label class="form-label">Sexe</label>
+                    <select class="form-select" id="calSexe">
+                        <option value="homme">Homme</option>
+                        <option value="femme">Femme</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Âge (ans)</label>
+                    <input type="number" class="form-control" id="calAge" placeholder="25">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Poids (kg)</label>
+                    <input type="number" class="form-control" id="calPoids" placeholder="75" step="0.1">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Taille (cm)</label>
+                    <input type="number" class="form-control" id="calTaille" placeholder="180">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Niveau d'activité</label>
+                    <select class="form-select" id="calActivite">
+                        <option value="1.2">Sédentaire (peu ou pas d'exercice)</option>
+                        <option value="1.375">Légèrement actif (1-3 jours/semaine)</option>
+                        <option value="1.55">Modérément actif (3-5 jours/semaine)</option>
+                        <option value="1.725">Très actif (6-7 jours/semaine)</option>
+                        <option value="1.9">Extrêmement actif (2x/jour)</option>
+                    </select>
+                </div>
+                <button class="btn btn-danger w-100 mb-3" onclick="calculateCalories()">
+                    <i class="bi bi-calculator"></i> Calculer
+                </button>
+
+                <div id="calResult" class="alert" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Macros Calculator -->
+    <div class="col-lg-6 mb-4">
+        <div class="card card-custom h-100">
+            <div class="card-body">
+                <h4 class="card-title mb-4">
+                    <i class="bi bi-egg-fried text-warning"></i> Répartition Macros
+                </h4>
+
+                <div class="mb-3">
+                    <label class="form-label">Calories quotidiennes</label>
+                    <input type="number" class="form-control" id="macrosCalories" placeholder="2000">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Objectif</label>
+                    <select class="form-select" id="macrosObjectif">
+                        <option value="perte">Perte de poids (40/35/25)</option>
+                        <option value="maintien">Maintien (30/40/30)</option>
+                        <option value="prise">Prise de masse (30/50/20)</option>
+                        <option value="personnalise">Personnalisé</option>
+                    </select>
+                </div>
+                <div id="customMacros" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label">Protéines (%)</label>
+                        <input type="number" class="form-control" id="macrosProteines" placeholder="40" min="0" max="100">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Glucides (%)</label>
+                        <input type="number" class="form-control" id="macrosGlucides" placeholder="35" min="0" max="100">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Lipides (%)</label>
+                        <input type="number" class="form-control" id="macrosLipides" placeholder="25" min="0" max="100">
+                    </div>
+                </div>
+                <button class="btn btn-warning w-100 mb-3" onclick="calculateMacros()">
+                    <i class="bi bi-calculator"></i> Calculer
+                </button>
+
+                <div id="macrosResult" class="alert" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1RM Calculator -->
+    <div class="col-lg-6 mb-4">
+        <div class="card card-custom h-100">
+            <div class="card-body">
+                <h4 class="card-title mb-4">
+                    <i class="bi bi-trophy text-success"></i> Force Maximale (1RM)
+                </h4>
+
+                <div class="alert alert-secondary small mb-3">
+                    Le 1RM (une répétition maximale) est le poids maximum que vous pouvez soulever une seule fois.
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Poids soulevé (kg)</label>
+                    <input type="number" class="form-control" id="rmPoids" placeholder="100" step="0.5">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Nombre de répétitions</label>
+                    <input type="number" class="form-control" id="rmReps" placeholder="10" min="1" max="20">
+                </div>
+                <button class="btn btn-success w-100 mb-3" onclick="calculate1RM()">
+                    <i class="bi bi-calculator"></i> Calculer
+                </button>
+
+                <div id="rmResult" class="alert" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Show/hide custom macros inputs
+document.getElementById('macrosObjectif').addEventListener('change', function() {
+    const customDiv = document.getElementById('customMacros');
+    if (this.value === 'personnalise') {
+        customDiv.style.display = 'block';
+    } else {
+        customDiv.style.display = 'none';
+    }
+});
+
+// IMC Calculator
+function calculateIMC() {
+    const poids = parseFloat(document.getElementById('imcPoids').value);
+    const taille = parseFloat(document.getElementById('imcTaille').value);
+
+    if (!poids || !taille) {
+        alert('Veuillez remplir tous les champs');
+        return;
+    }
+
+    const tailleM = taille / 100;
+    const imc = poids / (tailleM * tailleM);
+
+    let category, color;
+    if (imc < 18.5) {
+        category = 'Insuffisance pondérale';
+        color = 'alert-warning';
+    } else if (imc < 25) {
+        category = 'Poids normal';
+        color = 'alert-success';
+    } else if (imc < 30) {
+        category = 'Surpoids';
+        color = 'alert-warning';
+    } else {
+        category = 'Obésité';
+        color = 'alert-danger';
+    }
+
+    const resultDiv = document.getElementById('imcResult');
+    resultDiv.className = 'alert ' + color;
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = `
+        <strong>Votre IMC: ${imc.toFixed(1)}</strong><br>
+        Catégorie: ${category}<br>
+        <small class="text-muted mt-2 d-block">
+            <strong>Référence:</strong><br>
+            < 18.5: Insuffisance pondérale<br>
+            18.5 - 25: Poids normal<br>
+            25 - 30: Surpoids<br>
+            > 30: Obésité
+        </small>
+    `;
+}
+
+// Calories Calculator
+function calculateCalories() {
+    const sexe = document.getElementById('calSexe').value;
+    const age = parseInt(document.getElementById('calAge').value);
+    const poids = parseFloat(document.getElementById('calPoids').value);
+    const taille = parseFloat(document.getElementById('calTaille').value);
+    const activite = parseFloat(document.getElementById('calActivite').value);
+
+    if (!age || !poids || !taille) {
+        alert('Veuillez remplir tous les champs');
+        return;
+    }
+
+    // Mifflin-St Jeor equation
+    let bmr;
+    if (sexe === 'homme') {
+        bmr = (10 * poids) + (6.25 * taille) - (5 * age) + 5;
+    } else {
+        bmr = (10 * poids) + (6.25 * taille) - (5 * age) - 161;
+    }
+
+    const tdee = bmr * activite;
+    const perte = tdee - 500;
+    const prise = tdee + 300;
+
+    const resultDiv = document.getElementById('calResult');
+    resultDiv.className = 'alert alert-success';
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = `
+        <strong>Métabolisme de base (BMR): ${Math.round(bmr)} kcal/jour</strong><br>
+        <strong>Dépense totale (TDEE): ${Math.round(tdee)} kcal/jour</strong><br><br>
+        <strong>Objectifs recommandés:</strong><br>
+        🔥 <strong>Perte de poids:</strong> ${Math.round(perte)} kcal/jour<br>
+        ⚖️ <strong>Maintien:</strong> ${Math.round(tdee)} kcal/jour<br>
+        💪 <strong>Prise de masse:</strong> ${Math.round(prise)} kcal/jour
+    `;
+}
+
+// Macros Calculator
+function calculateMacros() {
+    const calories = parseInt(document.getElementById('macrosCalories').value);
+    const objectif = document.getElementById('macrosObjectif').value;
+
+    if (!calories) {
+        alert('Veuillez entrer vos calories quotidiennes');
+        return;
+    }
+
+    let proteines, glucides, lipides;
+
+    if (objectif === 'personnalise') {
+        proteines = parseInt(document.getElementById('macrosProteines').value) || 0;
+        glucides = parseInt(document.getElementById('macrosGlucides').value) || 0;
+        lipides = parseInt(document.getElementById('macrosLipides').value) || 0;
+
+        if (proteines + glucides + lipides !== 100) {
+            alert('La somme des pourcentages doit être égale à 100%');
+            return;
+        }
+    } else {
+        switch(objectif) {
+            case 'perte':
+                proteines = 40;
+                glucides = 35;
+                lipides = 25;
+                break;
+            case 'maintien':
+                proteines = 30;
+                glucides = 40;
+                lipides = 30;
+                break;
+            case 'prise':
+                proteines = 30;
+                glucides = 50;
+                lipides = 20;
+                break;
+        }
+    }
+
+    const protGrams = Math.round((calories * proteines / 100) / 4);
+    const carbGrams = Math.round((calories * glucides / 100) / 4);
+    const fatGrams = Math.round((calories * lipides / 100) / 9);
+
+    const resultDiv = document.getElementById('macrosResult');
+    resultDiv.className = 'alert alert-success';
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = `
+        <strong>Répartition pour ${calories} kcal/jour:</strong><br><br>
+        🥩 <strong>Protéines:</strong> ${proteines}% = ${protGrams}g/jour<br>
+        🍚 <strong>Glucides:</strong> ${glucides}% = ${carbGrams}g/jour<br>
+        🥑 <strong>Lipides:</strong> ${lipides}% = ${fatGrams}g/jour<br><br>
+        <small class="text-muted">
+            💡 <strong>Info:</strong> 1g protéines = 4 kcal | 1g glucides = 4 kcal | 1g lipides = 9 kcal
+        </small>
+    `;
+}
+
+// 1RM Calculator
+function calculate1RM() {
+    const poids = parseFloat(document.getElementById('rmPoids').value);
+    const reps = parseInt(document.getElementById('rmReps').value);
+
+    if (!poids || !reps) {
+        alert('Veuillez remplir tous les champs');
+        return;
+    }
+
+    if (reps < 1 || reps > 20) {
+        alert('Le nombre de répétitions doit être entre 1 et 20');
+        return;
+    }
+
+    // Formule d'Epley
+    const oneRM = poids * (1 + reps / 30);
+
+    // Calculate percentages
+    const percent90 = oneRM * 0.9;
+    const percent80 = oneRM * 0.8;
+    const percent70 = oneRM * 0.7;
+    const percent60 = oneRM * 0.6;
+
+    const resultDiv = document.getElementById('rmResult');
+    resultDiv.className = 'alert alert-success';
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = `
+        <strong>Votre 1RM estimé: ${oneRM.toFixed(1)} kg</strong><br><br>
+        <strong>Charges d'entraînement:</strong><br>
+        💪 <strong>90% (Force max):</strong> ${percent90.toFixed(1)} kg<br>
+        🏋️ <strong>80% (Hypertrophie):</strong> ${percent80.toFixed(1)} kg<br>
+        🔥 <strong>70% (Endurance force):</strong> ${percent70.toFixed(1)} kg<br>
+        ⚡ <strong>60% (Explosivité):</strong> ${percent60.toFixed(1)} kg<br><br>
+        <small class="text-muted">
+            💡 <strong>Basé sur:</strong> ${poids} kg × ${reps} reps (formule d'Epley)
+        </small>
+    `;
+}
+</script>
+
+<style>
+.card-custom {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-custom:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+</style>
+{% endblock %}

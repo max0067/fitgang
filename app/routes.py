@@ -12,7 +12,7 @@ from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
 from app import db
-from app.models import User, Programme, Ebook, Achat, Progression
+from app.models import User, Programme, Ebook, Achat, Progression, Photo
 from app.forms import (LoginForm, RegistrationForm, ProfileForm, ChangePasswordForm,
                        ProgressionForm, ProgrammeForm, EbookForm)
 
@@ -740,6 +740,26 @@ def admin_toggle_admin(id):
     return redirect(url_for('main.admin_user_detail', id=id))
 
 
+@bp.route('/admin/user/<int:id>/reset-password', methods=['POST'])
+@login_required
+@admin_required
+def admin_reset_password(id):
+    """Réinitialiser le mot de passe d'un utilisateur"""
+    user = User.query.get_or_404(id)
+
+    new_password = request.form.get('new_password')
+
+    if not new_password or len(new_password) < 6:
+        flash('Le mot de passe doit contenir au moins 6 caractères.', 'danger')
+        return redirect(url_for('main.admin_user_detail', id=id))
+
+    user.set_password(new_password)
+    db.session.commit()
+
+    flash(f'Mot de passe de {user.prenom} {user.nom} réinitialisé avec succès.', 'success')
+    return redirect(url_for('main.admin_user_detail', id=id))
+
+
 @bp.route('/admin/user/<int:id>/delete', methods=['POST'])
 @login_required
 @admin_required
@@ -761,3 +781,156 @@ def admin_delete_user(id):
 
     flash(f'L\'utilisateur {user.prenom} {user.nom} a été supprimé.', 'info')
     return redirect(url_for('main.admin_users'))
+
+
+# ===== ROUTES PHOTOS =====
+
+@bp.route('/photos')
+@login_required
+def photos():
+    """Page de gestion des photos avant/après"""
+    photos_avant = Photo.query.filter_by(user_id=current_user.id, type='avant')\
+        .order_by(Photo.date_upload.desc()).all()
+    photos_apres = Photo.query.filter_by(user_id=current_user.id, type='apres')\
+        .order_by(Photo.date_upload.desc()).all()
+
+    return render_template('photos.html',
+                         photos_avant=photos_avant,
+                         photos_apres=photos_apres)
+
+
+@bp.route('/photo/upload', methods=['POST'])
+@login_required
+def upload_photo():
+    """Upload d'une photo de transformation"""
+    if 'photo' not in request.files:
+        flash('Aucune photo sélectionnée.', 'danger')
+        return redirect(url_for('main.photos'))
+
+    file = request.files['photo']
+    if file.filename == '':
+        flash('Aucune photo sélectionnée.', 'danger')
+        return redirect(url_for('main.photos'))
+
+    # Vérifier l'extension du fichier
+    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    if '.' not in file.filename or \
+       file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
+        flash('Format de fichier non autorisé. Utilisez: PNG, JPG, JPEG, GIF, WEBP', 'danger')
+        return redirect(url_for('main.photos'))
+
+    # Générer un nom de fichier unique
+    random_hex = secrets.token_hex(16)
+    _, file_ext = os.path.splitext(secure_filename(file.filename))
+    filename = f"photo_{current_user.id}_{random_hex}{file_ext}"
+
+    # Sauvegarder le fichier
+    upload_folder = current_app.config.get('UPLOAD_FOLDER', 'app/static/uploads')
+    os.makedirs(upload_folder, exist_ok=True)
+    file_path = os.path.join(upload_folder, filename)
+    file.save(file_path)
+
+    # Créer l'entrée en base de données
+    photo = Photo(
+        user_id=current_user.id,
+        fichier=filename,
+        type=request.form.get('type', 'avant'),
+        poids=request.form.get('poids') if request.form.get('poids') else None,
+        notes=request.form.get('notes', ''),
+        visible_public=False
+    )
+
+    db.session.add(photo)
+    db.session.commit()
+
+    flash('Photo ajoutée avec succès!', 'success')
+    return redirect(url_for('main.photos'))
+
+
+@bp.route('/photo/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_photo(id):
+    """Supprimer une photo"""
+    photo = Photo.query.get_or_404(id)
+
+    # Vérifier que la photo appartient bien à l'utilisateur
+    if photo.user_id != current_user.id and not current_user.is_admin:
+        flash('Vous ne pouvez pas supprimer cette photo.', 'danger')
+        return redirect(url_for('main.photos'))
+
+    # Supprimer le fichier physique
+    upload_folder = current_app.config.get('UPLOAD_FOLDER', 'app/static/uploads')
+    file_path = os.path.join(upload_folder, photo.fichier)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    # Supprimer l'entrée en base de données
+    db.session.delete(photo)
+    db.session.commit()
+
+    flash('Photo supprimée.', 'info')
+    return redirect(url_for('main.photos'))
+
+
+@bp.route('/uploads/<filename>')
+def uploaded_file(filename):
+    """Servir les fichiers uploadés"""
+    upload_folder = current_app.config.get('UPLOAD_FOLDER', 'app/static/uploads')
+    return send_from_directory(upload_folder, filename)
+
+
+# ===== ROUTES STATISTIQUES =====
+
+@bp.route('/statistiques')
+@login_required
+def statistiques():
+    """Page de statistiques et graphiques de progression"""
+    # Récupérer toutes les progressions de l'utilisateur
+    progressions = Progression.query.filter_by(user_id=current_user.id)\
+        .order_by(Progression.date.asc()).all()
+
+    # Préparer les données pour les graphiques
+    dates = []
+    poids_data = []
+    seances_count = {}
+
+    for prog in progressions:
+        dates.append(prog.date.strftime('%Y-%m-%d'))
+        if prog.poids:
+            poids_data.append(prog.poids)
+
+        # Compter les séances
+        if prog.seance:
+            seances_count[prog.seance] = seances_count.get(prog.seance, 0) + 1
+
+    # Calculer quelques stats
+    nb_seances = len(progressions)
+    seances_last_30_days = Progression.query.filter(
+        Progression.user_id == current_user.id,
+        Progression.date >= datetime.utcnow() - timedelta(days=30)
+    ).count()
+
+    # Poids initial et actuel
+    poids_initial = poids_data[0] if poids_data else None
+    poids_actuel = poids_data[-1] if poids_data else None
+    poids_diff = (poids_actuel - poids_initial) if (poids_initial and poids_actuel) else None
+
+    return render_template('statistiques.html',
+                         progressions=progressions,
+                         dates=dates,
+                         poids_data=poids_data,
+                         seances_count=seances_count,
+                         nb_seances=nb_seances,
+                         seances_last_30_days=seances_last_30_days,
+                         poids_initial=poids_initial,
+                         poids_actuel=poids_actuel,
+                         poids_diff=poids_diff)
+
+
+# ===== ROUTES OUTILS / CALCULATEURS =====
+
+@bp.route('/calculateurs')
+@login_required
+def calculateurs():
+    """Page des calculateurs fitness (IMC, calories, macros, 1RM)"""
+    return render_template('calculateurs.html')

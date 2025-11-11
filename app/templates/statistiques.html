@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}Statistiques - FitGang{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="bi bi-graph-up-arrow text-danger"></i> Mes Statistiques
+    </h1>
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Retour Dashboard
+    </a>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card card-custom text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-calendar-check text-success" style="font-size: 2.5rem;"></i>
+                <h3 class="mt-2 mb-0">{{ nb_seances }}</h3>
+                <p class="text-muted small mb-0">Séances Totales</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-custom text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-fire text-danger" style="font-size: 2.5rem;"></i>
+                <h3 class="mt-2 mb-0">{{ seances_last_30_days }}</h3>
+                <p class="text-muted small mb-0">Séances (30 jours)</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-custom text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-speedometer2 text-primary" style="font-size: 2.5rem;"></i>
+                <h3 class="mt-2 mb-0">
+                    {% if poids_actuel %}
+                        {{ "%.1f"|format(poids_actuel) }} kg
+                    {% else %}
+                        -
+                    {% endif %}
+                </h3>
+                <p class="text-muted small mb-0">Poids Actuel</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-custom text-center h-100">
+            <div class="card-body">
+                {% if poids_diff %}
+                    {% if poids_diff < 0 %}
+                        <i class="bi bi-arrow-down-circle text-success" style="font-size: 2.5rem;"></i>
+                    {% else %}
+                        <i class="bi bi-arrow-up-circle text-info" style="font-size: 2.5rem;"></i>
+                    {% endif %}
+                    <h3 class="mt-2 mb-0">{{ "%.1f"|format(poids_diff|abs) }} kg</h3>
+                    <p class="text-muted small mb-0">
+                        {% if poids_diff < 0 %}Perdu{% else %}Gagné{% endif %}
+                    </p>
+                {% else %}
+                    <i class="bi bi-dash-circle text-muted" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2 mb-0">-</h3>
+                    <p class="text-muted small mb-0">Évolution</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Graphs -->
+<div class="row mb-4">
+    <!-- Weight Evolution Chart -->
+    <div class="col-lg-8 mb-4">
+        <div class="card card-custom">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    <i class="bi bi-graph-up text-danger"></i> Évolution du Poids
+                </h5>
+                {% if poids_data %}
+                    <canvas id="weightChart" height="80"></canvas>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        Aucune donnée de poids enregistrée. Ajoutez votre poids lors de vos séances pour voir l'évolution!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sessions Distribution Chart -->
+    <div class="col-lg-4 mb-4">
+        <div class="card card-custom">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    <i class="bi bi-pie-chart text-primary"></i> Répartition Séances
+                </h5>
+                {% if seances_count %}
+                    <canvas id="sessionsChart" height="160"></canvas>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        Aucune séance enregistrée.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Calendar -->
+<div class="card card-custom mb-4">
+    <div class="card-body">
+        <h5 class="card-title mb-4">
+            <i class="bi bi-calendar3 text-success"></i> Calendrier d'Activité (30 derniers jours)
+        </h5>
+        {% if progressions %}
+            <canvas id="activityChart" height="60"></canvas>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i>
+                Aucune activité enregistrée.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Recent Sessions Table -->
+<div class="card card-custom">
+    <div class="card-body">
+        <h5 class="card-title mb-3">
+            <i class="bi bi-list-ul text-danger"></i> Dernières Séances
+        </h5>
+        {% if progressions %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Date</th>
+                            <th>Séance</th>
+                            <th>Poids</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prog in progressions[-10:]|reverse %}
+                        <tr>
+                            <td>{{ prog.date.strftime('%d/%m/%Y') }}</td>
+                            <td><strong>{{ prog.seance }}</strong></td>
+                            <td>
+                                {% if prog.poids %}
+                                    {{ prog.poids }} kg
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ prog.notes[:50] if prog.notes else '-' }}{% if prog.notes and prog.notes|length > 50 %}...{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info mb-0">
+                <i class="bi bi-info-circle"></i>
+                Aucune séance enregistrée. <a href="{{ url_for('main.add_progression') }}" class="alert-link">Ajouter une séance</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+{% if poids_data %}
+// Weight Evolution Chart
+const weightCtx = document.getElementById('weightChart').getContext('2d');
+new Chart(weightCtx, {
+    type: 'line',
+    data: {
+        labels: {{ dates|tojson }},
+        datasets: [{
+            label: 'Poids (kg)',
+            data: {{ poids_data|tojson }},
+            borderColor: '#ED2F2F',
+            backgroundColor: 'rgba(237, 47, 47, 0.1)',
+            tension: 0.4,
+            fill: true,
+            pointRadius: 5,
+            pointHoverRadius: 7
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: false,
+                title: {
+                    display: true,
+                    text: 'Poids (kg)'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Date'
+                }
+            }
+        }
+    }
+});
+{% endif %}
+
+{% if seances_count %}
+// Sessions Distribution Chart
+const sessionsCtx = document.getElementById('sessionsChart').getContext('2d');
+new Chart(sessionsCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ seances_count.keys()|list|tojson }},
+        datasets: [{
+            data: {{ seances_count.values()|list|tojson }},
+            backgroundColor: [
+                '#ED2F2F',
+                '#0D6EFD',
+                '#198754',
+                '#FFC107',
+                '#6F42C1',
+                '#FD7E14',
+                '#20C997',
+                '#DC3545'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    boxWidth: 12,
+                    font: {
+                        size: 11
+                    }
+                }
+            }
+        }
+    }
+});
+{% endif %}
+
+{% if progressions %}
+// Activity Calendar Chart (Bar chart for last 30 days)
+const activityCtx = document.getElementById('activityChart').getContext('2d');
+
+// Get last 30 days
+const today = new Date();
+const last30Days = [];
+const activityData = [];
+
+for (let i = 29; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+    last30Days.push(date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }));
+
+    // Count sessions for this day
+    const count = {{ dates|tojson }}.filter(d => d === dateStr).length;
+    activityData.push(count);
+}
+
+new Chart(activityCtx, {
+    type: 'bar',
+    data: {
+        labels: last30Days,
+        datasets: [{
+            label: 'Séances',
+            data: activityData,
+            backgroundColor: activityData.map(val => val > 0 ? '#198754' : '#E9ECEF'),
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                callbacks: {
+                    title: function(context) {
+                        return 'Date: ' + context[0].label;
+                    },
+                    label: function(context) {
+                        const count = context.parsed.y;
+                        return count > 0 ? count + ' séance(s)' : 'Repos';
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    font: {
+                        size: 9
+                    }
+                }
+            }
+        }
+    }
+});
+{% endif %}
+</script>
+{% endblock %}

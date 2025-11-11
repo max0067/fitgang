@@ -39,6 +39,11 @@
                 <!-- Admin Actions -->
                 <div class="d-grid gap-2">
                     {% if user.id != current_user.id %}
+                        <!-- Reset Password Form -->
+                        <button type="button" class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+                            <i class="bi bi-key-fill"></i> Réinitialiser Mot de Passe
+                        </button>
+
                         <form method="POST" action="{{ url_for('main.admin_toggle_admin', id=user.id) }}">
                             <button type="submit" class="btn btn-warning w-100">
                                 {% if user.is_admin %}
@@ -259,4 +264,54 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetPasswordModalLabel">
+                    <i class="bi bi-key-fill"></i> Réinitialiser le mot de passe
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('main.admin_reset_password', id=user.id) }}">
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Attention:</strong> Vous allez réinitialiser le mot de passe de <strong>{{ user.prenom }} {{ user.nom }}</strong>.
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label">Nouveau mot de passe</label>
+                        <input type="text" class="form-control" id="new_password" name="new_password"
+                               required minlength="6" placeholder="Minimum 6 caractères">
+                        <div class="form-text">Le mot de passe doit contenir au moins 6 caractères.</div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="generatePassword()">
+                            <i class="bi bi-shuffle"></i> Générer un mot de passe
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="bi bi-check-circle"></i> Réinitialiser
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function generatePassword() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById('new_password').value = password;
+}
+</script>
 {% endblock %}

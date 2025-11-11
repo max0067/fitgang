@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Mes Photos Avant/Après - FitGang{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="bi bi-camera-fill text-danger"></i> Mes Photos de Transformation
+    </h1>
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Retour Dashboard
+    </a>
+</div>
+
+<div class="alert alert-info mb-4">
+    <i class="bi bi-lightbulb-fill"></i>
+    <strong>Astuce:</strong> Prenez des photos dans les mêmes conditions (lumière, angle, tenue) pour mieux visualiser votre progression!
+</div>
+
+<!-- Upload Buttons -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="card card-custom text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-arrow-down-circle text-primary" style="font-size: 3rem;"></i>
+                <h5 class="mt-3">Photos AVANT</h5>
+                <p class="text-muted">Photo de départ avant de commencer un programme</p>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal" data-type="avant">
+                    <i class="bi bi-cloud-upload"></i> Ajouter Photo Avant
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card card-custom text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-arrow-up-circle text-success" style="font-size: 3rem;"></i>
+                <h5 class="mt-3">Photos APRÈS</h5>
+                <p class="text-muted">Photo après la transformation</p>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal" data-type="apres">
+                    <i class="bi bi-cloud-upload"></i> Ajouter Photo Après
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Photos Grid -->
+<div class="row">
+    <!-- Photos AVANT -->
+    <div class="col-lg-6 mb-4">
+        <div class="card card-custom">
+            <div class="card-body">
+                <h4 class="card-title mb-4">
+                    <i class="bi bi-arrow-down-circle text-primary"></i> Photos AVANT
+                    <span class="badge bg-primary">{{ photos_avant|length }}</span>
+                </h4>
+
+                {% if photos_avant %}
+                    <div class="row">
+                        {% for photo in photos_avant %}
+                        <div class="col-md-6 mb-3">
+                            <div class="photo-card">
+                                <img src="{{ url_for('main.uploaded_file', filename=photo.fichier) }}"
+                                     alt="Photo avant"
+                                     class="img-fluid rounded mb-2"
+                                     style="width: 100%; height: 250px; object-fit: cover; cursor: pointer;"
+                                     onclick="showPhotoModal('{{ url_for('main.uploaded_file', filename=photo.fichier) }}', '{{ photo.notes }}', '{{ photo.poids }}', '{{ photo.date_upload.strftime('%d/%m/%Y') }}')">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar"></i> {{ photo.date_upload.strftime('%d/%m/%Y') }}
+                                        {% if photo.poids %}
+                                        <br><i class="bi bi-speedometer2"></i> {{ photo.poids }} kg
+                                        {% endif %}
+                                    </small>
+                                    <form method="POST" action="{{ url_for('main.delete_photo', id=photo.id) }}" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Supprimer cette photo?')"
+                                                title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                {% if photo.notes %}
+                                <p class="small text-muted mt-2 mb-0">{{ photo.notes[:50] }}{% if photo.notes|length > 50 %}...{% endif %}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-secondary text-center">
+                        <i class="bi bi-image"></i><br>
+                        Aucune photo "avant" ajoutée.<br>
+                        <button type="button" class="btn btn-sm btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#uploadModal" data-type="avant">
+                            Ajouter la première
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Photos APRÈS -->
+    <div class="col-lg-6 mb-4">
+        <div class="card card-custom">
+            <div class="card-body">
+                <h4 class="card-title mb-4">
+                    <i class="bi bi-arrow-up-circle text-success"></i> Photos APRÈS
+                    <span class="badge bg-success">{{ photos_apres|length }}</span>
+                </h4>
+
+                {% if photos_apres %}
+                    <div class="row">
+                        {% for photo in photos_apres %}
+                        <div class="col-md-6 mb-3">
+                            <div class="photo-card">
+                                <img src="{{ url_for('main.uploaded_file', filename=photo.fichier) }}"
+                                     alt="Photo après"
+                                     class="img-fluid rounded mb-2"
+                                     style="width: 100%; height: 250px; object-fit: cover; cursor: pointer;"
+                                     onclick="showPhotoModal('{{ url_for('main.uploaded_file', filename=photo.fichier) }}', '{{ photo.notes }}', '{{ photo.poids }}', '{{ photo.date_upload.strftime('%d/%m/%Y') }}')">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar"></i> {{ photo.date_upload.strftime('%d/%m/%Y') }}
+                                        {% if photo.poids %}
+                                        <br><i class="bi bi-speedometer2"></i> {{ photo.poids }} kg
+                                        {% endif %}
+                                    </small>
+                                    <form method="POST" action="{{ url_for('main.delete_photo', id=photo.id) }}" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Supprimer cette photo?')"
+                                                title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                {% if photo.notes %}
+                                <p class="small text-muted mt-2 mb-0">{{ photo.notes[:50] }}{% if photo.notes|length > 50 %}...{% endif %}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-secondary text-center">
+                        <i class="bi bi-image"></i><br>
+                        Aucune photo "après" ajoutée.<br>
+                        <button type="button" class="btn btn-sm btn-success mt-2" data-bs-toggle="modal" data-bs-target="#uploadModal" data-type="apres">
+                            Ajouter la première
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Comparison Section -->
+{% if photos_avant and photos_apres %}
+<div class="card card-custom">
+    <div class="card-body">
+        <h4 class="card-title mb-4">
+            <i class="bi bi-arrows-angle-expand text-warning"></i> Comparaison Avant / Après
+        </h4>
+        <div class="row">
+            <div class="col-md-6 text-center">
+                <h5 class="text-primary mb-3">AVANT</h5>
+                <img src="{{ url_for('main.uploaded_file', filename=photos_avant[0].fichier) }}"
+                     alt="Dernière photo avant"
+                     class="img-fluid rounded"
+                     style="max-height: 400px; object-fit: contain;">
+                <p class="text-muted mt-2">
+                    {% if photos_avant[0].poids %}{{ photos_avant[0].poids }} kg - {% endif %}
+                    {{ photos_avant[0].date_upload.strftime('%d/%m/%Y') }}
+                </p>
+            </div>
+            <div class="col-md-6 text-center">
+                <h5 class="text-success mb-3">APRÈS</h5>
+                <img src="{{ url_for('main.uploaded_file', filename=photos_apres[0].fichier) }}"
+                     alt="Dernière photo après"
+                     class="img-fluid rounded"
+                     style="max-height: 400px; object-fit: contain;">
+                <p class="text-muted mt-2">
+                    {% if photos_apres[0].poids %}{{ photos_apres[0].poids }} kg - {% endif %}
+                    {{ photos_apres[0].date_upload.strftime('%d/%m/%Y') }}
+                </p>
+            </div>
+        </div>
+        {% if photos_avant[0].poids and photos_apres[0].poids %}
+        <div class="alert alert-success text-center mt-3">
+            <strong>Progression:</strong>
+            {% set diff = photos_avant[0].poids - photos_apres[0].poids %}
+            {% if diff > 0 %}
+                Perte de {{ "%.1f"|format(diff) }} kg! 🎉
+            {% elif diff < 0 %}
+                Gain de {{ "%.1f"|format(-diff) }} kg! 💪
+            {% else %}
+                Poids stabilisé
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-cloud-upload"></i> <span id="modalTitle">Ajouter une photo</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('main.upload_photo') }}" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" name="type" id="photoType" value="avant">
+
+                    <div class="mb-3">
+                        <label for="photo" class="form-label">Sélectionner une photo *</label>
+                        <input type="file" class="form-control" id="photo" name="photo"
+                               accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                               required>
+                        <div class="form-text">Formats acceptés: PNG, JPG, JPEG, GIF, WEBP (max 10MB)</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="poids" class="form-label">Poids (kg)</label>
+                        <input type="number" class="form-control" id="poids" name="poids"
+                               step="0.1" min="0" placeholder="Ex: 75.5">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes (optionnel)</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"
+                                  placeholder="Ex: Début du programme sèche extrême..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-upload"></i> Uploader
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Photo Viewer Modal -->
+<div class="modal fade" id="photoViewerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><span id="viewerDate"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="viewerImage" src="" alt="Photo" class="img-fluid rounded mb-3" style="max-height: 500px;">
+                <p class="text-muted" id="viewerPoids"></p>
+                <p id="viewerNotes"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Set photo type when opening upload modal
+const uploadModal = document.getElementById('uploadModal');
+uploadModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const type = button.getAttribute('data-type');
+    document.getElementById('photoType').value = type;
+
+    const modalTitle = document.getElementById('modalTitle');
+    if (type === 'avant') {
+        modalTitle.textContent = 'Ajouter une photo AVANT';
+    } else {
+        modalTitle.textContent = 'Ajouter une photo APRÈS';
+    }
+});
+
+// Show photo in viewer modal
+function showPhotoModal(imageUrl, notes, poids, date) {
+    document.getElementById('viewerImage').src = imageUrl;
+    document.getElementById('viewerDate').textContent = date;
+    document.getElementById('viewerPoids').textContent = poids ? poids + ' kg' : '';
+    document.getElementById('viewerNotes').textContent = notes || '';
+
+    const modal = new bootstrap.Modal(document.getElementById('photoViewerModal'));
+    modal.show();
+}
+</script>
+
+<style>
+.photo-card {
+    transition: transform 0.2s;
+}
+
+.photo-card:hover {
+    transform: translateY(-5px);
+}
+</style>
+{% endblock %}
