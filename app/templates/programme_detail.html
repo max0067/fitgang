@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+
+{% block title %}{{ programme.titre }} - FitGang{% endblock %}
+
+{% block content %}
+<!-- Programme Hero Section -->
+<section class="programme-hero">
+    <div class="programme-hero-overlay"></div>
+    {% if programme.image %}
+    <div class="programme-hero-bg" style="background-image: url('{{ programme.image }}');"></div>
+    {% else %}
+    <div class="programme-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920&q=85');"></div>
+    {% endif %}
+    <div class="programme-hero-content">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="programme-hero-badge">{{ programme.niveau }}</div>
+                    <h1 class="programme-hero-title">{{ programme.titre }}</h1>
+                    <p class="programme-hero-subtitle">{{ programme.description }}</p>
+                    <div class="programme-hero-meta">
+                        <div class="meta-item">
+                            <i class="bi bi-clock-fill"></i>
+                            <span>{{ programme.duree }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-bar-chart-fill"></i>
+                            <span>{{ programme.niveau }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-fire"></i>
+                            <span>Résultats garantis</span>
+                        </div>
+                    </div>
+                    <div class="programme-hero-price">
+                        <span class="price-amount">{{ programme.prix }}€</span>
+                        <span class="price-label">Paiement unique</span>
+                    </div>
+                    <div class="programme-hero-cta">
+                        {% if has_purchased %}
+                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-hero-success">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                Programme Acheté - Accéder
+                            </a>
+                        {% elif current_user.is_authenticated %}
+                            <a href="{{ url_for('main.checkout', item_type='programme', item_id=programme.id) }}" class="btn btn-hero-buy">
+                                <i class="bi bi-cart-fill me-2"></i>
+                                Acheter Maintenant
+                            </a>
+                            <p class="cta-guarantee">
+                                <i class="bi bi-shield-check"></i>
+                                Satisfait ou remboursé 30 jours
+                            </p>
+                        {% else %}
+                            <a href="{{ url_for('main.login') }}" class="btn btn-hero-buy">
+                                <i class="bi bi-lock-fill me-2"></i>
+                                Se connecter pour acheter
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- What's Included Section -->
+<section class="programme-included">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="section-title-center">CE QUI EST INCLUS</h2>
+                <div class="included-grid">
+                    <div class="included-item">
+                        <div class="included-icon">
+                            <i class="bi bi-journal-text"></i>
+                        </div>
+                        <h3>Programme Complet</h3>
+                        <p>Tous les exercices détaillés semaine par semaine avec vidéos explicatives</p>
+                    </div>
+                    <div class="included-item">
+                        <div class="included-icon">
+                            <i class="bi bi-egg-fried"></i>
+                        </div>
+                        <h3>Plan Nutrition</h3>
+                        <p>Guide alimentaire adapté avec exemples de repas et calcul des macros</p>
+                    </div>
+                    <div class="included-item">
+                        <div class="included-icon">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <h3>Suivi Progression</h3>
+                        <p>Tableau de suivi pour mesurer tes performances et ton évolution</p>
+                    </div>
+                    <div class="included-item">
+                        <div class="included-icon">
+                            <i class="bi bi-play-circle"></i>
+                        </div>
+                        <h3>Vidéos HD</h3>
+                        <p>Démonstrations vidéo de tous les exercices pour une exécution parfaite</p>
+                    </div>
+                    <div class="included-item">
+                        <div class="included-icon">
+                            <i class="bi bi-phone"></i>
+                        </div>
+                        <h3>Application Mobile</h3>
+                        <p>Accès depuis ton téléphone pour suivre ton programme à la salle</p>
+                    </div>
+                    <div class="included-item">
+                        <div class="included-icon">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h3>Communauté</h3>
+                        <p>Accès au groupe privé FitGang pour motivation et conseils</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Programme Content Section -->
+{% if programme.contenu %}
+<section class="programme-content-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="section-title-center">CONTENU DU PROGRAMME</h2>
+                <div class="programme-content-box">
+                    {{ programme.contenu|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Transformation Section -->
+<section class="transformation-section">
+    <div class="container">
+        <h2 class="section-title-center">TRANSFORMATIONS RÉELLES</h2>
+        <p class="section-subtitle-center">
+            Des résultats concrets de membres qui ont suivi ce programme
+        </p>
+        <div class="row g-4 mt-4">
+            <div class="col-md-4">
+                <div class="transformation-card">
+                    <div class="transformation-image">
+                        <img src="https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=400&h=500&fit=crop" alt="Transformation">
+                    </div>
+                    <div class="transformation-info">
+                        <h4>Maxime L.</h4>
+                        <p class="transformation-result">-12kg en 8 semaines</p>
+                        <p class="transformation-quote">
+                            "Programme complet et facile à suivre. J'ai enfin atteint mes objectifs !"
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="transformation-card">
+                    <div class="transformation-image">
+                        <img src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&h=500&fit=crop" alt="Transformation">
+                    </div>
+                    <div class="transformation-info">
+                        <h4>Lucas M.</h4>
+                        <p class="transformation-result">+10kg de muscle</p>
+                        <p class="transformation-quote">
+                            "La meilleure prise de masse de ma vie. Le plan nutrition est excellent."
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="transformation-card">
+                    <div class="transformation-image">
+                        <img src="https://images.unsplash.com/photo-1567598508481-65985588e295?w=400&h=500&fit=crop" alt="Transformation">
+                    </div>
+                    <div class="transformation-info">
+                        <h4>Sarah K.</h4>
+                        <p class="transformation-result">Transformation totale</p>
+                        <p class="transformation-quote">
+                            "Plus qu'un programme, c'est un vrai changement de vie. Merci FitGang !"
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="benefits-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <img src="https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=800&h=600&fit=crop"
+                     alt="Benefits" class="img-fluid rounded-3 shadow-lg">
+            </div>
+            <div class="col-lg-6">
+                <h2 class="section-title-left">POURQUOI CHOISIR CE PROGRAMME?</h2>
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Conçu par des Experts</h4>
+                            <p>Élaboré par des coachs diplômés avec des années d'expérience</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Résultats Prouvés</h4>
+                            <p>Des milliers de membres ont atteint leurs objectifs avec ce programme</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Flexible et Adaptable</h4>
+                            <p>S'adapte à ton emploi du temps et ton niveau de forme actuel</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Support Illimité</h4>
+                            <p>Accès à notre équipe de coachs pour répondre à toutes tes questions</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Mises à Jour Gratuites</h4>
+                            <p>Reçois toutes les mises à jour et nouveaux contenus gratuitement</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="section-title-center">QUESTIONS FRÉQUENTES</h2>
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                À qui s'adresse ce programme ?
+                            </button>
+                        </h3>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Ce programme est adapté à tous les niveaux ({{ programme.niveau }}). Que tu débutes ou que tu aies déjà de l'expérience,
+                                les exercices et l'intensité sont modulables selon ton niveau.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                Ai-je besoin de matériel spécifique ?
+                            </button>
+                        </h3>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Le programme peut être suivi en salle de sport avec accès à des poids libres et machines.
+                                Des alternatives sont proposées pour s'entraîner à la maison avec un minimum d'équipement.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                Combien de temps dois-je m'entraîner par semaine ?
+                            </button>
+                        </h3>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Le programme recommande 4 à 5 séances par semaine de 45 à 60 minutes.
+                                Cependant, il peut être adapté si tu as moins de temps disponible.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                Y a-t-il une garantie de remboursement ?
+                            </button>
+                        </h3>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Oui ! Nous offrons une garantie satisfait ou remboursé de 30 jours.
+                                Si tu n'es pas satisfait du programme, contacte-nous pour un remboursement complet.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                Puis-je accéder au programme depuis mon téléphone ?
+                            </button>
+                        </h3>
+                        <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Absolument ! Le programme est accessible depuis tous les appareils : ordinateur,
+                                tablette et smartphone. Idéal pour suivre tes séances directement à la salle.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA Section -->
+<section class="programme-final-cta">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="final-cta-title">
+                    PRÊT À COMMENCER<br>
+                    <span class="text-danger">TA TRANSFORMATION?</span>
+                </h2>
+                <p class="final-cta-subtitle">
+                    Rejoins les milliers de membres qui ont transformé leur corps avec ce programme
+                </p>
+                <div class="final-cta-price">
+                    <span class="price-big">{{ programme.prix }}€</span>
+                    <span class="price-info">Accès à vie • Paiement unique</span>
+                </div>
+                {% if has_purchased %}
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-final-cta-success">
+                        <i class="bi bi-speedometer2 me-2"></i>
+                        Accéder à Mon Programme
+                    </a>
+                {% elif current_user.is_authenticated %}
+                    <a href="{{ url_for('main.checkout', item_type='programme', item_id=programme.id) }}" class="btn btn-final-cta">
+                        <i class="bi bi-lightning-charge-fill me-2"></i>
+                        Acheter Maintenant
+                    </a>
+                    <p class="final-cta-guarantee">
+                        <i class="bi bi-shield-check"></i>
+                        Paiement 100% sécurisé • Satisfait ou remboursé 30 jours
+                    </p>
+                {% else %}
+                    <a href="{{ url_for('main.login') }}" class="btn btn-final-cta">
+                        <i class="bi bi-lock-fill me-2"></i>
+                        Se connecter pour acheter
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Badges -->
+<section class="trust-section">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 col-6 mb-3">
+                <div class="trust-badge">
+                    <i class="bi bi-shield-check"></i>
+                    <p>Paiement<br>Sécurisé</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="trust-badge">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <p>Remboursement<br>30 jours</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="trust-badge">
+                    <i class="bi bi-infinity"></i>
+                    <p>Accès<br>À vie</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="trust-badge">
+                    <i class="bi bi-headset"></i>
+                    <p>Support<br>Illimité</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

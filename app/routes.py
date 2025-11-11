@@ -125,6 +125,19 @@ def programmes():
     return render_template('programmes.html', programmes=all_programmes)
 
 
+@bp.route('/programme/<int:id>')
+def programme_detail(id):
+    """Page de détail d'un programme spécifique"""
+    programme = Programme.query.get_or_404(id)
+
+    # Check if user has purchased this program
+    has_purchased = False
+    if current_user.is_authenticated:
+        has_purchased = current_user.has_purchased(id, 'programme')
+
+    return render_template('programme_detail.html', programme=programme, has_purchased=has_purchased)
+
+
 @bp.route('/ebooks')
 def ebooks():
     """Page listant tous les ebooks"""
