@@ -173,9 +173,15 @@ def register():
 
         # Envoyer un email de bienvenue
         try:
-            send_welcome_email(user)
+            email_sent = send_welcome_email(user)
+            if email_sent:
+                print(f"[INSCRIPTION] Email de bienvenue envoyé à {user.email}")
+            else:
+                print(f"[INSCRIPTION] ⚠️ Email de bienvenue NON envoyé à {user.email} - Vérifier config MAIL_*")
         except Exception as e:
-            print(f"Erreur lors de l'envoi de l'email de bienvenue: {e}")
+            print(f"[INSCRIPTION] ✗ ERREUR lors de l'envoi de l'email de bienvenue: {e}")
+            import traceback
+            traceback.print_exc()
 
         flash('Votre compte a été créé avec succès! Vous pouvez maintenant vous connecter.', 'success')
         return redirect(url_for('main.login'))
@@ -572,14 +578,24 @@ def checkout_success():
         # Envoyer les emails
         try:
             # Email de confirmation au client
-            send_purchase_confirmation_email(current_user, item, item_type)
+            email_client = send_purchase_confirmation_email(current_user, item, item_type)
+            if email_client:
+                print(f"[ACHAT] Email de confirmation envoyé à {current_user.email}")
+            else:
+                print(f"[ACHAT] ⚠️ Email de confirmation NON envoyé à {current_user.email} - Vérifier config MAIL_*")
 
             # Email de notification à l'admin
             admin_email = current_app.config.get('ADMIN_EMAIL')
             if admin_email:
-                send_admin_notification_email(admin_email, current_user, item, item_type)
+                email_admin = send_admin_notification_email(admin_email, current_user, item, item_type)
+                if email_admin:
+                    print(f"[ACHAT] Email admin envoyé à {admin_email}")
+                else:
+                    print(f"[ACHAT] ⚠️ Email admin NON envoyé à {admin_email} - Vérifier config MAIL_*")
         except Exception as e:
-            print(f"Erreur lors de l'envoi des emails: {e}")
+            print(f"[ACHAT] ✗ ERREUR lors de l'envoi des emails: {e}")
+            import traceback
+            traceback.print_exc()
 
         flash('Paiement réussi! L\'article a été ajouté à votre bibliothèque.', 'success')
     else:
