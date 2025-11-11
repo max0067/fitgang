@@ -58,9 +58,10 @@ def create_app(config_name='default'):
     from app import routes
     app.register_blueprint(routes.bp)
 
-    # Créer les tables de la base de données
-    with app.app_context():
-        db.create_all()
+    # Ne pas utiliser db.create_all() en production avec des migrations
+    # Les tables sont gérées par Flask-Migrate (flask db upgrade)
+    # with app.app_context():
+    #     db.create_all()
 
     return app
 
