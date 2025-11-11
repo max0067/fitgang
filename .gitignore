@@ -70,3 +70,7 @@ htmlcov/
 
 # System
 Thumbs.db
+
+# Passenger (o2switch)
+tmp/
+backups/
