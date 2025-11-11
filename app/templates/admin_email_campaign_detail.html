@@ -70,37 +70,9 @@
             </div>
         </div>
 
-        <!-- Détails de la campagne -->
-        <div class="row">
-            <div class="col-lg-10">
-                <div class="card card-custom mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Détails de la campagne</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <strong>Sujet:</strong>
-                            <p class="text-muted">{{ campaign.sujet }}</p>
-                        </div>
-
-                        <div class="mb-3">
-                            <strong>Contenu HTML:</strong>
-                            <div class="border rounded p-3 bg-light">
-                                {{ campaign.contenu_html|safe }}
-                            </div>
-                        </div>
-
-                        {% if campaign.contenu_texte %}
-                        <div class="mb-0">
-                            <strong>Contenu texte:</strong>
-                            <pre class="bg-light p-3 rounded">{{ campaign.contenu_texte }}</pre>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-2">
+        <!-- Actions rapides -->
+        <div class="row mb-4">
+            <div class="col-md-4">
                 <!-- Envoyer un test -->
                 <div class="card card-custom mb-4">
                     <div class="card-header bg-warning">
@@ -119,7 +91,9 @@
                         </form>
                     </div>
                 </div>
+            </div>
 
+            <div class="col-md-4">
                 <!-- Aperçu des destinataires -->
                 <div class="card card-custom mb-4">
                     <div class="card-header">
@@ -141,7 +115,9 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
+            <div class="col-md-4">
                 <!-- Actions -->
                 <div class="card card-custom">
                     <div class="card-header">
@@ -161,6 +137,33 @@
                         {% endif %}
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Détails de la campagne (pleine largeur) -->
+        <div class="card card-custom mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Détails de la campagne</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Sujet:</strong>
+                    <p class="text-muted">{{ campaign.sujet }}</p>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Contenu HTML:</strong>
+                    <div class="border rounded p-3 bg-light">
+                        {{ campaign.contenu_html|safe }}
+                    </div>
+                </div>
+
+                {% if campaign.contenu_texte %}
+                <div class="mb-0">
+                    <strong>Contenu texte:</strong>
+                    <pre class="bg-light p-3 rounded">{{ campaign.contenu_texte }}</pre>
+                </div>
+                {% endif %}
             </div>
         </div>
 
