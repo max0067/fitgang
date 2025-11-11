@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Newsletter - FitGang Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="bi bi-envelope-fill text-success"></i> Abonnés Newsletter
+    </h1>
+    <div>
+        <a href="{{ url_for('main.admin_newsletter_import') }}" class="btn btn-success">
+            <i class="bi bi-file-earmark-arrow-up"></i> Importer des emails
+        </a>
+        <a href="{{ url_for('main.admin_email_campaigns') }}" class="btn btn-primary">
+            <i class="bi bi-send"></i> Campagnes Email
+        </a>
+        <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card card-custom text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-people-fill text-success" style="font-size: 3rem;"></i>
+                <h3 class="mt-3">{{ total_abonnes }}</h3>
+                <p class="text-muted mb-0">Abonnés actifs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-custom text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-envelope text-primary" style="font-size: 3rem;"></i>
+                <h3 class="mt-3">Prêts</h3>
+                <p class="text-muted mb-0">Pour recevoir vos emails</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-custom text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-file-earmark-arrow-up text-success" style="font-size: 3rem;"></i>
+                <h3 class="mt-3">CSV</h3>
+                <p class="text-muted mb-0">Import en masse disponible</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if abonnes %}
+    <div class="card card-custom">
+        <div class="card-body">
+            <h5 class="card-title mb-3">
+                <i class="bi bi-list"></i> Liste des abonnés ({{ abonnes|length }} affichés)
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Email</th>
+                            <th>Date d'inscription</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for abonne in abonnes[:100] %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ abonne.email }}</td>
+                            <td>{{ abonne.date_inscription.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                {% if abonne.actif %}
+                                    <span class="badge bg-success">Actif</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactif</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if abonnes|length > 100 %}
+                <p class="text-center text-muted mt-3">
+                    <i class="bi bi-info-circle"></i> Affichage des 100 premiers abonnés sur {{ total_abonnes }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> Aucun abonné pour le moment.
+        <a href="{{ url_for('main.admin_newsletter_import') }}" class="alert-link">Importer votre base d'emails</a>
+    </div>
+{% endif %}
+
+<div class="alert alert-info mt-4">
+    <i class="bi bi-lightbulb"></i> <strong>Astuce:</strong> Pour envoyer un email à tous vos abonnés, créez une campagne email depuis
+    <a href="{{ url_for('main.admin_email_campaigns') }}" class="alert-link">la section Campagnes Email</a>.
+</div>
+{% endblock %}

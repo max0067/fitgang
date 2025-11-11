@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - FitGang Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="bi bi-envelope-plus text-primary"></i> {{ title }}
+            </h1>
+            <a href="{{ url_for('main.admin_email_campaigns') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
+        </div>
+
+        <div class="alert alert-info">
+            <i class="bi bi-lightbulb"></i> <strong>Astuce:</strong> Utilisez du HTML pour formater votre email. Vous pourrez tester l'envoi avant de le lancer en masse.
+        </div>
+
+        <div class="card card-custom">
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.nom.label(class="form-label fw-bold") }}
+                        {{ form.nom(class="form-control", placeholder="Ex: Newsletter Janvier 2025") }}
+                        <small class="text-muted">Nom interne de la campagne (non visible par les abonnés)</small>
+                        {% if form.nom.errors %}
+                            {% for error in form.nom.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.sujet.label(class="form-label fw-bold") }}
+                        {{ form.sujet(class="form-control", placeholder="Ex: Nouveaux programmes disponibles! 💪") }}
+                        <small class="text-muted">Le sujet de l'email que vos abonnés verront</small>
+                        {% if form.sujet.errors %}
+                            {% for error in form.sujet.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.contenu_html.label(class="form-label fw-bold") }}
+                        {{ form.contenu_html(class="form-control font-monospace") }}
+                        <small class="text-muted">Contenu HTML de votre email. Vous pouvez utiliser les balises HTML standards.</small>
+                        {% if form.contenu_html.errors %}
+                            {% for error in form.contenu_html.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        {{ form.contenu_texte.label(class="form-label fw-bold") }}
+                        {{ form.contenu_texte(class="form-control") }}
+                        <small class="text-muted">Version texte simple (optionnel, recommandé pour compatibilité)</small>
+                        {% if form.contenu_texte.errors %}
+                            {% for error in form.contenu_texte.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                        <a href="{{ url_for('main.admin_email_campaigns') }}" class="btn btn-outline-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card card-custom mt-4 bg-light">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-code-square"></i> Exemple de contenu HTML</h5>
+                <pre class="mb-0"><code>&lt;h2 style="color: #dc3545;"&gt;Salut membre FitGang!&lt;/h2&gt;
+&lt;p&gt;Nous avons de nouveaux programmes pour toi:&lt;/p&gt;
+&lt;ul&gt;
+    &lt;li&gt;Programme Prise de Masse&lt;/li&gt;
+    &lt;li&gt;Programme Sèche&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;
+    &lt;a href="https://fitgang.fr/programmes"
+       style="background-color: #dc3545; color: white; padding: 12px 30px;
+              text-decoration: none; border-radius: 5px; display: inline-block;"&gt;
+        Découvrir les programmes
+    &lt;/a&gt;
+&lt;/p&gt;
+&lt;p&gt;À bientôt,&lt;br&gt;L'équipe FitGang&lt;/p&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
