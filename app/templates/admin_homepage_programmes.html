@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Gérer Section Programmes - Admin FitGang{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-house-gear text-danger"></i> Section Programmes de la Page d'Accueil</h1>
+    <div>
+        <a href="{{ url_for('main.admin_homepage_content') }}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-pencil"></i> Autres sections
+        </a>
+        <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> Modifiez le contenu de la section "NOS PROGRAMMES" affichée sur la page d'accueil
+</div>
+
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <!-- Titre et sous-titre de la section -->
+    <div class="card card-custom mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-type"></i> Titre de la section</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                {{ form.section_titre.label(class="form-label fw-bold") }}
+                {{ form.section_titre(class="form-control") }}
+                <small class="text-muted">Ex: TROUVE TON PROGRAMME IDÉAL</small>
+            </div>
+            <div class="mb-0">
+                {{ form.section_sous_titre.label(class="form-label fw-bold") }}
+                {{ form.section_sous_titre(class="form-control", rows=3) }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Programme 1 -->
+    <div class="card card-custom mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="bi bi-1-circle"></i> Programme 1</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.prog1_badge.label(class="form-label fw-bold") }}
+                    {{ form.prog1_badge(class="form-control") }}
+                    <small class="text-muted">Badge optionnel (ex: POPULAIRE, TOP VENTES). Laisser vide si non nécessaire</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.prog1_badge_color.label(class="form-label fw-bold") }}
+                    {{ form.prog1_badge_color(class="form-select") }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.prog1_titre.label(class="form-label fw-bold") }}
+                    {{ form.prog1_titre(class="form-control") }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.prog1_prix.label(class="form-label fw-bold") }}
+                    {{ form.prog1_prix(class="form-control") }}
+                </div>
+            </div>
+            <div class="mb-3">
+                {{ form.prog1_description.label(class="form-label fw-bold") }}
+                {{ form.prog1_description(class="form-control", rows=2) }}
+            </div>
+            <div class="mb-3">
+                {{ form.prog1_features.label(class="form-label fw-bold") }}
+                {{ form.prog1_features(class="form-control", rows=3) }}
+                <small class="text-muted">Une caractéristique par ligne (ex: 12 semaines)</small>
+            </div>
+            <div class="mb-0">
+                {{ form.prog1_image.label(class="form-label fw-bold") }}
+                {{ form.prog1_image(class="form-control") }}
+                <small class="text-muted">URL de l'image Unsplash ou autre</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Programme 2 -->
+    <div class="card card-custom mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="bi bi-2-circle"></i> Programme 2</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.prog2_badge.label(class="form-label fw-bold") }}
+                    {{ form.prog2_badge(class="form-control") }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.prog2_badge_color.label(class="form-label fw-bold") }}
+                    {{ form.prog2_badge_color(class="form-select") }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.prog2_titre.label(class="form-label fw-bold") }}
+                    {{ form.prog2_titre(class="form-control") }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.prog2_prix.label(class="form-label fw-bold") }}
+                    {{ form.prog2_prix(class="form-control") }}
+                </div>
+            </div>
+            <div class="mb-3">
+                {{ form.prog2_description.label(class="form-label fw-bold") }}
+                {{ form.prog2_description(class="form-control", rows=2) }}
+            </div>
+            <div class="mb-3">
+                {{ form.prog2_features.label(class="form-label fw-bold") }}
+                {{ form.prog2_features(class="form-control", rows=3) }}
+            </div>
+            <div class="mb-0">
+                {{ form.prog2_image.label(class="form-label fw-bold") }}
+                {{ form.prog2_image(class="form-control") }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Programme 3 -->
+    <div class="card card-custom mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="bi bi-3-circle"></i> Programme 3</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.prog3_badge.label(class="form-label fw-bold") }}
+                    {{ form.prog3_badge(class="form-control") }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.prog3_badge_color.label(class="form-label fw-bold") }}
+                    {{ form.prog3_badge_color(class="form-select") }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.prog3_titre.label(class="form-label fw-bold") }}
+                    {{ form.prog3_titre(class="form-control") }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.prog3_prix.label(class="form-label fw-bold") }}
+                    {{ form.prog3_prix(class="form-control") }}
+                </div>
+            </div>
+            <div class="mb-3">
+                {{ form.prog3_description.label(class="form-label fw-bold") }}
+                {{ form.prog3_description(class="form-control", rows=2) }}
+            </div>
+            <div class="mb-3">
+                {{ form.prog3_features.label(class="form-label fw-bold") }}
+                {{ form.prog3_features(class="form-control", rows=3) }}
+            </div>
+            <div class="mb-0">
+                {{ form.prog3_image.label(class="form-label fw-bold") }}
+                {{ form.prog3_image(class="form-control") }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Programme 4 -->
+    <div class="card card-custom mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="bi bi-4-circle"></i> Programme 4</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.prog4_badge.label(class="form-label fw-bold") }}
+                    {{ form.prog4_badge(class="form-control") }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.prog4_badge_color.label(class="form-label fw-bold") }}
+                    {{ form.prog4_badge_color(class="form-select") }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.prog4_titre.label(class="form-label fw-bold") }}
+                    {{ form.prog4_titre(class="form-control") }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.prog4_prix.label(class="form-label fw-bold") }}
+                    {{ form.prog4_prix(class="form-control") }}
+                </div>
+            </div>
+            <div class="mb-3">
+                {{ form.prog4_description.label(class="form-label fw-bold") }}
+                {{ form.prog4_description(class="form-control", rows=2) }}
+            </div>
+            <div class="mb-3">
+                {{ form.prog4_features.label(class="form-label fw-bold") }}
+                {{ form.prog4_features(class="form-control", rows=3) }}
+            </div>
+            <div class="mb-0">
+                {{ form.prog4_image.label(class="form-label fw-bold") }}
+                {{ form.prog4_image(class="form-control") }}
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mb-4">
+        <button type="submit" class="btn btn-danger btn-lg px-5">
+            <i class="bi bi-save"></i> Sauvegarder les modifications
+        </button>
+    </div>
+</form>
+{% endblock %}

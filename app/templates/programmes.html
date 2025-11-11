@@ -16,9 +16,9 @@
         <div class="col-md-4 mb-4">
             <div class="card card-custom h-100">
                 {% if programme.image %}
-                    <img src="{{ programme.image }}" class="card-img-top" alt="{{ programme.titre }}">
+                    <img src="{{ programme.image }}" class="card-img-top" alt="{{ programme.titre }}" style="height: 300px; object-fit: cover;">
                 {% else %}
-                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 250px;">
+                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 300px;">
                         <i class="bi bi-dumbbell text-white" style="font-size: 100px;"></i>
                     </div>
                 {% endif %}
