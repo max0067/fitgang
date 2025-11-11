@@ -74,31 +74,30 @@
     <div class="container">
         <div class="section-header text-center mb-5">
             <span class="section-badge">NOS PROGRAMMES</span>
-            <h2 class="section-title">{{ page_content.prog_titre }}</h2>
+            <h2 class="section-title">TROUVE TON PROGRAMME IDÉAL</h2>
             <p class="section-subtitle">
-                {{ page_content.prog_sous_titre|safe }}
+                Que tu veux prendre du muscle, perdre du gras ou améliorer ta condition physique,<br>
+                on a le programme qu'il te faut.
             </p>
         </div>
 
         <div class="row g-4">
-            <!-- Programme 1 -->
+            <!-- Programme 1: Sèche -->
             <div class="col-lg-3 col-md-6">
                 <div class="programme-card">
-                    <div class="programme-image" style="background-image: url('{{ page_content.prog1.image }}');">
-                        {% if page_content.prog1.badge %}
-                        <div class="programme-badge {{ page_content.prog1.badge_color }}">{{ page_content.prog1.badge }}</div>
-                        {% endif %}
+                    <div class="programme-image" style="background-image: url('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&h=800&fit=crop');">
+                        <div class="programme-badge">POPULAIRE</div>
                     </div>
                     <div class="programme-content">
-                        <h3 class="programme-title">{{ page_content.prog1.titre }}</h3>
-                        <p class="programme-desc">{{ page_content.prog1.description }}</p>
+                        <h3 class="programme-title">SÈCHE</h3>
+                        <p class="programme-desc">Perds du gras tout en préservant ta masse musculaire</p>
                         <ul class="programme-features">
-                            {% for feature in page_content.prog1.features %}
-                            <li><i class="bi bi-check-circle-fill"></i> {{ feature }}</li>
-                            {% endfor %}
+                            <li><i class="bi bi-check-circle-fill"></i> 12 semaines</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Cardio HIIT</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Plan nutrition</li>
                         </ul>
                         <div class="programme-footer">
-                            <span class="programme-price">{{ page_content.prog1.prix }}</span>
+                            <span class="programme-price">29€</span>
                             <a href="{{ url_for('main.programmes') }}" class="btn-programme">
                                 Découvrir <i class="bi bi-arrow-right"></i>
                             </a>
@@ -107,24 +106,22 @@
                 </div>
             </div>
 
-            <!-- Programme 2 -->
+            <!-- Programme 2: Prise de Masse -->
             <div class="col-lg-3 col-md-6">
                 <div class="programme-card">
-                    <div class="programme-image" style="background-image: url('{{ page_content.prog2.image }}');">
-                        {% if page_content.prog2.badge %}
-                        <div class="programme-badge {{ page_content.prog2.badge_color }}">{{ page_content.prog2.badge }}</div>
-                        {% endif %}
+                    <div class="programme-image" style="background-image: url('https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=600&h=800&fit=crop');">
+                        <div class="programme-badge bg-danger">TOP VENTES</div>
                     </div>
                     <div class="programme-content">
-                        <h3 class="programme-title">{{ page_content.prog2.titre }}</h3>
-                        <p class="programme-desc">{{ page_content.prog2.description }}</p>
+                        <h3 class="programme-title">PRISE DE MASSE</h3>
+                        <p class="programme-desc">Construis du muscle de qualité avec notre méthode éprouvée</p>
                         <ul class="programme-features">
-                            {% for feature in page_content.prog2.features %}
-                            <li><i class="bi bi-check-circle-fill"></i> {{ feature }}</li>
-                            {% endfor %}
+                            <li><i class="bi bi-check-circle-fill"></i> 16 semaines</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Hypertrophie</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Calories ++</li>
                         </ul>
                         <div class="programme-footer">
-                            <span class="programme-price">{{ page_content.prog2.prix }}</span>
+                            <span class="programme-price">39€</span>
                             <a href="{{ url_for('main.programmes') }}" class="btn-programme">
                                 Découvrir <i class="bi bi-arrow-right"></i>
                             </a>
@@ -133,24 +130,21 @@
                 </div>
             </div>
 
-            <!-- Programme 3 -->
+            <!-- Programme 3: Full Body -->
             <div class="col-lg-3 col-md-6">
                 <div class="programme-card">
-                    <div class="programme-image" style="background-image: url('{{ page_content.prog3.image }}');">
-                        {% if page_content.prog3.badge %}
-                        <div class="programme-badge {{ page_content.prog3.badge_color }}">{{ page_content.prog3.badge }}</div>
-                        {% endif %}
+                    <div class="programme-image" style="background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=800&fit=crop');">
                     </div>
                     <div class="programme-content">
-                        <h3 class="programme-title">{{ page_content.prog3.titre }}</h3>
-                        <p class="programme-desc">{{ page_content.prog3.description }}</p>
+                        <h3 class="programme-title">FULL BODY</h3>
+                        <p class="programme-desc">Programme complet pour travailler tout le corps efficacement</p>
                         <ul class="programme-features">
-                            {% for feature in page_content.prog3.features %}
-                            <li><i class="bi bi-check-circle-fill"></i> {{ feature }}</li>
-                            {% endfor %}
+                            <li><i class="bi bi-check-circle-fill"></i> 8 semaines</li>
+                            <li><i class="bi bi-check-circle-fill"></i> 3x/semaine</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Polyvalent</li>
                         </ul>
                         <div class="programme-footer">
-                            <span class="programme-price">{{ page_content.prog3.prix }}</span>
+                            <span class="programme-price">24€</span>
                             <a href="{{ url_for('main.programmes') }}" class="btn-programme">
                                 Découvrir <i class="bi bi-arrow-right"></i>
                             </a>
@@ -159,24 +153,22 @@
                 </div>
             </div>
 
-            <!-- Programme 4 -->
+            <!-- Programme 4: Débutant -->
             <div class="col-lg-3 col-md-6">
                 <div class="programme-card">
-                    <div class="programme-image" style="background-image: url('{{ page_content.prog4.image }}');">
-                        {% if page_content.prog4.badge %}
-                        <div class="programme-badge {{ page_content.prog4.badge_color }}">{{ page_content.prog4.badge }}</div>
-                        {% endif %}
+                    <div class="programme-image" style="background-image: url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&h=800&fit=crop');">
+                        <div class="programme-badge bg-success">DÉBUTANT</div>
                     </div>
                     <div class="programme-content">
-                        <h3 class="programme-title">{{ page_content.prog4.titre }}</h3>
-                        <p class="programme-desc">{{ page_content.prog4.description }}</p>
+                        <h3 class="programme-title">DÉBUTANT</h3>
+                        <p class="programme-desc">Lance-toi dans le fitness avec des bases solides</p>
                         <ul class="programme-features">
-                            {% for feature in page_content.prog4.features %}
-                            <li><i class="bi bi-check-circle-fill"></i> {{ feature }}</li>
-                            {% endfor %}
+                            <li><i class="bi bi-check-circle-fill"></i> 6 semaines</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Progressif</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Vidéos incluses</li>
                         </ul>
                         <div class="programme-footer">
-                            <span class="programme-price">{{ page_content.prog4.prix }}</span>
+                            <span class="programme-price">19€</span>
                             <a href="{{ url_for('main.programmes') }}" class="btn-programme">
                                 Découvrir <i class="bi bi-arrow-right"></i>
                             </a>
