@@ -36,6 +36,15 @@ class Config:
     # URL de base pour les webhooks Stripe
     BASE_URL = os.environ.get('BASE_URL') or 'http://localhost:5000'
 
+    # Configuration Flask-Mail
+    MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp.gmail.com'
+    MAIL_PORT = int(os.environ.get('MAIL_PORT') or 587)
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER') or 'noreply@fitgang.fr'
+    ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL') or 'admin@fitgang.fr'
+
 
 class DevelopmentConfig(Config):
     """Configuration pour le développement"""

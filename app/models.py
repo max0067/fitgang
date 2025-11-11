@@ -56,6 +56,11 @@ class User(UserMixin, db.Model):
         achats = Achat.query.filter_by(user_id=self.id, type='ebook').all()
         return [Ebook.query.get(a.item_id) for a in achats]
 
+    def get_complements(self):
+        """Retourne tous les compléments achetés par l'utilisateur"""
+        achats = Achat.query.filter_by(user_id=self.id, type='complement').all()
+        return [Complement.query.get(a.item_id) for a in achats]
+
     def __repr__(self):
         return f'<User {self.email}>'
 
@@ -120,11 +125,13 @@ class Achat(db.Model):
     date_achat = db.Column(db.DateTime, default=datetime.utcnow)
 
     def get_item(self):
-        """Retourne l'objet programme ou ebook acheté"""
+        """Retourne l'objet programme, ebook ou complément acheté"""
         if self.type == 'programme':
             return Programme.query.get(self.item_id)
         elif self.type == 'ebook':
             return Ebook.query.get(self.item_id)
+        elif self.type == 'complement':
+            return Complement.query.get(self.item_id)
         return None
 
     def __repr__(self):
@@ -218,3 +225,42 @@ class ProgrammeProgression(db.Model):
 
     def __repr__(self):
         return f'<ProgrammeProgression User #{self.user_id} - Seance #{self.programme_seance_id}>'
+
+
+class Complement(db.Model):
+    """
+    Modèle complément alimentaire
+    Représente un complément vendable (protéine, créatine, vitamines, etc.)
+    """
+    __tablename__ = 'complements'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nom = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    prix = db.Column(db.Float, nullable=False)  # en euros
+    image = db.Column(db.String(300))  # URL ou chemin de l'image
+    categorie = db.Column(db.String(100))  # Ex: Protéines, Créatine, Vitamines, Pre-workout, etc.
+    marque = db.Column(db.String(100))  # Marque du produit
+    dosage = db.Column(db.String(200))  # Dosage recommandé (ex: "30g par jour")
+    lien_achat = db.Column(db.String(500))  # Lien d'achat (peut être lien affilié)
+    actif = db.Column(db.Boolean, default=True)
+    date_creation = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Complement {self.nom}>'
+
+
+class Newsletter(db.Model):
+    """
+    Modèle newsletter
+    Stocke les emails des abonnés à la newsletter
+    """
+    __tablename__ = 'newsletter'
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    date_inscription = db.Column(db.DateTime, default=datetime.utcnow)
+    actif = db.Column(db.Boolean, default=True)  # Permet de désabonner sans supprimer
+
+    def __repr__(self):
+        return f'<Newsletter {self.email}>'

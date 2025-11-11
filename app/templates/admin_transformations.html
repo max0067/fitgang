@@ -39,7 +39,8 @@
                 <div class="card-body">
                     <i class="bi bi-trophy-fill text-success" style="font-size: 2.5rem;"></i>
                     <h2 class="mt-2 mb-0">
-                        {{ transformations|selectattr('poids_diff')|select('lt', 0)|list|length }}
+                        {% set perte_count = transformations|selectattr('poids_diff')|selectattr('poids_diff', 'lt', 0)|list|length %}
+                        {{ perte_count }}
                     </h2>
                     <p class="text-muted mb-0">Perte de poids</p>
                 </div>
@@ -50,7 +51,8 @@
                 <div class="card-body">
                     <i class="bi bi-arrow-up-circle-fill text-primary" style="font-size: 2.5rem;"></i>
                     <h2 class="mt-2 mb-0">
-                        {{ transformations|selectattr('poids_diff')|select('gt', 0)|list|length }}
+                        {% set gain_count = transformations|selectattr('poids_diff')|selectattr('poids_diff', 'gt', 0)|list|length %}
+                        {{ gain_count }}
                     </h2>
                     <p class="text-muted mb-0">Prise de masse</p>
                 </div>

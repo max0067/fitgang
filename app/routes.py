@@ -12,9 +12,10 @@ from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
 from app import db
-from app.models import User, Programme, Ebook, Achat, Progression, Photo, ProgrammeSeance, ProgrammeProgression
+from app.models import User, Programme, Ebook, Achat, Progression, Photo, ProgrammeSeance, ProgrammeProgression, Complement, Newsletter
 from app.forms import (LoginForm, RegistrationForm, ProfileForm, ChangePasswordForm,
-                       ProgressionForm, ProgrammeForm, EbookForm, SeanceForm)
+                       ProgressionForm, ProgrammeForm, EbookForm, SeanceForm, ComplementForm)
+from app.email import send_welcome_email, send_purchase_confirmation_email, send_admin_notification_email
 
 # Créer le blueprint
 bp = Blueprint('main', __name__)
@@ -102,6 +103,12 @@ def register():
 
         db.session.add(user)
         db.session.commit()
+
+        # Envoyer un email de bienvenue
+        try:
+            send_welcome_email(user)
+        except Exception as e:
+            print(f"Erreur lors de l'envoi de l'email de bienvenue: {e}")
 
         flash('Votre compte a été créé avec succès! Vous pouvez maintenant vous connecter.', 'success')
         return redirect(url_for('main.login'))
@@ -284,6 +291,37 @@ def download_ebook(id):
         return redirect(url_for('main.dashboard'))
 
 
+# ===== ROUTES COMPLÉMENTS ALIMENTAIRES =====
+
+@bp.route('/complements')
+def complements():
+    """Page listant tous les compléments alimentaires"""
+    all_complements = Complement.query.filter_by(actif=True).order_by(Complement.categorie, Complement.nom).all()
+
+    # Grouper par catégorie
+    complements_par_categorie = {}
+    for complement in all_complements:
+        if complement.categorie not in complements_par_categorie:
+            complements_par_categorie[complement.categorie] = []
+        complements_par_categorie[complement.categorie].append(complement)
+
+    return render_template('complements.html',
+                         complements_par_categorie=complements_par_categorie)
+
+
+@bp.route('/complement/<int:id>')
+def complement_detail(id):
+    """Page de détail d'un complément spécifique"""
+    complement = Complement.query.get_or_404(id)
+
+    # Check if user has purchased this complement
+    has_purchased = False
+    if current_user.is_authenticated:
+        has_purchased = current_user.has_purchased(id, 'complement')
+
+    return render_template('complement_detail.html', complement=complement, has_purchased=has_purchased)
+
+
 # ===== ROUTES UTILISATEUR =====
 
 @bp.route('/dashboard')
@@ -385,11 +423,16 @@ def checkout(item_type, item_id):
         item = Programme.query.get_or_404(item_id)
     elif item_type == 'ebook':
         item = Ebook.query.get_or_404(item_id)
+    elif item_type == 'complement':
+        item = Complement.query.get_or_404(item_id)
     else:
         flash('Type d\'article invalide.', 'danger')
         return redirect(url_for('main.index'))
 
     try:
+        # Déterminer le nom du produit (titre pour programmes/ebooks, nom pour compléments)
+        product_name = getattr(item, 'titre', None) or getattr(item, 'nom', 'Produit')
+
         # Créer une session Stripe Checkout
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
@@ -397,7 +440,7 @@ def checkout(item_type, item_id):
                 'price_data': {
                     'currency': 'eur',
                     'product_data': {
-                        'name': item.titre,
+                        'name': product_name,
                         'description': item.description[:100],
                     },
                     'unit_amount': int(item.prix * 100),  # Stripe utilise les centimes
@@ -439,8 +482,13 @@ def checkout_success():
         # Récupérer l'item pour le prix
         if item_type == 'programme':
             item = Programme.query.get(item_id)
-        else:
+        elif item_type == 'ebook':
             item = Ebook.query.get(item_id)
+        elif item_type == 'complement':
+            item = Complement.query.get(item_id)
+        else:
+            flash('Type d\'article invalide.', 'danger')
+            return redirect(url_for('main.dashboard'))
 
         # Enregistrer l'achat
         achat = Achat(
@@ -453,6 +501,18 @@ def checkout_success():
 
         db.session.add(achat)
         db.session.commit()
+
+        # Envoyer les emails
+        try:
+            # Email de confirmation au client
+            send_purchase_confirmation_email(current_user, item, item_type)
+
+            # Email de notification à l'admin
+            admin_email = current_app.config.get('ADMIN_EMAIL')
+            if admin_email:
+                send_admin_notification_email(admin_email, current_user, item, item_type)
+        except Exception as e:
+            print(f"Erreur lors de l'envoi des emails: {e}")
 
         flash('Paiement réussi! L\'article a été ajouté à votre bibliothèque.', 'success')
     else:
@@ -752,6 +812,99 @@ def admin_delete_ebook(id):
 
     flash('Ebook supprimé.', 'info')
     return redirect(url_for('main.admin_ebooks'))
+
+
+# ===== ROUTES ADMIN - COMPLÉMENTS =====
+
+@bp.route('/admin/complements')
+@login_required
+@admin_required
+def admin_complements():
+    """Liste des compléments alimentaires (admin)"""
+    all_complements = Complement.query.order_by(Complement.date_creation.desc()).all()
+    return render_template('admin_complements.html', complements=all_complements)
+
+
+@bp.route('/admin/complement/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_add_complement():
+    """Ajouter un complément"""
+    form = ComplementForm()
+
+    if form.validate_on_submit():
+        complement = Complement(
+            nom=form.nom.data,
+            description=form.description.data,
+            prix=form.prix.data,
+            image=form.image.data,
+            categorie=form.categorie.data,
+            marque=form.marque.data,
+            dosage=form.dosage.data,
+            lien_achat=form.lien_achat.data,
+            actif=form.actif.data
+        )
+
+        db.session.add(complement)
+        db.session.commit()
+
+        flash('Complément créé avec succès!', 'success')
+        return redirect(url_for('main.admin_complements'))
+
+    form.actif.data = True
+    return render_template('admin_complement_form.html', form=form, title='Ajouter un complément')
+
+
+@bp.route('/admin/complement/<int:id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edit_complement(id):
+    """Modifier un complément"""
+    complement = Complement.query.get_or_404(id)
+    form = ComplementForm()
+
+    if form.validate_on_submit():
+        complement.nom = form.nom.data
+        complement.description = form.description.data
+        complement.prix = form.prix.data
+        complement.image = form.image.data
+        complement.categorie = form.categorie.data
+        complement.marque = form.marque.data
+        complement.dosage = form.dosage.data
+        complement.lien_achat = form.lien_achat.data
+        complement.actif = form.actif.data
+
+        db.session.commit()
+
+        flash('Complément mis à jour!', 'success')
+        return redirect(url_for('main.admin_complements'))
+
+    elif request.method == 'GET':
+        form.nom.data = complement.nom
+        form.description.data = complement.description
+        form.prix.data = complement.prix
+        form.image.data = complement.image
+        form.categorie.data = complement.categorie
+        form.marque.data = complement.marque
+        form.dosage.data = complement.dosage
+        form.lien_achat.data = complement.lien_achat
+        form.actif.data = complement.actif
+
+    return render_template('admin_complement_form.html', form=form, title='Modifier le complément', complement=complement)
+
+
+@bp.route('/admin/complement/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_delete_complement(id):
+    """Supprimer un complément"""
+    complement = Complement.query.get_or_404(id)
+
+    db.session.delete(complement)
+    db.session.commit()
+
+    flash('Complément supprimé.', 'info')
+    return redirect(url_for('main.admin_complements'))
 
 
 @bp.route('/admin/users')
@@ -1251,3 +1404,54 @@ def statistiques():
 def calculateurs():
     """Page des calculateurs fitness (IMC, calories, macros, 1RM)"""
     return render_template('calculateurs.html')
+
+
+# ===== ROUTES NEWSLETTER =====
+
+@bp.route('/newsletter/subscribe', methods=['POST'])
+def newsletter_subscribe():
+    """S'abonner à la newsletter"""
+    email = request.form.get('email') or (request.json.get('email') if request.is_json else None)
+
+    if not email:
+        if request.is_json:
+            return jsonify({'success': False, 'message': 'Email requis'}), 400
+        flash('Email requis', 'danger')
+        return redirect(url_for('main.index'))
+
+    # Vérifier si l'email est déjà abonné
+    existing = Newsletter.query.filter_by(email=email).first()
+
+    if existing:
+        if existing.actif:
+            if request.is_json:
+                return jsonify({'success': False, 'message': 'Cet email est déjà abonné'})
+            flash('Cet email est déjà abonné à la newsletter', 'info')
+        else:
+            # Réactiver l'abonnement
+            existing.actif = True
+            existing.date_inscription = datetime.utcnow()
+            db.session.commit()
+            if request.is_json:
+                return jsonify({'success': True, 'message': 'Abonnement réactivé avec succès!'})
+            flash('Ton abonnement a été réactivé!', 'success')
+    else:
+        # Créer un nouvel abonnement
+        newsletter = Newsletter(email=email)
+        db.session.add(newsletter)
+        db.session.commit()
+
+        if request.is_json:
+            return jsonify({'success': True, 'message': 'Merci de ton abonnement!'})
+        flash('Merci de t\'être abonné à notre newsletter!', 'success')
+
+    return redirect(url_for('main.index'))
+
+
+@bp.route('/admin/newsletter')
+@login_required
+@admin_required
+def admin_newsletter():
+    """Liste des abonnés à la newsletter (admin)"""
+    abonnes = Newsletter.query.filter_by(actif=True).order_by(Newsletter.date_inscription.desc()).all()
+    return render_template('admin_newsletter.html', abonnes=abonnes)

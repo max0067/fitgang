@@ -112,3 +112,27 @@ class SeanceForm(FlaskForm):
     exercices = TextAreaField('Exercices détaillés', validators=[DataRequired(), Length(max=5000)])
     notes = TextAreaField('Instructions/Notes', validators=[Optional(), Length(max=2000)])
     submit = SubmitField('Enregistrer')
+
+
+class ComplementForm(FlaskForm):
+    """Formulaire de création/modification de complément alimentaire"""
+    nom = StringField('Nom du produit', validators=[DataRequired(), Length(max=200)])
+    description = TextAreaField('Description', validators=[DataRequired(), Length(max=2000)])
+    prix = FloatField('Prix (€)', validators=[DataRequired(), NumberRange(min=0, max=9999)])
+    categorie = SelectField('Catégorie', choices=[
+        ('Protéines', 'Protéines'),
+        ('Créatine', 'Créatine'),
+        ('Pre-workout', 'Pre-workout'),
+        ('Vitamines', 'Vitamines'),
+        ('Oméga-3', 'Oméga-3'),
+        ('BCAA', 'BCAA'),
+        ('Gainers', 'Gainers'),
+        ('Brûleurs de graisse', 'Brûleurs de graisse'),
+        ('Autre', 'Autre')
+    ], validators=[DataRequired()])
+    marque = StringField('Marque', validators=[Optional(), Length(max=100)])
+    dosage = StringField('Dosage recommandé', validators=[Optional(), Length(max=200)])
+    image = StringField('URL de l\'image', validators=[Optional(), Length(max=300)])
+    lien_achat = StringField('Lien d\'achat', validators=[Optional(), Length(max=500)])
+    actif = BooleanField('Complément actif')
+    submit = SubmitField('Enregistrer')

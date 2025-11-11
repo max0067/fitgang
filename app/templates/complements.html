@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Compléments Alimentaires - FitGang{% endblock %}
+
+{% block content %}
+<div class="hero-section text-white text-center py-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <h1 class="display-4 fw-bold mb-3">
+        <i class="bi bi-capsule"></i> Compléments Alimentaires
+    </h1>
+    <p class="lead">
+        Les meilleurs suppléments pour maximiser vos résultats
+    </p>
+</div>
+
+{% if complements_par_categorie %}
+    {% for categorie, complements in complements_par_categorie.items() %}
+        <div class="mb-5">
+            <h2 class="mb-4">
+                <i class="bi bi-tag-fill text-primary"></i> {{ categorie }}
+            </h2>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for complement in complements %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm card-hover">
+                        {% if complement.image %}
+                        <img src="{{ complement.image }}" class="card-img-top" alt="{{ complement.nom }}" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-gradient text-white d-flex align-items-center justify-content-center" style="height: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="bi bi-capsule" style="font-size: 5rem;"></i>
+                        </div>
+                        {% endif %}
+
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title fw-bold mb-1">{{ complement.nom }}</h5>
+                                <span class="badge bg-primary">{{ complement.categorie }}</span>
+                            </div>
+
+                            {% if complement.marque %}
+                            <p class="text-muted mb-2"><small><i class="bi bi-shield-check"></i> {{ complement.marque }}</small></p>
+                            {% endif %}
+
+                            <p class="card-text text-muted flex-grow-1">
+                                {{ complement.description[:150] }}{% if complement.description|length > 150 %}...{% endif %}
+                            </p>
+
+                            {% if complement.dosage %}
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-clipboard-data"></i> <strong>Dosage:</strong> {{ complement.dosage }}
+                            </p>
+                            {% endif %}
+
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <h4 class="text-danger fw-bold mb-0">{{ complement.prix }}€</h4>
+                                <a href="{{ url_for('main.complement_detail', id=complement.id) }}" class="btn btn-primary">
+                                    Voir Détails
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-info text-center">
+        <i class="bi bi-info-circle"></i> Aucun complément disponible pour le moment.
+    </div>
+{% endif %}
+{% endblock %}

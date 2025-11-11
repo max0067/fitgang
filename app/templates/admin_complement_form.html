@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - FitGang Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h1 class="mb-4">
+            <i class="bi bi-capsule text-info"></i> {{ title }}
+        </h1>
+
+        <div class="card card-custom">
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.nom.label(class="form-label fw-bold") }}
+                        {{ form.nom(class="form-control", placeholder="Ex: Whey Protein Isolate") }}
+                        {% if form.nom.errors %}
+                            {% for error in form.nom.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label fw-bold") }}
+                        {{ form.description(class="form-control", rows="5", placeholder="Description complète du complément, ses bénéfices, composition...") }}
+                        {% if form.description.errors %}
+                            {% for error in form.description.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.categorie.label(class="form-label fw-bold") }}
+                            {{ form.categorie(class="form-select") }}
+                            {% if form.categorie.errors %}
+                                {% for error in form.categorie.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ form.marque.label(class="form-label fw-bold") }}
+                            {{ form.marque(class="form-control", placeholder="Ex: MyProtein") }}
+                            {% if form.marque.errors %}
+                                {% for error in form.marque.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.prix.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                {{ form.prix(class="form-control", placeholder="29.99") }}
+                                <span class="input-group-text">€</span>
+                            </div>
+                            {% if form.prix.errors %}
+                                {% for error in form.prix.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ form.dosage.label(class="form-label fw-bold") }}
+                            {{ form.dosage(class="form-control", placeholder="Ex: 30g par jour") }}
+                            <small class="text-muted">Dosage recommandé</small>
+                            {% if form.dosage.errors %}
+                                {% for error in form.dosage.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.image.label(class="form-label fw-bold") }}
+                        {{ form.image(class="form-control", placeholder="https://example.com/produit.jpg") }}
+                        <small class="text-muted">URL de l'image du produit</small>
+                        {% if form.image.errors %}
+                            {% for error in form.image.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.lien_achat.label(class="form-label fw-bold") }}
+                        {{ form.lien_achat(class="form-control", placeholder="https://myprotein.com/...") }}
+                        <small class="text-muted">Lien d'achat (peut être un lien affilié)</small>
+                        {% if form.lien_achat.errors %}
+                            {% for error in form.lien_achat.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ form.actif(class="form-check-input") }}
+                        {{ form.actif.label(class="form-check-label") }}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-info btn-lg") }}
+                        <a href="{{ url_for('main.admin_complements') }}" class="btn btn-outline-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

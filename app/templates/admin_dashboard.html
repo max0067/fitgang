@@ -14,6 +14,9 @@
         <a href="{{ url_for('main.admin_ebooks') }}" class="btn btn-outline-danger">
             <i class="bi bi-book"></i> Ebooks
         </a>
+        <a href="{{ url_for('main.admin_complements') }}" class="btn btn-outline-primary">
+            <i class="bi bi-capsule"></i> Compléments
+        </a>
         <a href="{{ url_for('main.admin_users') }}" class="btn btn-outline-danger">
             <i class="bi bi-people"></i> Utilisateurs
         </a>
@@ -267,11 +270,17 @@
                     <a href="{{ url_for('main.admin_add_ebook') }}" class="btn btn-info">
                         <i class="bi bi-plus-circle"></i> Nouveau Ebook
                     </a>
+                    <a href="{{ url_for('main.admin_add_complement') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Nouveau Complément
+                    </a>
                     <a href="{{ url_for('main.admin_programmes') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-list"></i> Gérer Programmes
                     </a>
                     <a href="{{ url_for('main.admin_ebooks') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-list"></i> Gérer Ebooks
+                    </a>
+                    <a href="{{ url_for('main.admin_complements') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-list"></i> Gérer Compléments
                     </a>
                 </div>
             </div>
