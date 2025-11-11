@@ -1560,6 +1560,7 @@ def admin_newsletter_import():
     form = EmailImportForm()
     if form.validate_on_submit():
         try:
+            import re
             file = form.fichier_csv.data
             # Lire le fichier
             content = file.read().decode('utf-8')
@@ -1569,15 +1570,21 @@ def admin_newsletter_import():
             for line in content.split('\n'):
                 line = line.strip()
                 if line and '@' in line:
-                    # Extraire l'email (gérer les formats: email, "nom,email", etc.)
-                    if ',' in line:
-                        parts = line.split(',')
-                        email = parts[-1].strip().strip('"')
-                    else:
-                        email = line
+                    # Détection du séparateur: , ou ;
+                    separator = ';' if ';' in line else ','
 
-                    if email and '@' in email:
-                        emails.append(email.lower())
+                    # Extraire seulement l'email (première partie avant le séparateur)
+                    if separator in line:
+                        parts = line.split(separator)
+                        email = parts[0].strip().strip('"')
+                    else:
+                        email = line.strip()
+
+                    # Utiliser regex pour extraire un email valide
+                    email_match = re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', email)
+                    if email_match:
+                        clean_email = email_match.group(0).lower()
+                        emails.append(clean_email)
 
             # Ajouter les emails à la base de données
             added = 0
@@ -1603,6 +1610,61 @@ def admin_newsletter_import():
             flash(f'Erreur lors de l\'import: {str(e)}', 'danger')
 
     return render_template('admin_newsletter_import.html', form=form)
+
+
+@bp.route('/admin/newsletter/cleanup', methods=['POST'])
+@login_required
+@admin_required
+def admin_newsletter_cleanup():
+    """Nettoyer les emails mal formatés dans la base de données"""
+    import re
+
+    try:
+        all_subscribers = Newsletter.query.all()
+        cleaned = 0
+        deleted = 0
+
+        for subscriber in all_subscribers:
+            # Extraire l'email valide avec regex
+            email_match = re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', subscriber.email)
+
+            if email_match:
+                clean_email = email_match.group(0).lower()
+                if clean_email != subscriber.email:
+                    # Vérifier si l'email nettoyé existe déjà
+                    existing = Newsletter.query.filter_by(email=clean_email).filter(Newsletter.id != subscriber.id).first()
+                    if existing:
+                        # Supprimer le doublon mal formaté
+                        db.session.delete(subscriber)
+                        deleted += 1
+                    else:
+                        # Nettoyer l'email
+                        subscriber.email = clean_email
+                        cleaned += 1
+            else:
+                # Pas d'email valide trouvé, supprimer l'entrée
+                db.session.delete(subscriber)
+                deleted += 1
+
+        db.session.commit()
+        flash(f'{cleaned} emails nettoyés, {deleted} entrées invalides supprimées!', 'success')
+    except Exception as e:
+        flash(f'Erreur lors du nettoyage: {str(e)}', 'danger')
+
+    return redirect(url_for('main.admin_newsletter'))
+
+
+@bp.route('/admin/newsletter/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_newsletter_delete(id):
+    """Supprimer un abonné"""
+    subscriber = Newsletter.query.get_or_404(id)
+    email = subscriber.email
+    db.session.delete(subscriber)
+    db.session.commit()
+    flash(f'Abonné {email} supprimé!', 'info')
+    return redirect(url_for('main.admin_newsletter'))
 
 
 @bp.route('/admin/email-campaigns')

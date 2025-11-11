@@ -8,6 +8,11 @@
         <i class="bi bi-envelope-fill text-success"></i> Abonnés Newsletter
     </h1>
     <div>
+        <form method="POST" action="{{ url_for('main.admin_newsletter_cleanup') }}" style="display: inline;" onsubmit="return confirm('Nettoyer tous les emails mal formatés? Cette action est irréversible.');">
+            <button type="submit" class="btn btn-warning">
+                <i class="bi bi-tools"></i> Nettoyer les emails
+            </button>
+        </form>
         <a href="{{ url_for('main.admin_newsletter_import') }}" class="btn btn-success">
             <i class="bi bi-file-earmark-arrow-up"></i> Importer des emails
         </a>
@@ -64,6 +69,7 @@
                             <th>Email</th>
                             <th>Date d'inscription</th>
                             <th>Statut</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -78,6 +84,13 @@
                                 {% else %}
                                     <span class="badge bg-secondary">Inactif</span>
                                 {% endif %}
+                            </td>
+                            <td>
+                                <form method="POST" action="{{ url_for('main.admin_newsletter_delete', id=abonne.id) }}" style="display: inline;" onsubmit="return confirm('Supprimer {{ abonne.email }}?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                         {% endfor %}
