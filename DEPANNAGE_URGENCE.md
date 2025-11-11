@@ -1,13 +1,18 @@
 # 🚨 DÉPANNAGE URGENCE - Site HS
 
+## ✅ CORRECTIF APPLIQUÉ - 11 Nov 2025
+
+Le problème était le modèle `Visit` dans models.py qui causait une erreur 500.
+**Le correctif a été appliqué et poussé sur la branche.**
+
 ## Le site est complètement down? Voici comment le remettre en ligne
 
-### OPTION 1: Mise à jour et redémarrage (RECOMMANDÉ)
+### OPTION 1: Mise à jour et redémarrage (RECOMMANDÉ) ✅ CORRECTIF INCLUS
 
 ```bash
 cd /home/wrbh3411/fitgang.fr
 
-# Récupérer le dernier code (avec analytics désactivés)
+# Récupérer le dernier code (CORRECTIF INCLUS - Visit model désactivé)
 git fetch origin
 git reset --hard origin/claude/fix-email-campaigns-011CV29exAWnnTfzcJ4vZoRk
 
@@ -21,6 +26,8 @@ sleep 5
 # Tester
 curl -I https://fitgang.fr
 ```
+
+**Ce correctif désactive temporairement le modèle Visit qui causait l'erreur 500.**
 
 Si ça ne marche toujours pas, passe à l'option 2.
 
