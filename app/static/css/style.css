@@ -702,12 +702,11 @@ h1, h2, h3, h4, h5, h6 {
 .navbar-brand img {
     height: 65px;
     transition: var(--transition);
-    /* Invert logo colors for white background */
-    filter: invert(1);
+    /* Pas de filtre - logo original */
 }
 
 .navbar-brand:hover img {
-    filter: invert(1) brightness(0.8);
+    opacity: 0.8;
 }
 
 .nav-link {
