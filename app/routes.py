@@ -922,6 +922,67 @@ def admin_grant_access(id):
     return redirect(url_for('main.admin_user_detail', id=id))
 
 
+@bp.route('/admin/transformations')
+@login_required
+@admin_required
+def admin_transformations():
+    """Page admin pour voir toutes les transformations des utilisateurs"""
+    # Récupérer tous les utilisateurs qui ont au moins une photo
+    users_with_photos = db.session.query(User)\
+        .join(Photo, User.id == Photo.user_id)\
+        .distinct()\
+        .all()
+
+    transformations = []
+
+    for user in users_with_photos:
+        # Récupérer la première photo "avant" et la dernière photo "après"
+        photo_avant = Photo.query.filter_by(user_id=user.id, type='avant')\
+            .order_by(Photo.date_upload.asc()).first()
+        photo_apres = Photo.query.filter_by(user_id=user.id, type='apres')\
+            .order_by(Photo.date_upload.desc()).first()
+
+        if photo_avant and photo_apres:
+            # Calculer la différence de poids
+            poids_diff = None
+            if photo_avant.poids and photo_apres.poids:
+                poids_diff = photo_apres.poids - photo_avant.poids
+
+            # Calculer la durée de transformation
+            duree_jours = (photo_apres.date_upload - photo_avant.date_upload).days
+
+            transformations.append({
+                'user': user,
+                'photo_avant': photo_avant,
+                'photo_apres': photo_apres,
+                'poids_diff': poids_diff,
+                'duree_jours': duree_jours,
+                'nb_photos_avant': Photo.query.filter_by(user_id=user.id, type='avant').count(),
+                'nb_photos_apres': Photo.query.filter_by(user_id=user.id, type='apres').count()
+            })
+
+    # Trier par date la plus récente
+    transformations.sort(key=lambda x: x['photo_apres'].date_upload, reverse=True)
+
+    return render_template('admin_transformations.html', transformations=transformations)
+
+
+@bp.route('/admin/photo/<int:id>/toggle-public', methods=['POST'])
+@login_required
+@admin_required
+def admin_toggle_photo_public(id):
+    """Basculer la visibilité publique d'une photo (pour témoignages)"""
+    photo = Photo.query.get_or_404(id)
+
+    photo.visible_public = not photo.visible_public
+    db.session.commit()
+
+    status = "publique" if photo.visible_public else "privée"
+    flash(f'Photo marquée comme {status}.', 'success')
+
+    return redirect(url_for('main.admin_transformations'))
+
+
 # ===== ROUTES ADMIN SÉANCES DE PROGRAMME =====
 
 @bp.route('/admin/programme/<int:id>/seances')

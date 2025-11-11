@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+
+{% block title %}Transformations Clients - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-2">
+                        <i class="bi bi-images text-danger"></i> Transformations Clients
+                    </h1>
+                    <p class="text-muted">Photos avant/après de tes membres pour témoignages et marketing</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Retour Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card card-custom text-center border-danger">
+                <div class="card-body">
+                    <i class="bi bi-people-fill text-danger" style="font-size: 2.5rem;"></i>
+                    <h2 class="mt-2 mb-0">{{ transformations|length }}</h2>
+                    <p class="text-muted mb-0">Transformations</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-custom text-center border-success">
+                <div class="card-body">
+                    <i class="bi bi-trophy-fill text-success" style="font-size: 2.5rem;"></i>
+                    <h2 class="mt-2 mb-0">
+                        {{ transformations|selectattr('poids_diff')|select('lt', 0)|list|length }}
+                    </h2>
+                    <p class="text-muted mb-0">Perte de poids</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-custom text-center border-primary">
+                <div class="card-body">
+                    <i class="bi bi-arrow-up-circle-fill text-primary" style="font-size: 2.5rem;"></i>
+                    <h2 class="mt-2 mb-0">
+                        {{ transformations|selectattr('poids_diff')|select('gt', 0)|list|length }}
+                    </h2>
+                    <p class="text-muted mb-0">Prise de masse</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-custom text-center border-warning">
+                <div class="card-body">
+                    <i class="bi bi-eye-fill text-warning" style="font-size: 2.5rem;"></i>
+                    <h2 class="mt-2 mb-0">
+                        {% set public_count = namespace(value=0) %}
+                        {% for t in transformations %}
+                            {% if t.photo_avant.visible_public or t.photo_apres.visible_public %}
+                                {% set public_count.value = public_count.value + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        {{ public_count.value }}
+                    </h2>
+                    <p class="text-muted mb-0">Publiques</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transformations Grid -->
+    {% if transformations %}
+        <div class="row">
+            {% for t in transformations %}
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="card transformation-card shadow-sm h-100">
+                        <div class="card-header bg-gradient-danger text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-person-fill"></i>
+                                        {{ t.user.prenom }} {{ t.user.nom }}
+                                    </h5>
+                                    <small>{{ t.user.email }}</small>
+                                </div>
+                                <a href="{{ url_for('main.admin_user_detail', id=t.user.id) }}"
+                                   class="btn btn-sm btn-light">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-0">
+                            <!-- Photos Avant/Après -->
+                            <div class="row g-0">
+                                <div class="col-6 position-relative">
+                                    <div class="transformation-label avant">AVANT</div>
+                                    <img src="{{ url_for('main.uploaded_file', filename=t.photo_avant.fichier) }}"
+                                         class="img-fluid transformation-img"
+                                         alt="Photo avant">
+                                    {% if t.photo_avant.poids %}
+                                        <div class="poids-badge avant-badge">
+                                            <i class="bi bi-speedometer2"></i> {{ t.photo_avant.poids }}kg
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-6 position-relative">
+                                    <div class="transformation-label apres">APRÈS</div>
+                                    <img src="{{ url_for('main.uploaded_file', filename=t.photo_apres.fichier) }}"
+                                         class="img-fluid transformation-img"
+                                         alt="Photo après">
+                                    {% if t.photo_apres.poids %}
+                                        <div class="poids-badge apres-badge">
+                                            <i class="bi bi-speedometer2"></i> {{ t.photo_apres.poids }}kg
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Stats -->
+                            <div class="transformation-stats p-3">
+                                <div class="row text-center">
+                                    {% if t.poids_diff %}
+                                        <div class="col-6">
+                                            <div class="stat-item">
+                                                <i class="bi bi-{{ 'arrow-down' if t.poids_diff < 0 else 'arrow-up' }}-circle-fill
+                                                    text-{{ 'success' if t.poids_diff < 0 else 'primary' }}"></i>
+                                                <h4 class="mb-0 text-{{ 'success' if t.poids_diff < 0 else 'primary' }}">
+                                                    {{ "%.1f"|format(t.poids_diff|abs) }}kg
+                                                </h4>
+                                                <small class="text-muted">
+                                                    {{ 'Perte' if t.poids_diff < 0 else 'Gain' }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    <div class="col-{{ '6' if t.poids_diff else '12' }}">
+                                        <div class="stat-item">
+                                            <i class="bi bi-calendar-check text-info"></i>
+                                            <h4 class="mb-0 text-info">{{ t.duree_jours }}</h4>
+                                            <small class="text-muted">Jours</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Dates -->
+                                <div class="row mt-3">
+                                    <div class="col-6 text-center">
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar3"></i>
+                                            {{ t.photo_avant.date_upload.strftime('%d/%m/%Y') }}
+                                        </small>
+                                    </div>
+                                    <div class="col-6 text-center">
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar3"></i>
+                                            {{ t.photo_apres.date_upload.strftime('%d/%m/%Y') }}
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <!-- Notes -->
+                                {% if t.photo_avant.notes or t.photo_apres.notes %}
+                                    <div class="mt-3">
+                                        {% if t.photo_avant.notes %}
+                                            <div class="alert alert-secondary mb-2 py-2 px-3">
+                                                <small><strong>Avant:</strong> {{ t.photo_avant.notes }}</small>
+                                            </div>
+                                        {% endif %}
+                                        {% if t.photo_apres.notes %}
+                                            <div class="alert alert-success mb-0 py-2 px-3">
+                                                <small><strong>Après:</strong> {{ t.photo_apres.notes }}</small>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-light">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <form method="POST"
+                                          action="{{ url_for('main.admin_toggle_photo_public', id=t.photo_avant.id) }}"
+                                          style="display: inline;">
+                                        <button type="submit"
+                                                class="btn btn-sm btn-{{ 'success' if t.photo_avant.visible_public else 'outline-secondary' }} w-100">
+                                            <i class="bi bi-eye{{ '' if t.photo_avant.visible_public else '-slash' }}"></i>
+                                            Avant {{ 'Public' if t.photo_avant.visible_public else 'Privé' }}
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="col-6">
+                                    <form method="POST"
+                                          action="{{ url_for('main.admin_toggle_photo_public', id=t.photo_apres.id) }}"
+                                          style="display: inline;">
+                                        <button type="submit"
+                                                class="btn btn-sm btn-{{ 'success' if t.photo_apres.visible_public else 'outline-secondary' }} w-100">
+                                            <i class="bi bi-eye{{ '' if t.photo_apres.visible_public else '-slash' }}"></i>
+                                            Après {{ 'Public' if t.photo_apres.visible_public else 'Privé' }}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-images"></i>
+                                    {{ t.nb_photos_avant }} avant • {{ t.nb_photos_apres }} après
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i>
+            Aucune transformation disponible pour le moment. Les transformations apparaîtront ici quand tes membres uploadent des photos avant ET après.
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #ED2F2F, #ff5252);
+}
+
+.transformation-card {
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.transformation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+.transformation-img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    display: block;
+}
+
+.transformation-label {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    z-index: 2;
+}
+
+.transformation-label.avant {
+    background: rgba(237, 47, 47, 0.9);
+}
+
+.transformation-label.apres {
+    background: rgba(76, 175, 80, 0.9);
+}
+
+.poids-badge {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    z-index: 2;
+}
+
+.transformation-stats {
+    background: #f8f9fa;
+}
+
+.stat-item {
+    padding: 10px;
+}
+
+.stat-item i {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.stat-item h4 {
+    font-weight: 900;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .transformation-img {
+        height: 200px;
+    }
+}
+</style>
+
+<script>
+// Optional: Add lightbox for images
+document.addEventListener('DOMContentLoaded', function() {
+    const images = document.querySelectorAll('.transformation-img');
+    images.forEach(img => {
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', function() {
+            // Create modal to show full size image
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.background = 'rgba(0, 0, 0, 0.9)';
+            modal.style.zIndex = '9999';
+            modal.style.display = 'flex';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            modal.style.cursor = 'pointer';
+
+            const fullImg = document.createElement('img');
+            fullImg.src = this.src;
+            fullImg.style.maxWidth = '90%';
+            fullImg.style.maxHeight = '90%';
+            fullImg.style.objectFit = 'contain';
+
+            modal.appendChild(fullImg);
+            document.body.appendChild(modal);
+
+            modal.addEventListener('click', function() {
+                document.body.removeChild(modal);
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
