@@ -84,7 +84,50 @@ def index():
         'philosophie_titre': get_content('philosophie_titre', 'PLUS QU\'UNE SALLE, UN MODE DE VIE'),
         'philosophie_texte': get_content('philosophie_texte', 'Nous croyons en la discipline, la consistance et la communauté. Rejoins notre gang et transforme non seulement ton physique, mais aussi ton mindset. Ensemble, nous sommes plus forts.'),
         'cta_titre': get_content('cta_titre', 'PRÊT À COMMENCER TA TRANSFORMATION ?'),
-        'cta_texte': get_content('cta_texte', 'Rejoins des milliers de membres qui ont déjà transformé leur vie avec FitGang.')
+        'cta_texte': get_content('cta_texte', 'Rejoins des milliers de membres qui ont déjà transformé leur vie avec FitGang.'),
+        # Section programmes
+        'prog_titre': get_content('hp_prog_titre', 'TROUVE TON PROGRAMME IDÉAL'),
+        'prog_sous_titre': get_content('hp_prog_sous_titre', 'Que tu veux prendre du muscle, perdre du gras ou améliorer ta condition physique,<br>on a le programme qu\'il te faut.'),
+        # Programme 1
+        'prog1': {
+            'badge': get_content('hp_prog1_badge', 'POPULAIRE'),
+            'badge_color': get_content('hp_prog1_badge_color', 'bg-warning'),
+            'titre': get_content('hp_prog1_titre', 'SÈCHE'),
+            'description': get_content('hp_prog1_description', 'Perds du gras tout en préservant ta masse musculaire'),
+            'features': get_content('hp_prog1_features', '12 semaines\nCardio HIIT\nPlan nutrition').split('\n'),
+            'prix': get_content('hp_prog1_prix', '29€'),
+            'image': get_content('hp_prog1_image', 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&h=800&fit=crop')
+        },
+        # Programme 2
+        'prog2': {
+            'badge': get_content('hp_prog2_badge', 'TOP VENTES'),
+            'badge_color': get_content('hp_prog2_badge_color', 'bg-danger'),
+            'titre': get_content('hp_prog2_titre', 'PRISE DE MASSE'),
+            'description': get_content('hp_prog2_description', 'Construis du muscle de qualité avec notre méthode éprouvée'),
+            'features': get_content('hp_prog2_features', '16 semaines\nHypertrophie\nCalories ++').split('\n'),
+            'prix': get_content('hp_prog2_prix', '39€'),
+            'image': get_content('hp_prog2_image', 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=600&h=800&fit=crop')
+        },
+        # Programme 3
+        'prog3': {
+            'badge': get_content('hp_prog3_badge', ''),
+            'badge_color': get_content('hp_prog3_badge_color', ''),
+            'titre': get_content('hp_prog3_titre', 'FULL BODY'),
+            'description': get_content('hp_prog3_description', 'Programme complet pour travailler tout le corps efficacement'),
+            'features': get_content('hp_prog3_features', '8 semaines\n3x/semaine\nPolyvalent').split('\n'),
+            'prix': get_content('hp_prog3_prix', '24€'),
+            'image': get_content('hp_prog3_image', 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=800&fit=crop')
+        },
+        # Programme 4
+        'prog4': {
+            'badge': get_content('hp_prog4_badge', 'DÉBUTANT'),
+            'badge_color': get_content('hp_prog4_badge_color', 'bg-success'),
+            'titre': get_content('hp_prog4_titre', 'DÉBUTANT'),
+            'description': get_content('hp_prog4_description', 'Lance-toi dans le fitness avec des bases solides'),
+            'features': get_content('hp_prog4_features', '6 semaines\nProgressif\nVidéos incluses').split('\n'),
+            'prix': get_content('hp_prog4_prix', '19€'),
+            'image': get_content('hp_prog4_image', 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&h=800&fit=crop')
+        }
     }
 
     return render_template('index.html', programmes=programmes, ebooks=ebooks, page_content=page_content)
@@ -999,6 +1042,114 @@ def admin_homepage_content():
         form.cta_texte.data = content.contenu if content else ''
 
     return render_template('admin_homepage_content.html', form=form)
+@bp.route('/admin/homepage-programmes', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_homepage_programmes():
+    """Gestion de la section programmes de la page d'accueil"""
+    from app.forms import HomepageProgrammesForm
+    form = HomepageProgrammesForm()
+
+    if form.validate_on_submit():
+        # Mise à jour de chaque section
+        sections = {
+            'hp_prog_titre': form.section_titre.data,
+            'hp_prog_sous_titre': form.section_sous_titre.data,
+            # Programme 1
+            'hp_prog1_badge': form.prog1_badge.data or '',
+            'hp_prog1_badge_color': form.prog1_badge_color.data or '',
+            'hp_prog1_titre': form.prog1_titre.data,
+            'hp_prog1_description': form.prog1_description.data,
+            'hp_prog1_features': form.prog1_features.data,
+            'hp_prog1_prix': form.prog1_prix.data,
+            'hp_prog1_image': form.prog1_image.data,
+            # Programme 2
+            'hp_prog2_badge': form.prog2_badge.data or '',
+            'hp_prog2_badge_color': form.prog2_badge_color.data or '',
+            'hp_prog2_titre': form.prog2_titre.data,
+            'hp_prog2_description': form.prog2_description.data,
+            'hp_prog2_features': form.prog2_features.data,
+            'hp_prog2_prix': form.prog2_prix.data,
+            'hp_prog2_image': form.prog2_image.data,
+            # Programme 3
+            'hp_prog3_badge': form.prog3_badge.data or '',
+            'hp_prog3_badge_color': form.prog3_badge_color.data or '',
+            'hp_prog3_titre': form.prog3_titre.data,
+            'hp_prog3_description': form.prog3_description.data,
+            'hp_prog3_features': form.prog3_features.data,
+            'hp_prog3_prix': form.prog3_prix.data,
+            'hp_prog3_image': form.prog3_image.data,
+            # Programme 4
+            'hp_prog4_badge': form.prog4_badge.data or '',
+            'hp_prog4_badge_color': form.prog4_badge_color.data or '',
+            'hp_prog4_titre': form.prog4_titre.data,
+            'hp_prog4_description': form.prog4_description.data,
+            'hp_prog4_features': form.prog4_features.data,
+            'hp_prog4_prix': form.prog4_prix.data,
+            'hp_prog4_image': form.prog4_image.data,
+        }
+
+        for section_key, contenu in sections.items():
+            page_content = PageContent.query.filter_by(section=section_key).first()
+            if page_content:
+                page_content.contenu = contenu
+                page_content.date_modification = datetime.utcnow()
+            else:
+                page_content = PageContent(section=section_key, contenu=contenu)
+                db.session.add(page_content)
+
+        db.session.commit()
+        flash('La section programmes de la page d\'accueil a été mise à jour avec succès!', 'success')
+        return redirect(url_for('main.admin_homepage_programmes'))
+
+    # Pré-remplir le formulaire avec les valeurs actuelles
+    if request.method == 'GET':
+        def get_content(section_name):
+            content = PageContent.query.filter_by(section=section_name).first()
+            return content.contenu if content else ''
+
+        form.section_titre.data = get_content('hp_prog_titre') or 'TROUVE TON PROGRAMME IDÉAL'
+        form.section_sous_titre.data = get_content('hp_prog_sous_titre') or 'Que tu veux prendre du muscle, perdre du gras ou améliorer ta condition physique,\non a le programme qu\'il te faut.'
+
+        # Programme 1
+        form.prog1_badge.data = get_content('hp_prog1_badge') or 'POPULAIRE'
+        form.prog1_badge_color.data = get_content('hp_prog1_badge_color') or 'bg-warning'
+        form.prog1_titre.data = get_content('hp_prog1_titre') or 'SÈCHE'
+        form.prog1_description.data = get_content('hp_prog1_description') or 'Perds du gras tout en préservant ta masse musculaire'
+        form.prog1_features.data = get_content('hp_prog1_features') or '12 semaines\nCardio HIIT\nPlan nutrition'
+        form.prog1_prix.data = get_content('hp_prog1_prix') or '29€'
+        form.prog1_image.data = get_content('hp_prog1_image') or 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&h=800&fit=crop'
+
+        # Programme 2
+        form.prog2_badge.data = get_content('hp_prog2_badge') or 'TOP VENTES'
+        form.prog2_badge_color.data = get_content('hp_prog2_badge_color') or 'bg-danger'
+        form.prog2_titre.data = get_content('hp_prog2_titre') or 'PRISE DE MASSE'
+        form.prog2_description.data = get_content('hp_prog2_description') or 'Construis du muscle de qualité avec notre méthode éprouvée'
+        form.prog2_features.data = get_content('hp_prog2_features') or '16 semaines\nHypertrophie\nCalories ++'
+        form.prog2_prix.data = get_content('hp_prog2_prix') or '39€'
+        form.prog2_image.data = get_content('hp_prog2_image') or 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=600&h=800&fit=crop'
+
+        # Programme 3
+        form.prog3_badge.data = get_content('hp_prog3_badge') or ''
+        form.prog3_badge_color.data = get_content('hp_prog3_badge_color') or ''
+        form.prog3_titre.data = get_content('hp_prog3_titre') or 'FULL BODY'
+        form.prog3_description.data = get_content('hp_prog3_description') or 'Programme complet pour travailler tout le corps efficacement'
+        form.prog3_features.data = get_content('hp_prog3_features') or '8 semaines\n3x/semaine\nPolyvalent'
+        form.prog3_prix.data = get_content('hp_prog3_prix') or '24€'
+        form.prog3_image.data = get_content('hp_prog3_image') or 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=800&fit=crop'
+
+        # Programme 4
+        form.prog4_badge.data = get_content('hp_prog4_badge') or 'DÉBUTANT'
+        form.prog4_badge_color.data = get_content('hp_prog4_badge_color') or 'bg-success'
+        form.prog4_titre.data = get_content('hp_prog4_titre') or 'DÉBUTANT'
+        form.prog4_description.data = get_content('hp_prog4_description') or 'Lance-toi dans le fitness avec des bases solides'
+        form.prog4_features.data = get_content('hp_prog4_features') or '6 semaines\nProgressif\nVidéos incluses'
+        form.prog4_prix.data = get_content('hp_prog4_prix') or '19€'
+        form.prog4_image.data = get_content('hp_prog4_image') or 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&h=800&fit=crop'
+
+    return render_template('admin_homepage_programmes.html', form=form)
+
+
 
 
 @bp.route('/admin/users')

@@ -170,3 +170,48 @@ class EmailImportForm(FlaskForm):
     """Formulaire d'import de liste d'emails"""
     fichier_csv = FileField('Fichier CSV d\'emails', validators=[DataRequired(), FileAllowed(['csv', 'txt'], 'Seulement les fichiers CSV et TXT!')])
     submit = SubmitField('Importer les emails')
+
+
+class HomepageProgrammesForm(FlaskForm):
+    """Formulaire pour éditer la section programmes de la page d'accueil"""
+    # Titre de la section
+    section_titre = StringField('Titre de la section', validators=[DataRequired(), Length(max=200)])
+    section_sous_titre = TextAreaField('Sous-titre de la section', validators=[DataRequired(), Length(max=500)])
+    
+    # Programme 1
+    prog1_badge = StringField('Badge (optionnel)', validators=[Optional(), Length(max=50)])
+    prog1_badge_color = SelectField('Couleur du badge', choices=[('', 'Aucun'), ('bg-warning', 'Jaune (Warning)'), ('bg-danger', 'Rouge (Danger)'), ('bg-success', 'Vert (Success)'), ('bg-info', 'Bleu (Info)')], validators=[Optional()])
+    prog1_titre = StringField('Titre', validators=[DataRequired(), Length(max=100)])
+    prog1_description = TextAreaField('Description', validators=[DataRequired(), Length(max=300)])
+    prog1_features = TextAreaField('Caractéristiques (une par ligne)', validators=[DataRequired()])
+    prog1_prix = StringField('Prix', validators=[DataRequired(), Length(max=20)])
+    prog1_image = StringField('URL de l\'image', validators=[DataRequired(), Length(max=500)])
+    
+    # Programme 2
+    prog2_badge = StringField('Badge (optionnel)', validators=[Optional(), Length(max=50)])
+    prog2_badge_color = SelectField('Couleur du badge', choices=[('', 'Aucun'), ('bg-warning', 'Jaune (Warning)'), ('bg-danger', 'Rouge (Danger)'), ('bg-success', 'Vert (Success)'), ('bg-info', 'Bleu (Info)')], validators=[Optional()])
+    prog2_titre = StringField('Titre', validators=[DataRequired(), Length(max=100)])
+    prog2_description = TextAreaField('Description', validators=[DataRequired(), Length(max=300)])
+    prog2_features = TextAreaField('Caractéristiques (une par ligne)', validators=[DataRequired()])
+    prog2_prix = StringField('Prix', validators=[DataRequired(), Length(max=20)])
+    prog2_image = StringField('URL de l\'image', validators=[DataRequired(), Length(max=500)])
+    
+    # Programme 3
+    prog3_badge = StringField('Badge (optionnel)', validators=[Optional(), Length(max=50)])
+    prog3_badge_color = SelectField('Couleur du badge', choices=[('', 'Aucun'), ('bg-warning', 'Jaune (Warning)'), ('bg-danger', 'Rouge (Danger)'), ('bg-success', 'Vert (Success)'), ('bg-info', 'Bleu (Info)')], validators=[Optional()])
+    prog3_titre = StringField('Titre', validators=[DataRequired(), Length(max=100)])
+    prog3_description = TextAreaField('Description', validators=[DataRequired(), Length(max=300)])
+    prog3_features = TextAreaField('Caractéristiques (une par ligne)', validators=[DataRequired()])
+    prog3_prix = StringField('Prix', validators=[DataRequired(), Length(max=20)])
+    prog3_image = StringField('URL de l\'image', validators=[DataRequired(), Length(max=500)])
+    
+    # Programme 4
+    prog4_badge = StringField('Badge (optionnel)', validators=[Optional(), Length(max=50)])
+    prog4_badge_color = SelectField('Couleur du badge', choices=[('', 'Aucun'), ('bg-warning', 'Jaune (Warning)'), ('bg-danger', 'Rouge (Danger)'), ('bg-success', 'Vert (Success)'), ('bg-info', 'Bleu (Info)')], validators=[Optional()])
+    prog4_titre = StringField('Titre', validators=[DataRequired(), Length(max=100)])
+    prog4_description = TextAreaField('Description', validators=[DataRequired(), Length(max=300)])
+    prog4_features = TextAreaField('Caractéristiques (une par ligne)', validators=[DataRequired()])
+    prog4_prix = StringField('Prix', validators=[DataRequired(), Length(max=20)])
+    prog4_image = StringField('URL de l\'image', validators=[DataRequired(), Length(max=500)])
+    
+    submit = SubmitField('Sauvegarder les modifications')
