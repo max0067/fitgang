@@ -18,42 +18,44 @@
             <h2 class="mb-4">
                 <i class="bi bi-tag-fill text-primary"></i> {{ categorie }}
             </h2>
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <div class="row">
                 {% for complement in complements %}
-                <div class="col">
+                <div class="col-md-4 mb-4">
                     <div class="card h-100 shadow-sm card-hover">
                         {% if complement.image %}
-                        <img src="{{ complement.image }}" class="card-img-top" alt="{{ complement.nom }}" style="height: 250px; object-fit: cover;">
+                        <img src="{{ complement.image }}" class="card-img-top" alt="{{ complement.nom }}" style="height: 200px; object-fit: cover;">
                         {% else %}
-                        <div class="card-img-top bg-gradient text-white d-flex align-items-center justify-content-center" style="height: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            <i class="bi bi-capsule" style="font-size: 5rem;"></i>
+                        <div class="card-img-top bg-gradient text-white d-flex align-items-center justify-content-center" style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="bi bi-capsule" style="font-size: 3rem;"></i>
                         </div>
                         {% endif %}
 
                         <div class="card-body d-flex flex-column">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title fw-bold mb-1">{{ complement.nom }}</h5>
+                            <div class="mb-2">
                                 <span class="badge bg-primary">{{ complement.categorie }}</span>
+                                {% if complement.marque %}
+                                <span class="badge bg-secondary">{{ complement.marque }}</span>
+                                {% endif %}
                             </div>
 
-                            {% if complement.marque %}
-                            <p class="text-muted mb-2"><small><i class="bi bi-shield-check"></i> {{ complement.marque }}</small></p>
-                            {% endif %}
+                            <h5 class="card-title fw-bold">{{ complement.nom }}</h5>
 
-                            <p class="card-text text-muted flex-grow-1">
-                                {{ complement.description[:150] }}{% if complement.description|length > 150 %}...{% endif %}
+                            <p class="card-text text-muted small flex-grow-1">
+                                {{ complement.description[:100] }}{% if complement.description|length > 100 %}...{% endif %}
                             </p>
 
                             {% if complement.dosage %}
                             <p class="text-muted small mb-2">
-                                <i class="bi bi-clipboard-data"></i> <strong>Dosage:</strong> {{ complement.dosage }}
+                                <i class="bi bi-clipboard-data"></i> {{ complement.dosage }}
                             </p>
                             {% endif %}
+                        </div>
 
-                            <div class="d-flex justify-content-between align-items-center mt-auto">
-                                <h4 class="text-danger fw-bold mb-0">{{ complement.prix }}€</h4>
-                                <a href="{{ url_for('main.complement_detail', id=complement.id) }}" class="btn btn-primary">
-                                    Voir Détails
+                        <div class="card-footer bg-transparent border-0 pt-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h5 mb-0 text-danger fw-bold">{{ complement.prix }}€</span>
+                                <a href="{{ url_for('main.complement_detail', id=complement.id) }}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-eye"></i> Détails
                                 </a>
                             </div>
                         </div>
