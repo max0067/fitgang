@@ -94,7 +94,7 @@
     </div>
 
     <!-- Content -->
-    <main class="container mt-4">
+    <main class="{% block main_class %}container{% endblock %} mt-4">
         {% block content %}{% endblock %}
     </main>
 
