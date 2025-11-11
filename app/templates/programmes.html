@@ -22,15 +22,15 @@
                         <i class="bi bi-dumbbell text-white" style="font-size: 100px;"></i>
                     </div>
                 {% endif %}
-                <div class="card-body">
+                <div class="card-body d-flex flex-column">
                     <div class="mb-2">
                         <span class="badge bg-danger">{{ programme.niveau }}</span>
                         <span class="badge bg-secondary">{{ programme.duree }}</span>
                     </div>
                     <h5 class="card-title fw-bold">{{ programme.titre }}</h5>
-                    <p class="card-text">{{ programme.description }}</p>
-                    <a href="{{ url_for('main.programme_detail', id=programme.id) }}" class="btn btn-danger w-100 mb-3">
-                        <i class="bi bi-eye-fill"></i> VOIR LES DÉTAILS COMPLETS
+                    <p class="card-text flex-grow-1">{{ programme.description }}</p>
+                    <a href="{{ url_for('main.programme_detail', id=programme.id) }}" class="btn btn-outline-danger w-100">
+                        <i class="bi bi-eye-fill"></i> Voir les détails
                     </a>
                 </div>
                 <div class="card-footer bg-transparent border-0 pt-0">
