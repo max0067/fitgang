@@ -3,9 +3,27 @@
 """
 Script simple pour diagnostiquer le problème d'envoi d'emails
 """
+import os
+
 print("=" * 60)
 print("DIAGNOSTIC EMAIL FITGANG")
 print("=" * 60)
+
+# 0. Charger le fichier .env
+print("\n0. Chargement du fichier .env:")
+try:
+    from dotenv import load_dotenv
+    load_dotenv('.env')
+    print("   ✓ Fichier .env chargé")
+
+    # Vérifier que le mot de passe est bien chargé
+    password = os.getenv('MAIL_PASSWORD')
+    if password:
+        print(f"   ✓ MAIL_PASSWORD chargé (longueur: {len(password)})")
+    else:
+        print("   ✗ PROBLÈME: MAIL_PASSWORD non trouvé dans .env")
+except Exception as e:
+    print(f"   ✗ Erreur lors du chargement de .env: {e}")
 
 # 1. Vérifier l'import de Flask-Mail
 print("\n1. Import Flask-Mail:")
