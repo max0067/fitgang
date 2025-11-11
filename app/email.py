@@ -20,18 +20,23 @@ def send_email(subject, recipient, text_body, html_body):
     """
     # Si Flask-Mail n'est pas disponible, ne rien faire
     if not MAIL_ENABLED or not mail:
-        print(f"[EMAIL DÉSACTIVÉ] Would send email to {recipient}: {subject}")
-        return True
-
-    msg = Message(subject, recipients=[recipient])
-    msg.body = text_body
-    msg.html = html_body
+        error_msg = f"[EMAIL DÉSACTIVÉ] MAIL_ENABLED={MAIL_ENABLED}, mail={mail}"
+        print(error_msg)
+        print(f"Would send email to {recipient}: {subject}")
+        return False  # Retourner False au lieu de True pour signaler l'erreur
 
     try:
+        msg = Message(subject, recipients=[recipient])
+        msg.body = text_body
+        msg.html = html_body
         mail.send(msg)
+        print(f"[EMAIL ENVOYÉ] Email envoyé avec succès à {recipient}: {subject}")
         return True
     except Exception as e:
-        print(f"Erreur lors de l'envoi de l'email: {e}")
+        error_msg = f"[ERREUR EMAIL] Erreur lors de l'envoi de l'email: {e}"
+        print(error_msg)
+        import traceback
+        traceback.print_exc()
         return False
 
 
