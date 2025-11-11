@@ -4,14 +4,25 @@ Envoi d'emails pour bienvenue, confirmation d'achat, et notifications admin
 """
 import os
 from flask import render_template, current_app
-from flask_mail import Message
-from app import mail
+
+# Import optionnel de Flask-Mail
+try:
+    from flask_mail import Message
+    from app import mail, MAIL_ENABLED
+except ImportError:
+    MAIL_ENABLED = False
+    mail = None
 
 
 def send_email(subject, recipient, text_body, html_body):
     """
     Fonction générique pour envoyer un email
     """
+    # Si Flask-Mail n'est pas disponible, ne rien faire
+    if not MAIL_ENABLED or not mail:
+        print(f"[EMAIL DÉSACTIVÉ] Would send email to {recipient}: {subject}")
+        return True
+
     msg = Message(subject, recipients=[recipient])
     msg.body = text_body
     msg.html = html_body
