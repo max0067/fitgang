@@ -1,154 +1,440 @@
 {% extends "base.html" %}
 
-{% block title %}Accueil - FitGang{% endblock %}
+{% block title %}FitGang - Transforme ton Corps, Dépasse tes Limites{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="hero-section text-center py-5">
-    <div class="container">
-        <h1 class="display-3 fw-bold text-danger mb-3">
-            <i class="bi bi-lightning-charge-fill"></i> FITGANG
-        </h1>
-        <p class="lead mb-4">
-            Transforme ton corps, dépasse tes limites, rejoins le gang!
-        </p>
-        {% if not current_user.is_authenticated %}
-            <a href="{{ url_for('main.register') }}" class="btn btn-danger btn-lg me-2">Rejoindre FitGang</a>
-            <a href="{{ url_for('main.programmes') }}" class="btn btn-outline-light btn-lg">Voir les Programmes</a>
-        {% else %}
-            <a href="{{ url_for('main.dashboard') }}" class="btn btn-danger btn-lg">Mon Tableau de Bord</a>
-        {% endif %}
-    </div>
-</div>
-
-<!-- About Section -->
-<section class="py-5">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h2 class="fw-bold mb-4">Qui sommes-nous?</h2>
-                <p class="lead">
-                    FitGang est une communauté de passionnés de fitness qui repoussent leurs limites chaque jour.
-                </p>
-                <p>
-                    Nous proposons des programmes d'entraînement personnalisés, des ebooks complets et un suivi
-                    de progression pour t'aider à atteindre tes objectifs.
-                </p>
-                <ul class="list-unstyled">
-                    <li><i class="bi bi-check-circle-fill text-danger"></i> Programmes adaptés à tous niveaux</li>
-                    <li><i class="bi bi-check-circle-fill text-danger"></i> Suivi de progression détaillé</li>
-                    <li><i class="bi bi-check-circle-fill text-danger"></i> Ebooks nutrition et entraînement</li>
-                    <li><i class="bi bi-check-circle-fill text-danger"></i> Communauté motivante</li>
-                </ul>
+<!-- Hero Section - Full Screen -->
+<section class="hero-modern">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 text-center">
+                    <h1 class="hero-title animate-fade-in">
+                        TRANSFORME TON CORPS,<br>
+                        <span class="text-danger">DÉPASSE TES LIMITES</span>
+                    </h1>
+                    <p class="hero-subtitle animate-fade-in-delay">
+                        Des programmes d'entraînement et ebooks nutrition créés par des passionnés,
+                        pour des athlètes qui veulent performer.
+                    </p>
+                    <div class="hero-cta animate-fade-in-delay-2">
+                        {% if not current_user.is_authenticated %}
+                            <a href="{{ url_for('main.register') }}" class="btn btn-hero-primary">
+                                Rejoindre FitGang
+                                <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+                            <a href="{{ url_for('main.programmes') }}" class="btn btn-hero-secondary">
+                                Découvrir les Programmes
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-hero-primary">
+                                Mon Tableau de Bord
+                                <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-            <div class="col-md-6 text-center">
-                <i class="bi bi-trophy-fill text-danger" style="font-size: 200px;"></i>
+        </div>
+    </div>
+    <div class="scroll-indicator">
+        <i class="bi bi-chevron-down"></i>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 col-6 mb-4 mb-md-0">
+                <div class="stat-item">
+                    <h3 class="stat-number">10K+</h3>
+                    <p class="stat-label">Membres Actifs</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4 mb-md-0">
+                <div class="stat-item">
+                    <h3 class="stat-number">50+</h3>
+                    <p class="stat-label">Programmes</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-item">
+                    <h3 class="stat-number">95%</h3>
+                    <p class="stat-label">Satisfaction</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-item">
+                    <h3 class="stat-number">24/7</h3>
+                    <p class="stat-label">Support</p>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Programmes Section -->
-<section class="py-5 bg-dark">
+<section class="section-modern programmes-section">
     <div class="container">
-        <h2 class="text-center fw-bold mb-5">Nos Programmes</h2>
-        <div class="row">
-            {% for programme in programmes %}
-            <div class="col-md-4 mb-4">
-                <div class="card card-custom h-100">
-                    {% if programme.image %}
-                        <img src="{{ programme.image }}" class="card-img-top" alt="{{ programme.titre }}">
-                    {% else %}
-                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
-                            <i class="bi bi-dumbbell text-white" style="font-size: 80px;"></i>
-                        </div>
-                    {% endif %}
-                    <div class="card-body">
-                        <span class="badge bg-danger mb-2">{{ programme.niveau }}</span>
-                        <h5 class="card-title">{{ programme.titre }}</h5>
-                        <p class="card-text">{{ programme.description }}</p>
-                        <p class="text-muted">
-                            <i class="bi bi-clock"></i> {{ programme.duree }}
-                        </p>
+        <div class="section-header text-center mb-5">
+            <span class="section-badge">NOS PROGRAMMES</span>
+            <h2 class="section-title">TROUVE TON PROGRAMME IDÉAL</h2>
+            <p class="section-subtitle">
+                Que tu veux prendre du muscle, perdre du gras ou améliorer ta condition physique,<br>
+                on a le programme qu'il te faut.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Programme 1: Sèche -->
+            <div class="col-lg-3 col-md-6">
+                <div class="programme-card">
+                    <div class="programme-image" style="background-image: url('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&h=800&fit=crop');">
+                        <div class="programme-badge">POPULAIRE</div>
                     </div>
-                    <div class="card-footer bg-transparent border-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 mb-0 text-danger">{{ programme.prix }}€</span>
-                            {% if current_user.is_authenticated %}
-                                {% if current_user.has_purchased(programme.id, 'programme') %}
-                                    <span class="badge bg-success">Acheté</span>
-                                {% else %}
-                                    <a href="{{ url_for('main.checkout', item_type='programme', item_id=programme.id) }}" class="btn btn-danger">Acheter</a>
-                                {% endif %}
-                            {% else %}
-                                <a href="{{ url_for('main.login') }}" class="btn btn-danger">Acheter</a>
-                            {% endif %}
+                    <div class="programme-content">
+                        <h3 class="programme-title">SÈCHE</h3>
+                        <p class="programme-desc">Perds du gras tout en préservant ta masse musculaire</p>
+                        <ul class="programme-features">
+                            <li><i class="bi bi-check-circle-fill"></i> 12 semaines</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Cardio HIIT</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Plan nutrition</li>
+                        </ul>
+                        <div class="programme-footer">
+                            <span class="programme-price">29€</span>
+                            <a href="{{ url_for('main.programmes') }}" class="btn-programme">
+                                Découvrir <i class="bi bi-arrow-right"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
-            {% endfor %}
+
+            <!-- Programme 2: Prise de Masse -->
+            <div class="col-lg-3 col-md-6">
+                <div class="programme-card">
+                    <div class="programme-image" style="background-image: url('https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=600&h=800&fit=crop');">
+                        <div class="programme-badge bg-danger">TOP VENTES</div>
+                    </div>
+                    <div class="programme-content">
+                        <h3 class="programme-title">PRISE DE MASSE</h3>
+                        <p class="programme-desc">Construis du muscle de qualité avec notre méthode éprouvée</p>
+                        <ul class="programme-features">
+                            <li><i class="bi bi-check-circle-fill"></i> 16 semaines</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Hypertrophie</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Calories ++</li>
+                        </ul>
+                        <div class="programme-footer">
+                            <span class="programme-price">39€</span>
+                            <a href="{{ url_for('main.programmes') }}" class="btn-programme">
+                                Découvrir <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Programme 3: Full Body -->
+            <div class="col-lg-3 col-md-6">
+                <div class="programme-card">
+                    <div class="programme-image" style="background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=800&fit=crop');">
+                    </div>
+                    <div class="programme-content">
+                        <h3 class="programme-title">FULL BODY</h3>
+                        <p class="programme-desc">Programme complet pour travailler tout le corps efficacement</p>
+                        <ul class="programme-features">
+                            <li><i class="bi bi-check-circle-fill"></i> 8 semaines</li>
+                            <li><i class="bi bi-check-circle-fill"></i> 3x/semaine</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Polyvalent</li>
+                        </ul>
+                        <div class="programme-footer">
+                            <span class="programme-price">24€</span>
+                            <a href="{{ url_for('main.programmes') }}" class="btn-programme">
+                                Découvrir <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Programme 4: Débutant -->
+            <div class="col-lg-3 col-md-6">
+                <div class="programme-card">
+                    <div class="programme-image" style="background-image: url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&h=800&fit=crop');">
+                        <div class="programme-badge bg-success">DÉBUTANT</div>
+                    </div>
+                    <div class="programme-content">
+                        <h3 class="programme-title">DÉBUTANT</h3>
+                        <p class="programme-desc">Lance-toi dans le fitness avec des bases solides</p>
+                        <ul class="programme-features">
+                            <li><i class="bi bi-check-circle-fill"></i> 6 semaines</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Progressif</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Vidéos incluses</li>
+                        </ul>
+                        <div class="programme-footer">
+                            <span class="programme-price">19€</span>
+                            <a href="{{ url_for('main.programmes') }}" class="btn-programme">
+                                Découvrir <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="text-center mt-4">
-            <a href="{{ url_for('main.programmes') }}" class="btn btn-outline-danger">Voir tous les programmes</a>
+
+        <div class="text-center mt-5">
+            <a href="{{ url_for('main.programmes') }}" class="btn btn-outline-dark btn-lg">
+                Voir tous les programmes
+                <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Philosophy Section -->
+<section class="philosophy-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="philosophy-image">
+                    <img src="https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=800&h=600&fit=crop"
+                         alt="FitGang Philosophy" class="img-fluid rounded-3">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="philosophy-content">
+                    <span class="section-badge">NOTRE PHILOSOPHIE</span>
+                    <h2 class="section-title mb-4">
+                        PLUS QU'UNE SALLE,<br>
+                        <span class="text-danger">UN MODE DE VIE</span>
+                    </h2>
+                    <p class="philosophy-text">
+                        Chez FitGang, on croit que le fitness n'est pas qu'une question de physique.
+                        C'est un <strong>état d'esprit</strong>, une <strong>discipline</strong>,
+                        une <strong>détermination</strong> à devenir la meilleure version de soi-même.
+                    </p>
+                    <p class="philosophy-text">
+                        Nos programmes ne se contentent pas de te donner des exercices.
+                        Ils te forgent mentalement, te poussent à dépasser tes limites et
+                        te font rejoindre une communauté de guerriers qui partagent la même passion.
+                    </p>
+                    <div class="philosophy-values mt-4">
+                        <div class="value-item">
+                            <i class="bi bi-fire text-danger"></i>
+                            <div>
+                                <h4>Intensité</h4>
+                                <p>Pas de place pour la médiocrité</p>
+                            </div>
+                        </div>
+                        <div class="value-item">
+                            <i class="bi bi-lightning-charge text-danger"></i>
+                            <div>
+                                <h4>Performance</h4>
+                                <p>Résultats visibles, progrès mesurables</p>
+                            </div>
+                        </div>
+                        <div class="value-item">
+                            <i class="bi bi-people text-danger"></i>
+                            <div>
+                                <h4>Communauté</h4>
+                                <p>Plus forts ensemble</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
 <!-- Ebooks Section -->
-<section class="py-5">
+<section class="section-modern ebooks-section">
     <div class="container">
-        <h2 class="text-center fw-bold mb-5">Nos Ebooks</h2>
-        <div class="row">
-            {% for ebook in ebooks %}
-            <div class="col-md-4 mb-4">
-                <div class="card card-custom h-100">
-                    {% if ebook.image %}
-                        <img src="{{ ebook.image }}" class="card-img-top" alt="{{ ebook.titre }}">
-                    {% else %}
-                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 250px;">
-                            <i class="bi bi-book text-white" style="font-size: 80px;"></i>
-                        </div>
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ ebook.titre }}</h5>
-                        <p class="card-text">{{ ebook.description[:100] }}...</p>
-                        {% if ebook.nombre_pages %}
-                            <p class="text-muted"><i class="bi bi-file-earmark-text"></i> {{ ebook.nombre_pages }} pages</p>
-                        {% endif %}
-                    </div>
-                    <div class="card-footer bg-transparent border-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 mb-0 text-danger">{{ ebook.prix }}€</span>
-                            {% if current_user.is_authenticated %}
-                                {% if current_user.has_purchased(ebook.id, 'ebook') %}
-                                    <span class="badge bg-success">Acheté</span>
-                                {% else %}
-                                    <a href="{{ url_for('main.checkout', item_type='ebook', item_id=ebook.id) }}" class="btn btn-danger">Acheter</a>
-                                {% endif %}
+        <div class="section-header text-center mb-5">
+            <span class="section-badge">NOS EBOOKS</span>
+            <h2 class="section-title">LA CONNAISSANCE, C'EST LE POUVOIR</h2>
+            <p class="section-subtitle">
+                Guides complets nutrition, entraînement et mindset pour optimiser ta transformation
+            </p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            {% if ebooks %}
+                {% for ebook in ebooks[:3] %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="ebook-card">
+                        <div class="ebook-image">
+                            {% if ebook.image %}
+                                <img src="{{ ebook.image }}" alt="{{ ebook.titre }}">
                             {% else %}
-                                <a href="{{ url_for('main.login') }}" class="btn btn-danger">Acheter</a>
+                                <div class="ebook-placeholder">
+                                    <i class="bi bi-book"></i>
+                                </div>
                             {% endif %}
+                        </div>
+                        <div class="ebook-content">
+                            <h3 class="ebook-title">{{ ebook.titre }}</h3>
+                            <p class="ebook-desc">{{ ebook.description[:120] }}...</p>
+                            {% if ebook.nombre_pages %}
+                                <p class="ebook-pages"><i class="bi bi-file-earmark-text"></i> {{ ebook.nombre_pages }} pages</p>
+                            {% endif %}
+                            <div class="ebook-footer">
+                                <span class="ebook-price">{{ ebook.prix }}€</span>
+                                {% if current_user.is_authenticated %}
+                                    {% if current_user.has_purchased(ebook.id, 'ebook') %}
+                                        <span class="badge bg-success">Acheté</span>
+                                    {% else %}
+                                        <a href="{{ url_for('main.checkout', item_type='ebook', item_id=ebook.id) }}" class="btn-ebook">
+                                            Acheter
+                                        </a>
+                                    {% endif %}
+                                {% else %}
+                                    <a href="{{ url_for('main.login') }}" class="btn-ebook">
+                                        Acheter
+                                    </a>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            {% endfor %}
+                {% endfor %}
+            {% else %}
+                <!-- Placeholder ebooks if none exist -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="ebook-card">
+                        <div class="ebook-image">
+                            <div class="ebook-placeholder">
+                                <i class="bi bi-book"></i>
+                            </div>
+                        </div>
+                        <div class="ebook-content">
+                            <h3 class="ebook-title">Guide Nutrition Sèche</h3>
+                            <p class="ebook-desc">Tout ce que tu dois savoir pour perdre du gras efficacement sans perdre de muscle</p>
+                            <p class="ebook-pages"><i class="bi bi-file-earmark-text"></i> 120 pages</p>
+                            <div class="ebook-footer">
+                                <span class="ebook-price">14€</span>
+                                <a href="{{ url_for('main.ebooks') }}" class="btn-ebook">Découvrir</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="ebook-card">
+                        <div class="ebook-image">
+                            <div class="ebook-placeholder">
+                                <i class="bi bi-book"></i>
+                            </div>
+                        </div>
+                        <div class="ebook-content">
+                            <h3 class="ebook-title">Prise de Masse Optimale</h3>
+                            <p class="ebook-desc">Stratégies éprouvées pour construire du muscle de qualité rapidement</p>
+                            <p class="ebook-pages"><i class="bi bi-file-earmark-text"></i> 150 pages</p>
+                            <div class="ebook-footer">
+                                <span class="ebook-price">19€</span>
+                                <a href="{{ url_for('main.ebooks') }}" class="btn-ebook">Découvrir</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
-        <div class="text-center mt-4">
-            <a href="{{ url_for('main.ebooks') }}" class="btn btn-outline-danger">Voir tous les ebooks</a>
+
+        <div class="text-center mt-5">
+            <a href="{{ url_for('main.ebooks') }}" class="btn btn-outline-dark btn-lg">
+                Tous nos ebooks
+                <i class="bi bi-arrow-right ms-2"></i>
+            </a>
         </div>
     </div>
 </section>
 
-<!-- CTA Section -->
-<section class="py-5 bg-danger text-white text-center">
+<!-- Community/Testimonials Section -->
+<section class="community-section">
     <div class="container">
-        <h2 class="fw-bold mb-3">Prêt à transformer ton corps?</h2>
-        <p class="lead mb-4">Rejoins des milliers d'athlètes qui ont choisi FitGang</p>
-        {% if not current_user.is_authenticated %}
-            <a href="{{ url_for('main.register') }}" class="btn btn-dark btn-lg">Commencer maintenant</a>
-        {% endif %}
+        <div class="section-header text-center mb-5">
+            <span class="section-badge">COMMUNAUTÉ</span>
+            <h2 class="section-title text-white">ILS ONT TRANSFORMÉ LEUR VIE</h2>
+            <p class="section-subtitle text-white-50">
+                Rejoins des milliers d'athlètes qui ont choisi FitGang
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="testimonial-card">
+                    <div class="testimonial-image">
+                        <img src="https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=400&h=400&fit=crop" alt="Membre">
+                    </div>
+                    <div class="testimonial-content">
+                        <p class="testimonial-text">
+                            "J'ai perdu 15kg en 3 mois avec le programme sèche. Les résultats sont incroyables!"
+                        </p>
+                        <h4 class="testimonial-author">Kevin M.</h4>
+                        <p class="testimonial-result text-danger">-15kg en 3 mois</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="testimonial-card">
+                    <div class="testimonial-image">
+                        <img src="https://images.unsplash.com/photo-1567598508481-65985588e295?w=400&h=400&fit=crop" alt="Membre">
+                    </div>
+                    <div class="testimonial-content">
+                        <p class="testimonial-text">
+                            "Meilleur investissement de ma vie. La communauté est incroyable et les coachs au top!"
+                        </p>
+                        <h4 class="testimonial-author">Sarah L.</h4>
+                        <p class="testimonial-result text-danger">+8kg de muscle</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="testimonial-card">
+                    <div class="testimonial-image">
+                        <img src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=400&h=400&fit=crop" alt="Membre">
+                    </div>
+                    <div class="testimonial-content">
+                        <p class="testimonial-text">
+                            "Débutant complet il y a 6 mois, je me sens maintenant comme un athlète confirmé!"
+                        </p>
+                        <h4 class="testimonial-author">Marc B.</h4>
+                        <p class="testimonial-result text-danger">Total transformation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA Section -->
+<section class="cta-final-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="cta-title">
+                    PRÊT À TRANSFORMER<br>
+                    <span class="text-danger">TON CORPS?</span>
+                </h2>
+                <p class="cta-text">
+                    Rejoins la FitGang family aujourd'hui et commence ta transformation.
+                    Des milliers de membres ont déjà franchi le pas.
+                </p>
+                {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('main.register') }}" class="btn btn-cta-primary">
+                        <i class="bi bi-lightning-charge-fill me-2"></i>
+                        Rejoindre FitGang Maintenant
+                    </a>
+                    <p class="cta-small mt-3">Essai gratuit 7 jours • Sans engagement</p>
+                {% else %}
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-cta-primary">
+                        <i class="bi bi-speedometer2 me-2"></i>
+                        Accéder à mon espace
+                    </a>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </section>
 {% endblock %}
