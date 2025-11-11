@@ -329,28 +329,29 @@ class EmailCampaign(db.Model):
         return f'<EmailCampaign {self.nom}>'
 
 
-class Visit(db.Model):
-    """
-    Modèle de tracking des visites
-    Enregistre chaque visite sur le site pour les statistiques
-    """
-    __tablename__ = 'visits'
-
-    id = db.Column(db.Integer, primary_key=True)
-    ip_address = db.Column(db.String(50))  # Adresse IP du visiteur
-    user_agent = db.Column(db.String(500))  # Navigateur utilisé
-    page = db.Column(db.String(500))  # Page visitée
-    referer = db.Column(db.String(500))  # D'où vient le visiteur
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # Si connecté
-    session_id = db.Column(db.String(100), index=True)  # ID de session unique
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-
-    # Informations géographiques (optionnel)
-    country = db.Column(db.String(100))
-    city = db.Column(db.String(100))
-
-    # Relation
-    user = db.relationship('User', backref=db.backref('visits', lazy='dynamic'))
-
-    def __repr__(self):
-        return f'<Visit {self.page} at {self.timestamp}>'
+# TEMPORAIREMENT DÉSACTIVÉ - Analytics en cours de développement
+# class Visit(db.Model):
+#     """
+#     Modèle de tracking des visites
+#     Enregistre chaque visite sur le site pour les statistiques
+#     """
+#     __tablename__ = 'visits'
+#
+#     id = db.Column(db.Integer, primary_key=True)
+#     ip_address = db.Column(db.String(50))  # Adresse IP du visiteur
+#     user_agent = db.Column(db.String(500))  # Navigateur utilisé
+#     page = db.Column(db.String(500))  # Page visitée
+#     referer = db.Column(db.String(500))  # D'où vient le visiteur
+#     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # Si connecté
+#     session_id = db.Column(db.String(100), index=True)  # ID de session unique
+#     timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+#
+#     # Informations géographiques (optionnel)
+#     country = db.Column(db.String(100))
+#     city = db.Column(db.String(100))
+#
+#     # Relation
+#     user = db.relationship('User', backref=db.backref('visits', lazy='dynamic'))
+#
+#     def __repr__(self):
+#         return f'<Visit {self.page} at {self.timestamp}>'
