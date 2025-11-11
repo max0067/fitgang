@@ -264,3 +264,19 @@ class Newsletter(db.Model):
 
     def __repr__(self):
         return f'<Newsletter {self.email}>'
+
+
+class PageContent(db.Model):
+    """
+    Modèle contenu de page
+    Stocke le contenu éditable des différentes sections du site
+    """
+    __tablename__ = 'page_content'
+
+    id = db.Column(db.Integer, primary_key=True)
+    section = db.Column(db.String(100), unique=True, nullable=False, index=True)  # Clé unique pour chaque section
+    contenu = db.Column(db.Text, nullable=False)  # Le contenu de la section
+    date_modification = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<PageContent {self.section}>'

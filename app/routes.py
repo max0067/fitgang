@@ -12,9 +12,9 @@ from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
 from app import db
-from app.models import User, Programme, Ebook, Achat, Progression, Photo, ProgrammeSeance, ProgrammeProgression, Complement, Newsletter
+from app.models import User, Programme, Ebook, Achat, Progression, Photo, ProgrammeSeance, ProgrammeProgression, Complement, Newsletter, PageContent
 from app.forms import (LoginForm, RegistrationForm, ProfileForm, ChangePasswordForm,
-                       ProgressionForm, ProgrammeForm, EbookForm, SeanceForm, ComplementForm)
+                       ProgressionForm, ProgrammeForm, EbookForm, SeanceForm, ComplementForm, HomepageContentForm)
 from app.email import send_welcome_email, send_purchase_confirmation_email, send_admin_notification_email
 
 # Créer le blueprint
@@ -63,7 +63,26 @@ def index():
     """Page d'accueil"""
     programmes = Programme.query.filter_by(actif=True).limit(3).all()
     ebooks = Ebook.query.filter_by(actif=True).limit(3).all()
-    return render_template('index.html', programmes=programmes, ebooks=ebooks)
+
+    # Charger le contenu personnalisable de la page
+    def get_content(section, default=''):
+        content = PageContent.query.filter_by(section=section).first()
+        return content.contenu if content else default
+
+    page_content = {
+        'hero_titre': get_content('hero_titre', 'TRANSFORME TON CORPS, DÉPASSE TES LIMITES'),
+        'hero_sous_titre': get_content('hero_sous_titre', 'Rejoins FitGang et découvre des programmes exclusifs pour atteindre tes objectifs fitness. Nutrition, entraînement, mindset : tout pour réussir ta transformation.'),
+        'stat_membres': get_content('stat_membres', '10K+ Membres Actifs'),
+        'stat_programmes': get_content('stat_programmes', '50+ Programmes'),
+        'stat_transformations': get_content('stat_transformations', '1000+ Transformations'),
+        'stat_satisfaction': get_content('stat_satisfaction', '98% Satisfaction'),
+        'philosophie_titre': get_content('philosophie_titre', 'PLUS QU\'UNE SALLE, UN MODE DE VIE'),
+        'philosophie_texte': get_content('philosophie_texte', 'Nous croyons en la discipline, la consistance et la communauté. Rejoins notre gang et transforme non seulement ton physique, mais aussi ton mindset. Ensemble, nous sommes plus forts.'),
+        'cta_titre': get_content('cta_titre', 'PRÊT À COMMENCER TA TRANSFORMATION ?'),
+        'cta_texte': get_content('cta_texte', 'Rejoins des milliers de membres qui ont déjà transformé leur vie avec FitGang.')
+    }
+
+    return render_template('index.html', programmes=programmes, ebooks=ebooks, page_content=page_content)
 
 
 @bp.route('/login', methods=['GET', 'POST'])
@@ -905,6 +924,76 @@ def admin_delete_complement(id):
 
     flash('Complément supprimé.', 'info')
     return redirect(url_for('main.admin_complements'))
+
+
+@bp.route('/admin/homepage-content', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_homepage_content():
+    """Gestion du contenu de la page d'accueil"""
+    form = HomepageContentForm()
+
+    if form.validate_on_submit():
+        # Mise à jour de chaque section
+        sections = {
+            'hero_titre': form.hero_titre.data,
+            'hero_sous_titre': form.hero_sous_titre.data,
+            'stat_membres': form.stat_membres.data,
+            'stat_programmes': form.stat_programmes.data,
+            'stat_transformations': form.stat_transformations.data,
+            'stat_satisfaction': form.stat_satisfaction.data,
+            'philosophie_titre': form.philosophie_titre.data,
+            'philosophie_texte': form.philosophie_texte.data,
+            'cta_titre': form.cta_titre.data,
+            'cta_texte': form.cta_texte.data
+        }
+
+        for section_key, contenu in sections.items():
+            page_content = PageContent.query.filter_by(section=section_key).first()
+            if page_content:
+                page_content.contenu = contenu
+                page_content.date_modification = datetime.utcnow()
+            else:
+                page_content = PageContent(section=section_key, contenu=contenu)
+                db.session.add(page_content)
+
+        db.session.commit()
+        flash('Le contenu de la page d\'accueil a été mis à jour avec succès!', 'success')
+        return redirect(url_for('main.admin_homepage_content'))
+
+    # Pré-remplir le formulaire avec les valeurs actuelles
+    if request.method == 'GET':
+        form.hero_titre.data = PageContent.query.filter_by(section='hero_titre').first()
+        form.hero_titre.data = form.hero_titre.data.contenu if form.hero_titre.data else ''
+
+        content = PageContent.query.filter_by(section='hero_sous_titre').first()
+        form.hero_sous_titre.data = content.contenu if content else ''
+
+        content = PageContent.query.filter_by(section='stat_membres').first()
+        form.stat_membres.data = content.contenu if content else ''
+
+        content = PageContent.query.filter_by(section='stat_programmes').first()
+        form.stat_programmes.data = content.contenu if content else ''
+
+        content = PageContent.query.filter_by(section='stat_transformations').first()
+        form.stat_transformations.data = content.contenu if content else ''
+
+        content = PageContent.query.filter_by(section='stat_satisfaction').first()
+        form.stat_satisfaction.data = content.contenu if content else ''
+
+        content = PageContent.query.filter_by(section='philosophie_titre').first()
+        form.philosophie_titre.data = content.contenu if content else ''
+
+        content = PageContent.query.filter_by(section='philosophie_texte').first()
+        form.philosophie_texte.data = content.contenu if content else ''
+
+        content = PageContent.query.filter_by(section='cta_titre').first()
+        form.cta_titre.data = content.contenu if content else ''
+
+        content = PageContent.query.filter_by(section='cta_texte').first()
+        form.cta_texte.data = content.contenu if content else ''
+
+    return render_template('admin_homepage_content.html', form=form)
 
 
 @bp.route('/admin/users')

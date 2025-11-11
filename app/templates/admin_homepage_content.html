@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier la page d'accueil - FitGang Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="bi bi-house-door text-danger"></i> Modifier la page d'accueil
+            </h1>
+            <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Retour au dashboard
+            </a>
+        </div>
+
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> <strong>Astuce:</strong> Modifiez le contenu de votre page d'accueil directement depuis cette interface. Les changements seront visibles immédiatement.
+        </div>
+
+        <div class="card card-custom">
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Section Hero -->
+                    <h4 class="text-danger border-bottom pb-2 mb-3">
+                        <i class="bi bi-star-fill"></i> Section Hero (En-tête principal)
+                    </h4>
+
+                    <div class="mb-3">
+                        {{ form.hero_titre.label(class="form-label fw-bold") }}
+                        {{ form.hero_titre(class="form-control form-control-lg", placeholder="TRANSFORME TON CORPS, DÉPASSE TES LIMITES") }}
+                        {% if form.hero_titre.errors %}
+                            {% for error in form.hero_titre.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        {{ form.hero_sous_titre.label(class="form-label fw-bold") }}
+                        {{ form.hero_sous_titre(class="form-control", rows="3", placeholder="Rejoins FitGang et découvre des programmes exclusifs...") }}
+                        {% if form.hero_sous_titre.errors %}
+                            {% for error in form.hero_sous_titre.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Section Statistiques -->
+                    <h4 class="text-danger border-bottom pb-2 mb-3 mt-5">
+                        <i class="bi bi-graph-up"></i> Statistiques
+                    </h4>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.stat_membres.label(class="form-label fw-bold") }}
+                            {{ form.stat_membres(class="form-control", placeholder="10K+ Membres Actifs") }}
+                            <small class="text-muted">Ex: 10K+ Membres Actifs</small>
+                            {% if form.stat_membres.errors %}
+                                {% for error in form.stat_membres.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ form.stat_programmes.label(class="form-label fw-bold") }}
+                            {{ form.stat_programmes(class="form-control", placeholder="50+ Programmes") }}
+                            <small class="text-muted">Ex: 50+ Programmes</small>
+                            {% if form.stat_programmes.errors %}
+                                {% for error in form.stat_programmes.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.stat_transformations.label(class="form-label fw-bold") }}
+                            {{ form.stat_transformations(class="form-control", placeholder="1000+ Transformations") }}
+                            <small class="text-muted">Ex: 1000+ Transformations</small>
+                            {% if form.stat_transformations.errors %}
+                                {% for error in form.stat_transformations.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ form.stat_satisfaction.label(class="form-label fw-bold") }}
+                            {{ form.stat_satisfaction(class="form-control", placeholder="98% Satisfaction") }}
+                            <small class="text-muted">Ex: 98% Satisfaction</small>
+                            {% if form.stat_satisfaction.errors %}
+                                {% for error in form.stat_satisfaction.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Section Philosophie -->
+                    <h4 class="text-danger border-bottom pb-2 mb-3 mt-5">
+                        <i class="bi bi-heart-fill"></i> Section Philosophie
+                    </h4>
+
+                    <div class="mb-3">
+                        {{ form.philosophie_titre.label(class="form-label fw-bold") }}
+                        {{ form.philosophie_titre(class="form-control", placeholder="PLUS QU'UNE SALLE, UN MODE DE VIE") }}
+                        {% if form.philosophie_titre.errors %}
+                            {% for error in form.philosophie_titre.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        {{ form.philosophie_texte.label(class="form-label fw-bold") }}
+                        {{ form.philosophie_texte(class="form-control", rows="4", placeholder="Nous croyons en la discipline, la consistance et la communauté...") }}
+                        {% if form.philosophie_texte.errors %}
+                            {% for error in form.philosophie_texte.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Section Call-to-Action -->
+                    <h4 class="text-danger border-bottom pb-2 mb-3 mt-5">
+                        <i class="bi bi-megaphone-fill"></i> Appel à l'action final
+                    </h4>
+
+                    <div class="mb-3">
+                        {{ form.cta_titre.label(class="form-label fw-bold") }}
+                        {{ form.cta_titre(class="form-control", placeholder="PRÊT À COMMENCER TA TRANSFORMATION ?") }}
+                        {% if form.cta_titre.errors %}
+                            {% for error in form.cta_titre.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        {{ form.cta_texte.label(class="form-label fw-bold") }}
+                        {{ form.cta_texte(class="form-control", rows="3", placeholder="Rejoins des milliers de membres qui ont déjà transformé leur vie avec FitGang.") }}
+                        {% if form.cta_texte.errors %}
+                            {% for error in form.cta_texte.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        {{ form.submit(class="btn btn-danger btn-lg") }}
+                        <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-outline-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

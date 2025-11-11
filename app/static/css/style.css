@@ -242,6 +242,14 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0;
 }
 
+.stat-full {
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    font-weight: 700;
+    color: var(--gray-900);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
 /* ===== SECTIONS MODERNES ===== */
 .section-modern {
     padding: 6rem 0;

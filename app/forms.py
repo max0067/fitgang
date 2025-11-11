@@ -136,3 +136,22 @@ class ComplementForm(FlaskForm):
     lien_achat = StringField('Lien d\'achat', validators=[Optional(), Length(max=500)])
     actif = BooleanField('Complément actif')
     submit = SubmitField('Enregistrer')
+
+
+class HomepageContentForm(FlaskForm):
+    """Formulaire d'édition du contenu de la page d'accueil"""
+    hero_titre = StringField('Titre principal (Hero)', validators=[DataRequired(), Length(max=200)])
+    hero_sous_titre = TextAreaField('Sous-titre (Hero)', validators=[DataRequired(), Length(max=500)])
+
+    stat_membres = StringField('Statistique - Membres', validators=[DataRequired(), Length(max=50)])
+    stat_programmes = StringField('Statistique - Programmes', validators=[DataRequired(), Length(max=50)])
+    stat_transformations = StringField('Statistique - Transformations', validators=[DataRequired(), Length(max=50)])
+    stat_satisfaction = StringField('Statistique - Satisfaction', validators=[DataRequired(), Length(max=50)])
+
+    philosophie_titre = StringField('Titre section philosophie', validators=[DataRequired(), Length(max=200)])
+    philosophie_texte = TextAreaField('Texte section philosophie', validators=[DataRequired(), Length(max=1000)])
+
+    cta_titre = StringField('Titre appel à l\'action final', validators=[DataRequired(), Length(max=200)])
+    cta_texte = TextAreaField('Texte appel à l\'action final', validators=[DataRequired(), Length(max=500)])
+
+    submit = SubmitField('Enregistrer les modifications')

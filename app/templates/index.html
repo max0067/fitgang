@@ -11,12 +11,10 @@
             <div class="row justify-content-center">
                 <div class="col-lg-10 text-center">
                     <h1 class="hero-title animate-fade-in">
-                        TRANSFORME TON CORPS,<br>
-                        <span class="text-danger">DÉPASSE TES LIMITES</span>
+                        {{ page_content.hero_titre|safe }}
                     </h1>
                     <p class="hero-subtitle animate-fade-in-delay">
-                        Des programmes d'entraînement et ebooks nutrition créés par des passionnés,
-                        pour des athlètes qui veulent performer.
+                        {{ page_content.hero_sous_titre }}
                     </p>
                     <div class="hero-cta animate-fade-in-delay-2">
                         {% if not current_user.is_authenticated %}
@@ -49,26 +47,22 @@
         <div class="row text-center">
             <div class="col-md-3 col-6 mb-4 mb-md-0">
                 <div class="stat-item">
-                    <h3 class="stat-number">10K+</h3>
-                    <p class="stat-label">Membres Actifs</p>
+                    <div class="stat-full">{{ page_content.stat_membres }}</div>
                 </div>
             </div>
             <div class="col-md-3 col-6 mb-4 mb-md-0">
                 <div class="stat-item">
-                    <h3 class="stat-number">50+</h3>
-                    <p class="stat-label">Programmes</p>
+                    <div class="stat-full">{{ page_content.stat_programmes }}</div>
                 </div>
             </div>
             <div class="col-md-3 col-6">
                 <div class="stat-item">
-                    <h3 class="stat-number">95%</h3>
-                    <p class="stat-label">Satisfaction</p>
+                    <div class="stat-full">{{ page_content.stat_transformations }}</div>
                 </div>
             </div>
             <div class="col-md-3 col-6">
                 <div class="stat-item">
-                    <h3 class="stat-number">24/7</h3>
-                    <p class="stat-label">Support</p>
+                    <div class="stat-full">{{ page_content.stat_satisfaction }}</div>
                 </div>
             </div>
         </div>
@@ -207,18 +201,10 @@
                 <div class="philosophy-content">
                     <span class="section-badge">NOTRE PHILOSOPHIE</span>
                     <h2 class="section-title mb-4">
-                        PLUS QU'UNE SALLE,<br>
-                        <span class="text-danger">UN MODE DE VIE</span>
+                        {{ page_content.philosophie_titre|safe }}
                     </h2>
                     <p class="philosophy-text">
-                        Chez FitGang, on croit que le fitness n'est pas qu'une question de physique.
-                        C'est un <strong>état d'esprit</strong>, une <strong>discipline</strong>,
-                        une <strong>détermination</strong> à devenir la meilleure version de soi-même.
-                    </p>
-                    <p class="philosophy-text">
-                        Nos programmes ne se contentent pas de te donner des exercices.
-                        Ils te forgent mentalement, te poussent à dépasser tes limites et
-                        te font rejoindre une communauté de guerriers qui partagent la même passion.
+                        {{ page_content.philosophie_texte }}
                     </p>
                     <div class="philosophy-values mt-4">
                         <div class="value-item">
@@ -414,12 +400,10 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 text-center">
                 <h2 class="cta-title">
-                    PRÊT À TRANSFORMER<br>
-                    <span class="text-danger">TON CORPS?</span>
+                    {{ page_content.cta_titre|safe }}
                 </h2>
                 <p class="cta-text">
-                    Rejoins la FitGang family aujourd'hui et commence ta transformation.
-                    Des milliers de membres ont déjà franchi le pas.
+                    {{ page_content.cta_texte }}
                 </p>
                 {% if not current_user.is_authenticated %}
                     <a href="{{ url_for('main.register') }}" class="btn btn-cta-primary">
