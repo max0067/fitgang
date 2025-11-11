@@ -12,9 +12,9 @@ from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
 from app import db
-from app.models import User, Programme, Ebook, Achat, Progression, Photo
+from app.models import User, Programme, Ebook, Achat, Progression, Photo, ProgrammeSeance, ProgrammeProgression
 from app.forms import (LoginForm, RegistrationForm, ProfileForm, ChangePasswordForm,
-                       ProgressionForm, ProgrammeForm, EbookForm)
+                       ProgressionForm, ProgrammeForm, EbookForm, SeanceForm)
 
 # Créer le blueprint
 bp = Blueprint('main', __name__)
@@ -156,7 +156,80 @@ def programme_access(id):
         type='programme'
     ).first()
 
-    return render_template('programme_access.html', programme=programme, achat=achat)
+    # Récupérer toutes les séances organisées par semaine
+    seances = ProgrammeSeance.query.filter_by(programme_id=id)\
+        .order_by(ProgrammeSeance.semaine, ProgrammeSeance.jour).all()
+
+    # Organiser par semaine
+    seances_par_semaine = {}
+    for seance in seances:
+        if seance.semaine not in seances_par_semaine:
+            seances_par_semaine[seance.semaine] = []
+        seances_par_semaine[seance.semaine].append(seance)
+
+    # Récupérer les séances complétées par l'utilisateur
+    progressions = ProgrammeProgression.query.filter_by(user_id=current_user.id).all()
+    seances_completees = {p.programme_seance_id for p in progressions if p.completed}
+
+    # Calculer les stats de progression
+    total_seances = len(seances)
+    seances_completees_count = len(seances_completees)
+    pourcentage_completion = (seances_completees_count / total_seances * 100) if total_seances > 0 else 0
+
+    return render_template('programme_access.html',
+                         programme=programme,
+                         achat=achat,
+                         seances_par_semaine=seances_par_semaine,
+                         seances_completees=seances_completees,
+                         total_seances=total_seances,
+                         seances_completees_count=seances_completees_count,
+                         pourcentage_completion=pourcentage_completion)
+
+
+@bp.route('/programme/<int:prog_id>/seance/<int:seance_id>/toggle', methods=['POST'])
+@login_required
+def toggle_seance_completion(prog_id, seance_id):
+    """Cocher/décocher une séance comme complétée"""
+    # Vérifier que l'utilisateur a acheté le programme
+    if not current_user.has_purchased(prog_id, 'programme'):
+        return jsonify({'success': False, 'message': 'Accès non autorisé'}), 403
+
+    # Vérifier que la séance existe et appartient au programme
+    seance = ProgrammeSeance.query.get_or_404(seance_id)
+    if seance.programme_id != prog_id:
+        return jsonify({'success': False, 'message': 'Séance non trouvée'}), 404
+
+    # Chercher si la séance est déjà complétée
+    progression = ProgrammeProgression.query.filter_by(
+        user_id=current_user.id,
+        programme_seance_id=seance_id
+    ).first()
+
+    if progression:
+        # Toggle: si elle existe, on l'inverse ou la supprime
+        if progression.completed:
+            # Décocher
+            db.session.delete(progression)
+            completed = False
+        else:
+            # Cocher
+            progression.completed = True
+            progression.date_completed = datetime.utcnow()
+            completed = True
+    else:
+        # Créer nouvelle progression
+        progression = ProgrammeProgression(
+            user_id=current_user.id,
+            programme_seance_id=seance_id,
+            completed=True,
+            date_completed=datetime.utcnow()
+        )
+        db.session.add(progression)
+        completed = True
+
+    db.session.commit()
+
+    return jsonify({'success': True, 'completed': completed})
 
 
 @bp.route('/ebooks')
@@ -164,6 +237,19 @@ def ebooks():
     """Page listant tous les ebooks"""
     all_ebooks = Ebook.query.filter_by(actif=True).all()
     return render_template('ebooks.html', ebooks=all_ebooks)
+
+
+@bp.route('/ebook/<int:id>')
+def ebook_detail(id):
+    """Page de détail d'un ebook spécifique"""
+    ebook = Ebook.query.get_or_404(id)
+
+    # Check if user has purchased this ebook
+    has_purchased = False
+    if current_user.is_authenticated:
+        has_purchased = current_user.has_purchased(id, 'ebook')
+
+    return render_template('ebook_detail.html', ebook=ebook, has_purchased=has_purchased)
 
 
 @bp.route('/ebook/<int:id>/download')
@@ -834,6 +920,123 @@ def admin_grant_access(id):
 
     flash(f'{item.titre} offert à {user.prenom} {user.nom} avec succès!', 'success')
     return redirect(url_for('main.admin_user_detail', id=id))
+
+
+# ===== ROUTES ADMIN SÉANCES DE PROGRAMME =====
+
+@bp.route('/admin/programme/<int:id>/seances')
+@login_required
+@admin_required
+def admin_programme_seances(id):
+    """Liste des séances d'un programme"""
+    programme = Programme.query.get_or_404(id)
+
+    # Récupérer toutes les séances organisées par semaine et jour
+    seances = ProgrammeSeance.query.filter_by(programme_id=id)\
+        .order_by(ProgrammeSeance.semaine, ProgrammeSeance.jour).all()
+
+    # Organiser par semaine
+    seances_par_semaine = {}
+    for seance in seances:
+        if seance.semaine not in seances_par_semaine:
+            seances_par_semaine[seance.semaine] = []
+        seances_par_semaine[seance.semaine].append(seance)
+
+    return render_template('admin_programme_seances.html',
+                         programme=programme,
+                         seances_par_semaine=seances_par_semaine)
+
+
+@bp.route('/admin/programme/<int:id>/seance/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_add_seance(id):
+    """Ajouter une séance à un programme"""
+    programme = Programme.query.get_or_404(id)
+    form = SeanceForm()
+
+    if form.validate_on_submit():
+        seance = ProgrammeSeance(
+            programme_id=id,
+            semaine=form.semaine.data,
+            jour=form.jour.data,
+            titre=form.titre.data,
+            exercices=form.exercices.data,
+            notes=form.notes.data,
+            ordre=(form.semaine.data - 1) * 7 + form.jour.data
+        )
+
+        db.session.add(seance)
+        db.session.commit()
+
+        flash(f'Séance "{seance.titre}" ajoutée avec succès!', 'success')
+        return redirect(url_for('main.admin_programme_seances', id=id))
+
+    return render_template('admin_seance_form.html',
+                         form=form,
+                         programme=programme,
+                         title='Ajouter une séance')
+
+
+@bp.route('/admin/programme/<int:prog_id>/seance/<int:seance_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edit_seance(prog_id, seance_id):
+    """Modifier une séance"""
+    programme = Programme.query.get_or_404(prog_id)
+    seance = ProgrammeSeance.query.get_or_404(seance_id)
+
+    # Vérifier que la séance appartient bien au programme
+    if seance.programme_id != prog_id:
+        flash('Séance non trouvée.', 'danger')
+        return redirect(url_for('main.admin_programme_seances', id=prog_id))
+
+    form = SeanceForm()
+
+    if form.validate_on_submit():
+        seance.semaine = form.semaine.data
+        seance.jour = form.jour.data
+        seance.titre = form.titre.data
+        seance.exercices = form.exercices.data
+        seance.notes = form.notes.data
+        seance.ordre = (form.semaine.data - 1) * 7 + form.jour.data
+
+        db.session.commit()
+
+        flash('Séance mise à jour!', 'success')
+        return redirect(url_for('main.admin_programme_seances', id=prog_id))
+
+    elif request.method == 'GET':
+        form.semaine.data = seance.semaine
+        form.jour.data = seance.jour
+        form.titre.data = seance.titre
+        form.exercices.data = seance.exercices
+        form.notes.data = seance.notes
+
+    return render_template('admin_seance_form.html',
+                         form=form,
+                         programme=programme,
+                         seance=seance,
+                         title='Modifier la séance')
+
+
+@bp.route('/admin/programme/<int:prog_id>/seance/<int:seance_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_delete_seance(prog_id, seance_id):
+    """Supprimer une séance"""
+    seance = ProgrammeSeance.query.get_or_404(seance_id)
+
+    # Vérifier que la séance appartient bien au programme
+    if seance.programme_id != prog_id:
+        flash('Séance non trouvée.', 'danger')
+        return redirect(url_for('main.admin_programme_seances', id=prog_id))
+
+    db.session.delete(seance)
+    db.session.commit()
+
+    flash('Séance supprimée.', 'info')
+    return redirect(url_for('main.admin_programme_seances', id=prog_id))
 
 
 # ===== ROUTES PHOTOS =====

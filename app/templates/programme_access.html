@@ -1,432 +1,180 @@
 {% extends "base.html" %}
 
-{% block title %}{{ programme.titre }} - Accès Programme - FitGang{% endblock %}
+{% block title %}{{ programme.titre }} - Mon Programme - FitGang{% endblock %}
 
 {% block content %}
-<!-- Header Programme -->
-<div class="programme-access-header mb-5">
+<!-- Header Programme avec Stats -->
+<div class="programme-header mb-5">
     <div class="row align-items-center">
         <div class="col-lg-8">
             <div class="d-flex align-items-center mb-3">
-                <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary me-3">
-                    <i class="bi bi-arrow-left"></i> Retour au dashboard
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-light me-3">
+                    <i class="bi bi-arrow-left"></i> Dashboard
                 </a>
                 <span class="badge bg-success px-3 py-2">
-                    <i class="bi bi-check-circle-fill"></i> Programme acheté
+                    <i class="bi bi-check-circle-fill"></i> Programme Actif
                 </span>
             </div>
-            <h1 class="display-4 fw-bold mb-3">{{ programme.titre }}</h1>
-            <p class="lead text-muted mb-3">{{ programme.description }}</p>
+            <h1 class="display-4 fw-bold text-white mb-3">{{ programme.titre }}</h1>
+            <p class="lead text-white-50 mb-3">{{ programme.description }}</p>
             <div class="d-flex flex-wrap gap-3">
-                <div class="badge bg-dark px-3 py-2">
+                <div class="badge-custom">
                     <i class="bi bi-bar-chart-fill"></i> {{ programme.niveau }}
                 </div>
-                <div class="badge bg-dark px-3 py-2">
+                <div class="badge-custom">
                     <i class="bi bi-clock-fill"></i> {{ programme.duree }}
                 </div>
                 {% if achat %}
-                <div class="badge bg-dark px-3 py-2">
-                    <i class="bi bi-calendar-check"></i> Acheté le {{ achat.date_achat.strftime('%d/%m/%Y') }}
+                <div class="badge-custom">
+                    <i class="bi bi-calendar-check"></i> Depuis le {{ achat.date_achat.strftime('%d/%m/%Y') }}
                 </div>
                 {% endif %}
             </div>
         </div>
-        <div class="col-lg-4 text-center">
-            {% if programme.image %}
-                <img src="{{ programme.image }}" alt="{{ programme.titre }}" class="img-fluid rounded shadow" style="max-height: 300px; object-fit: cover;">
-            {% else %}
-                <div class="bg-danger text-white rounded shadow d-flex align-items-center justify-content-center" style="height: 300px;">
-                    <i class="bi bi-dumbbell" style="font-size: 80px;"></i>
+        <div class="col-lg-4 text-center mt-4 mt-lg-0">
+            <!-- Progress Circle -->
+            <div class="progress-circle-container">
+                <div class="progress-circle" data-percentage="{{ pourcentage_completion|int }}">
+                    <div class="progress-circle-inner">
+                        <span class="progress-number">{{ pourcentage_completion|int }}%</span>
+                        <span class="progress-label">Complété</span>
+                    </div>
                 </div>
-            {% endif %}
+                <p class="text-white mt-3 mb-0">
+                    <strong>{{ seances_completees_count }}/{{ total_seances }}</strong> séances
+                </p>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Navigation Tabs -->
-<ul class="nav nav-tabs mb-4" id="programmeTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="contenu-tab" data-bs-toggle="tab" data-bs-target="#contenu" type="button" role="tab">
-            <i class="bi bi-file-text-fill"></i> Contenu du Programme
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="planning-tab" data-bs-toggle="tab" data-bs-target="#planning" type="button" role="tab">
-            <i class="bi bi-calendar3"></i> Planning
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="nutrition-tab" data-bs-toggle="tab" data-bs-target="#nutrition" type="button" role="tab">
-            <i class="bi bi-egg-fried"></i> Nutrition
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="ressources-tab" data-bs-toggle="tab" data-bs-target="#ressources" type="button" role="tab">
-            <i class="bi bi-download"></i> Ressources
-        </button>
-    </li>
-</ul>
+<!-- Séances par Semaine -->
+<div class="container-fluid px-0">
+    {% if seances_par_semaine %}
+        {% for semaine_num in seances_par_semaine.keys()|sort %}
+            <div class="card card-custom mb-4 shadow">
+                <div class="card-header bg-gradient-danger text-white py-3">
+                    <h3 class="mb-0">
+                        <i class="bi bi-calendar-week"></i> Semaine {{ semaine_num }}
+                    </h3>
+                </div>
+                <div class="card-body p-0">
+                    {% for seance in seances_par_semaine[semaine_num] %}
+                        <div class="seance-item {% if seance.id in seances_completees %}completed{% endif %}" id="seance-{{ seance.id }}">
+                            <div class="seance-header" onclick="toggleSeanceDetails({{ seance.id }})">
+                                <div class="seance-main-info">
+                                    <div class="seance-checkbox">
+                                        <input type="checkbox"
+                                               class="form-check-input"
+                                               {% if seance.id in seances_completees %}checked{% endif %}
+                                               onclick="event.stopPropagation(); toggleSeanceCompletion({{ programme.id }}, {{ seance.id }}, this)">
+                                    </div>
+                                    <div class="seance-badge">
+                                        <span class="badge bg-primary">Jour {{ seance.jour }}</span>
+                                    </div>
+                                    <div class="seance-title-container">
+                                        <h5 class="seance-title mb-0">{{ seance.titre }}</h5>
+                                    </div>
+                                </div>
+                                <div class="seance-toggle">
+                                    <i class="bi bi-chevron-down"></i>
+                                </div>
+                            </div>
 
-<!-- Tab Content -->
-<div class="tab-content" id="programmeTabContent">
-    <!-- Contenu Tab -->
-    <div class="tab-pane fade show active" id="contenu" role="tabpanel">
-        <div class="card card-custom">
-            <div class="card-body">
-                <h3 class="mb-4">
-                    <i class="bi bi-book-fill text-danger"></i> Contenu Complet du Programme
-                </h3>
+                            <div class="seance-details" id="details-{{ seance.id }}" style="display: none;">
+                                <div class="seance-content">
+                                    <div class="row">
+                                        <div class="col-lg-8">
+                                            <h6 class="text-danger fw-bold mb-3">
+                                                <i class="bi bi-list-check"></i> Exercices
+                                            </h6>
+                                            <pre class="exercices-pre">{{ seance.exercices }}</pre>
+                                        </div>
+                                        {% if seance.notes %}
+                                        <div class="col-lg-4">
+                                            <div class="notes-box">
+                                                <h6 class="text-warning fw-bold mb-3">
+                                                    <i class="bi bi-lightbulb"></i> Instructions
+                                                </h6>
+                                                <p class="mb-0">{{ seance.notes }}</p>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i>
+            Les séances de ce programme seront ajoutées prochainement. Consulte le contenu général dans l'onglet ci-dessous.
+        </div>
 
-                {% if programme.contenu %}
+        <!-- Fallback: Afficher le contenu texte s'il existe -->
+        {% if programme.contenu %}
+            <div class="card card-custom shadow">
+                <div class="card-body">
+                    <h3 class="mb-4">
+                        <i class="bi bi-book-fill text-danger"></i> Contenu du Programme
+                    </h3>
                     <div class="programme-content">
                         {{ programme.contenu|safe }}
                     </div>
-                {% else %}
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i>
-                        Le contenu détaillé du programme sera bientôt disponible. En attendant, consulte les autres sections pour commencer ton entraînement!
-                    </div>
-                {% endif %}
-
-                <!-- Quick Access Cards -->
-                <div class="row mt-5">
-                    <div class="col-md-6 mb-3">
-                        <div class="card bg-light h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <i class="bi bi-lightning-charge-fill text-warning"></i> Démarrage Rapide
-                                </h5>
-                                <p class="card-text">Commence dès aujourd'hui avec la première séance du programme.</p>
-                                <button class="btn btn-warning btn-sm">Commencer maintenant</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="card bg-light h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <i class="bi bi-question-circle-fill text-info"></i> Besoin d'aide?
-                                </h5>
-                                <p class="card-text">Notre équipe est là pour répondre à tes questions.</p>
-                                <a href="mailto:support@fitgang.fr" class="btn btn-info btn-sm">Contacter le support</a>
-                            </div>
-                        </div>
-                    </div>
                 </div>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-5">
+    <div class="col-md-4 mb-3">
+        <div class="card card-custom h-100 border-0 shadow-sm text-center">
+            <div class="card-body p-4">
+                <i class="bi bi-graph-up-arrow text-success" style="font-size: 3rem;"></i>
+                <h5 class="mt-3">Mes Statistiques</h5>
+                <p class="text-muted">Visualise ta progression</p>
+                <a href="{{ url_for('main.statistiques') }}" class="btn btn-outline-success">
+                    <i class="bi bi-bar-chart"></i> Voir mes stats
+                </a>
             </div>
         </div>
     </div>
-
-    <!-- Planning Tab -->
-    <div class="tab-pane fade" id="planning" role="tabpanel">
-        <div class="card card-custom">
-            <div class="card-body">
-                <h3 class="mb-4">
-                    <i class="bi bi-calendar-week-fill text-danger"></i> Planning Hebdomadaire
-                </h3>
-
-                <div class="alert alert-success">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <strong>Conseils:</strong> Respecte les jours de repos pour une récupération optimale. Adapte le planning selon ton emploi du temps.
-                </div>
-
-                <!-- Weekly Planning Example -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th width="15%">Jour</th>
-                                        <th width="30%">Séance</th>
-                                        <th width="20%">Durée</th>
-                                        <th width="35%">Focus</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>Lundi</strong></td>
-                                        <td>Séance 1 - Haut du corps</td>
-                                        <td>60-75 min</td>
-                                        <td>Pectoraux, Épaules, Triceps</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Mardi</strong></td>
-                                        <td>Séance 2 - Bas du corps</td>
-                                        <td>60-75 min</td>
-                                        <td>Quadriceps, Ischio, Mollets</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Mercredi</strong></td>
-                                        <td class="table-secondary">Repos / Cardio léger</td>
-                                        <td>30 min (optionnel)</td>
-                                        <td>Récupération active</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Jeudi</strong></td>
-                                        <td>Séance 3 - Dos et Biceps</td>
-                                        <td>60-75 min</td>
-                                        <td>Dorsaux, Trapèzes, Biceps</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Vendredi</strong></td>
-                                        <td>Séance 4 - Full Body</td>
-                                        <td>60-75 min</td>
-                                        <td>Corps complet - intensité élevée</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Samedi</strong></td>
-                                        <td class="table-secondary">Repos / Mobilité</td>
-                                        <td>20-30 min</td>
-                                        <td>Étirements, Yoga</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Dimanche</strong></td>
-                                        <td class="table-secondary">Repos complet</td>
-                                        <td>-</td>
-                                        <td>Récupération totale</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <a href="{{ url_for('main.add_progression') }}" class="btn btn-danger">
-                        <i class="bi bi-plus-circle"></i> Enregistrer ma séance d'aujourd'hui
-                    </a>
-                </div>
+    <div class="col-md-4 mb-3">
+        <div class="card card-custom h-100 border-0 shadow-sm text-center">
+            <div class="card-body p-4">
+                <i class="bi bi-plus-circle text-danger" style="font-size: 3rem;"></i>
+                <h5 class="mt-3">Enregistrer une Séance</h5>
+                <p class="text-muted">Ajoute ta séance perso</p>
+                <a href="{{ url_for('main.add_progression') }}" class="btn btn-outline-danger">
+                    <i class="bi bi-journal-plus"></i> Nouvelle séance
+                </a>
             </div>
         </div>
     </div>
-
-    <!-- Nutrition Tab -->
-    <div class="tab-pane fade" id="nutrition" role="tabpanel">
-        <div class="card card-custom">
-            <div class="card-body">
-                <h3 class="mb-4">
-                    <i class="bi bi-egg-fried text-danger"></i> Plan Nutritionnel
-                </h3>
-
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    <strong>Important:</strong> Ces recommandations sont générales. Adapte-les selon tes besoins, morphologie et objectifs.
-                </div>
-
-                <!-- Macros Recommendations -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="card bg-primary text-white text-center">
-                            <div class="card-body">
-                                <h2 class="mb-0">40%</h2>
-                                <p class="mb-0">Protéines</p>
-                                <small>2g/kg de poids de corps</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-success text-white text-center">
-                            <div class="card-body">
-                                <h2 class="mb-0">35%</h2>
-                                <p class="mb-0">Glucides</p>
-                                <small>Selon activité physique</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-warning text-white text-center">
-                            <div class="card-body">
-                                <h2 class="mb-0">25%</h2>
-                                <p class="mb-0">Lipides</p>
-                                <small>Sources de qualité</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sample Meal Plan -->
-                <h4 class="mb-3">Exemple de journée type</h4>
-                <div class="accordion" id="mealAccordion">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#breakfast">
-                                <i class="bi bi-sunrise me-2"></i> Petit-déjeuner (7h00)
-                            </button>
-                        </h2>
-                        <div id="breakfast" class="accordion-collapse collapse show" data-bs-parent="#mealAccordion">
-                            <div class="accordion-body">
-                                <ul>
-                                    <li>4 œufs entiers brouillés</li>
-                                    <li>100g de flocons d'avoine</li>
-                                    <li>1 banane</li>
-                                    <li>30g d'amandes</li>
-                                    <li>Thé vert ou café</li>
-                                </ul>
-                                <p class="text-muted mb-0"><small>~600 kcal | P: 35g | G: 65g | L: 20g</small></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#snack1">
-                                <i class="bi bi-cup-straw me-2"></i> Collation (10h00)
-                            </button>
-                        </h2>
-                        <div id="snack1" class="accordion-collapse collapse" data-bs-parent="#mealAccordion">
-                            <div class="accordion-body">
-                                <ul>
-                                    <li>Shaker de whey (30g)</li>
-                                    <li>1 pomme</li>
-                                    <li>Poignée de noix de cajou</li>
-                                </ul>
-                                <p class="text-muted mb-0"><small>~300 kcal | P: 25g | G: 25g | L: 10g</small></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#lunch">
-                                <i class="bi bi-clock me-2"></i> Déjeuner (13h00)
-                            </button>
-                        </h2>
-                        <div id="lunch" class="accordion-collapse collapse" data-bs-parent="#mealAccordion">
-                            <div class="accordion-body">
-                                <ul>
-                                    <li>200g de poulet grillé</li>
-                                    <li>150g de riz basmati</li>
-                                    <li>Légumes verts à volonté</li>
-                                    <li>1 cuillère à soupe d'huile d'olive</li>
-                                </ul>
-                                <p class="text-muted mb-0"><small>~650 kcal | P: 50g | G: 60g | L: 15g</small></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#preworkout">
-                                <i class="bi bi-lightning-charge me-2"></i> Pre-workout (16h00)
-                            </button>
-                        </h2>
-                        <div id="preworkout" class="accordion-collapse collapse" data-bs-parent="#mealAccordion">
-                            <div class="accordion-body">
-                                <ul>
-                                    <li>2 tranches de pain complet</li>
-                                    <li>2 cuillères à soupe de beurre de cacahuète</li>
-                                    <li>1 banane</li>
-                                </ul>
-                                <p class="text-muted mb-0"><small>~400 kcal | P: 15g | G: 50g | L: 15g</small></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#dinner">
-                                <i class="bi bi-moon-stars me-2"></i> Dîner (20h00)
-                            </button>
-                        </h2>
-                        <div id="dinner" class="accordion-collapse collapse" data-bs-parent="#mealAccordion">
-                            <div class="accordion-body">
-                                <ul>
-                                    <li>200g de saumon</li>
-                                    <li>200g de patates douces</li>
-                                    <li>Brocolis vapeur</li>
-                                    <li>Salade verte</li>
-                                </ul>
-                                <p class="text-muted mb-0"><small>~600 kcal | P: 45g | G: 50g | L: 20g</small></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="alert alert-info mt-4">
-                    <i class="bi bi-lightbulb-fill"></i>
-                    <strong>Astuce:</strong> Pour maximiser tes résultats, consulte nos ebooks nutrition dans ton dashboard!
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Ressources Tab -->
-    <div class="tab-pane fade" id="ressources" role="tabpanel">
-        <div class="card card-custom">
-            <div class="card-body">
-                <h3 class="mb-4">
-                    <i class="bi bi-download text-danger"></i> Ressources Téléchargeables
-                </h3>
-
-                <div class="row">
-                    <!-- PDF Programme -->
-                    <div class="col-md-6 mb-3">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="bi bi-file-earmark-pdf text-danger" style="font-size: 4rem;"></i>
-                                <h5 class="mt-3">Programme PDF</h5>
-                                <p class="text-muted">Télécharge le programme complet en PDF pour l'avoir toujours avec toi.</p>
-                                <button class="btn btn-outline-danger" disabled>
-                                    <i class="bi bi-download"></i> Bientôt disponible
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Fiche de suivi -->
-                    <div class="col-md-6 mb-3">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="bi bi-clipboard-data text-success" style="font-size: 4rem;"></i>
-                                <h5 class="mt-3">Fiche de Suivi</h5>
-                                <p class="text-muted">Imprime ta fiche de suivi pour noter tes performances.</p>
-                                <button class="btn btn-outline-success" disabled>
-                                    <i class="bi bi-download"></i> Bientôt disponible
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Guide des exercices -->
-                    <div class="col-md-6 mb-3">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="bi bi-camera-video text-primary" style="font-size: 4rem;"></i>
-                                <h5 class="mt-3">Vidéos des Exercices</h5>
-                                <p class="text-muted">Accède aux vidéos de démonstration pour chaque exercice.</p>
-                                <button class="btn btn-outline-primary" disabled>
-                                    <i class="bi bi-play-circle"></i> Bientôt disponible
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Accès communauté -->
-                    <div class="col-md-6 mb-3">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="bi bi-people-fill text-warning" style="font-size: 4rem;"></i>
-                                <h5 class="mt-3">Communauté FitGang</h5>
-                                <p class="text-muted">Rejoins notre groupe privé pour partager ton expérience.</p>
-                                <button class="btn btn-outline-warning" disabled>
-                                    <i class="bi bi-arrow-right-circle"></i> Bientôt disponible
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="alert alert-info mt-4">
-                    <i class="bi bi-info-circle-fill"></i>
-                    Les ressources téléchargeables seront disponibles prochainement. Toutes les mises à jour sont gratuites à vie!
-                </div>
+    <div class="col-md-4 mb-3">
+        <div class="card card-custom h-100 border-0 shadow-sm text-center">
+            <div class="card-body p-4">
+                <i class="bi bi-calculator text-primary" style="font-size: 3rem;"></i>
+                <h5 class="mt-3">Calculateurs</h5>
+                <p class="text-muted">IMC, calories, macros...</p>
+                <a href="{{ url_for('main.calculateurs') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-calculator-fill"></i> Calculer
+                </a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Bottom CTA -->
-<div class="card card-custom bg-dark text-white mt-5">
+<!-- Support CTA -->
+<div class="card card-custom bg-dark text-white mt-4 shadow">
     <div class="card-body text-center py-5">
-        <h3 class="mb-3">Questions ou besoin d'aide?</h3>
-        <p class="lead mb-4">Notre équipe est là pour t'accompagner dans ta transformation.</p>
+        <h3 class="mb-3">Besoin d'aide avec le programme?</h3>
+        <p class="lead mb-4">Notre équipe est là pour répondre à toutes tes questions.</p>
         <a href="mailto:support@fitgang.fr" class="btn btn-danger btn-lg">
             <i class="bi bi-envelope-fill"></i> Contacter le Support
         </a>
@@ -434,12 +182,187 @@
 </div>
 
 <style>
-/* Programme Access Styles */
-.programme-access-header {
-    padding: 2rem 0;
-    border-bottom: 3px solid var(--red);
+/* Programme Header avec gradient */
+.programme-header {
+    background: linear-gradient(135deg, #ED2F2F, #B71C1C);
+    padding: 3rem 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(237, 47, 47, 0.3);
+    margin-bottom: 2rem;
 }
 
+.badge-custom {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Progress Circle */
+.progress-circle-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.progress-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: conic-gradient(
+        #4CAF50 0%,
+        #4CAF50 calc(var(--percentage) * 1%),
+        rgba(255, 255, 255, 0.2) calc(var(--percentage) * 1%),
+        rgba(255, 255, 255, 0.2) 100%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.progress-circle::before {
+    content: '';
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ED2F2F, #B71C1C);
+}
+
+.progress-circle-inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+}
+
+.progress-number {
+    font-size: 2rem;
+    font-weight: 900;
+}
+
+.progress-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Séances */
+.seance-item {
+    border-bottom: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.seance-item:last-child {
+    border-bottom: none;
+}
+
+.seance-item.completed {
+    background: #f1f8f4;
+}
+
+.seance-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.seance-header:hover {
+    background: #f8f9fa;
+}
+
+.seance-main-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.seance-checkbox .form-check-input {
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
+    border: 2px solid #ccc;
+}
+
+.seance-checkbox .form-check-input:checked {
+    background-color: #4CAF50;
+    border-color: #4CAF50;
+}
+
+.seance-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #212529;
+}
+
+.seance-item.completed .seance-title {
+    color: #4CAF50;
+    text-decoration: line-through;
+    opacity: 0.8;
+}
+
+.seance-toggle {
+    padding: 0.5rem;
+    color: #6c757d;
+    transition: transform 0.3s ease;
+}
+
+.seance-toggle i {
+    font-size: 1.5rem;
+}
+
+.seance-item.open .seance-toggle {
+    transform: rotate(180deg);
+}
+
+.seance-details {
+    border-top: 1px solid #e9ecef;
+}
+
+.seance-content {
+    padding: 2rem 1.5rem;
+    background: #f8f9fa;
+}
+
+.exercices-pre {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    border-left: 4px solid #ED2F2F;
+    margin: 0;
+}
+
+.notes-box {
+    background: #fff3cd;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid #FFC107;
+    height: 100%;
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #ED2F2F, #ff5252);
+}
+
+/* Programme content styling */
 .programme-content {
     line-height: 1.8;
     font-size: 1.05rem;
@@ -447,17 +370,11 @@
 
 .programme-content h1,
 .programme-content h2,
-.programme-content h3,
-.programme-content h4 {
+.programme-content h3 {
     margin-top: 2rem;
     margin-bottom: 1rem;
-    color: var(--black);
+    color: #212529;
 }
-
-.programme-content h1 { font-size: 2rem; font-weight: 700; }
-.programme-content h2 { font-size: 1.75rem; font-weight: 700; }
-.programme-content h3 { font-size: 1.5rem; font-weight: 600; }
-.programme-content h4 { font-size: 1.25rem; font-weight: 600; }
 
 .programme-content ul,
 .programme-content ol {
@@ -465,40 +382,92 @@
     padding-left: 2rem;
 }
 
-.programme-content li {
-    margin-bottom: 0.5rem;
-}
-
-.programme-content p {
-    margin-bottom: 1rem;
-}
-
 .programme-content strong {
-    color: var(--red);
+    color: #ED2F2F;
     font-weight: 600;
 }
 
-.nav-tabs .nav-link {
-    color: var(--black);
-    font-weight: 600;
-    border: none;
-    border-bottom: 3px solid transparent;
-    padding: 1rem 1.5rem;
-}
+/* Responsive */
+@media (max-width: 768px) {
+    .programme-header {
+        padding: 2rem 1rem;
+    }
 
-.nav-tabs .nav-link:hover {
-    color: var(--red);
-    border-bottom-color: var(--red);
-}
+    .seance-main-info {
+        flex-wrap: wrap;
+    }
 
-.nav-tabs .nav-link.active {
-    color: var(--red);
-    background: transparent;
-    border-bottom-color: var(--red);
-}
+    .progress-circle {
+        width: 120px;
+        height: 120px;
+    }
 
-.table-hover tbody tr:hover {
-    background-color: rgba(237, 47, 47, 0.1);
+    .progress-circle::before {
+        width: 95px;
+        height: 95px;
+    }
+
+    .progress-number {
+        font-size: 1.5rem;
+    }
 }
 </style>
+
+<script>
+// Set progress circle percentage
+document.addEventListener('DOMContentLoaded', function() {
+    const progressCircle = document.querySelector('.progress-circle');
+    if (progressCircle) {
+        const percentage = progressCircle.getAttribute('data-percentage');
+        progressCircle.style.setProperty('--percentage', percentage);
+    }
+});
+
+// Toggle séance details
+function toggleSeanceDetails(seanceId) {
+    const seanceItem = document.getElementById('seance-' + seanceId);
+    const details = document.getElementById('details-' + seanceId);
+
+    if (details.style.display === 'none') {
+        details.style.display = 'block';
+        seanceItem.classList.add('open');
+    } else {
+        details.style.display = 'none';
+        seanceItem.classList.remove('open');
+    }
+}
+
+// Toggle séance completion
+function toggleSeanceCompletion(programmeId, seanceId, checkbox) {
+    const seanceItem = document.getElementById('seance-' + seanceId);
+
+    fetch(`/programme/${programmeId}/seance/${seanceId}/toggle`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.completed) {
+                seanceItem.classList.add('completed');
+                checkbox.checked = true;
+            } else {
+                seanceItem.classList.remove('completed');
+                checkbox.checked = false;
+            }
+            // Reload page to update progress
+            setTimeout(() => location.reload(), 500);
+        } else {
+            console.error('Error toggling completion:', data.message);
+            checkbox.checked = !checkbox.checked;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        checkbox.checked = !checkbox.checked;
+    });
+}
+</script>
 {% endblock %}

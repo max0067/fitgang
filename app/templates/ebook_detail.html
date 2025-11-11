@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ebook.titre }} - FitGang{% endblock %}
+
+{% block content %}
+<!-- Ebook Hero Section -->
+<section class="ebook-hero">
+    <div class="ebook-hero-overlay"></div>
+    {% if ebook.image %}
+    <div class="ebook-hero-bg" style="background-image: url('{{ ebook.image }}');"></div>
+    {% else %}
+    <div class="ebook-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1526243741027-444d633d7365?w=1920&q=85');"></div>
+    {% endif %}
+    <div class="ebook-hero-content">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="ebook-hero-badge">E-BOOK FITNESS</div>
+                    <h1 class="ebook-hero-title">{{ ebook.titre }}</h1>
+                    <p class="ebook-hero-subtitle">{{ ebook.description }}</p>
+                    <div class="ebook-hero-meta">
+                        {% if ebook.nombre_pages %}
+                        <div class="meta-item">
+                            <i class="bi bi-file-earmark-text-fill"></i>
+                            <span>{{ ebook.nombre_pages }} pages</span>
+                        </div>
+                        {% endif %}
+                        <div class="meta-item">
+                            <i class="bi bi-file-pdf-fill"></i>
+                            <span>Format PDF</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-download"></i>
+                            <span>Téléchargeable</span>
+                        </div>
+                    </div>
+                    <div class="ebook-hero-price">
+                        <span class="price-amount">{{ ebook.prix }}€</span>
+                        <span class="price-label">Accès à vie</span>
+                    </div>
+                    <div class="ebook-hero-cta">
+                        {% if has_purchased %}
+                            <a href="{{ url_for('main.download_ebook', id=ebook.id) }}" class="btn btn-hero-success">
+                                <i class="bi bi-download me-2"></i>
+                                Télécharger l'Ebook
+                            </a>
+                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-light ms-2">
+                                <i class="bi bi-speedometer2 me-2"></i>
+                                Mon Dashboard
+                            </a>
+                        {% elif current_user.is_authenticated %}
+                            <a href="{{ url_for('main.checkout', item_type='ebook', item_id=ebook.id) }}" class="btn btn-hero-buy">
+                                <i class="bi bi-cart-fill me-2"></i>
+                                Acheter Maintenant
+                            </a>
+                            <p class="cta-guarantee">
+                                <i class="bi bi-shield-check"></i>
+                                Satisfait ou remboursé 30 jours
+                            </p>
+                        {% else %}
+                            <a href="{{ url_for('main.login') }}" class="btn btn-hero-buy">
+                                <i class="bi bi-lock-fill me-2"></i>
+                                Se connecter pour acheter
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- What's Inside Section -->
+<section class="ebook-content-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="section-title-center">CONTENU DE L'EBOOK</h2>
+                <div class="content-grid">
+                    <div class="content-item">
+                        <div class="content-icon">
+                            <i class="bi bi-journal-text"></i>
+                        </div>
+                        <h3>Connaissances Approfondies</h3>
+                        <p>Tout ce que tu dois savoir expliqué de manière simple et applicable immédiatement</p>
+                    </div>
+                    <div class="content-item">
+                        <div class="content-icon">
+                            <i class="bi bi-list-check"></i>
+                        </div>
+                        <h3>Guides Pratiques</h3>
+                        <p>Des étapes concrètes et des plans d'action pour appliquer directement</p>
+                    </div>
+                    <div class="content-item">
+                        <div class="content-icon">
+                            <i class="bi bi-lightbulb"></i>
+                        </div>
+                        <h3>Astuces & Conseils</h3>
+                        <p>Les secrets et techniques que seuls les experts connaissent</p>
+                    </div>
+                    <div class="content-item">
+                        <div class="content-icon">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <h3>Résultats Mesurables</h3>
+                        <p>Des méthodes prouvées qui garantissent des résultats concrets</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="benefits-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=600&fit=crop"
+                     alt="Ebook Benefits" class="img-fluid rounded-3 shadow-lg">
+            </div>
+            <div class="col-lg-6">
+                <h2 class="section-title-left">POURQUOI CET EBOOK?</h2>
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Information de Qualité</h4>
+                            <p>Contenu rédigé par des experts avec des années d'expérience</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Application Immédiate</h4>
+                            <p>Conçu pour être mis en pratique dès aujourd'hui</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Format Pratique</h4>
+                            <p>PDF lisible sur tous les appareils - ordi, tablette, mobile</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Mises à Jour Gratuites</h4>
+                            <p>Reçois toutes les futures versions améliorées sans frais supplémentaires</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="section-title-center">QUESTIONS FRÉQUENTES</h2>
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                Comment vais-je recevoir l'ebook?
+                            </button>
+                        </h3>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Après l'achat, tu pourras télécharger l'ebook directement depuis ton dashboard.
+                                Tu recevras également un email de confirmation avec un lien de téléchargement.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                Sur quels appareils puis-je lire l'ebook?
+                            </button>
+                        </h3>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                L'ebook est au format PDF, compatible avec tous les appareils:
+                                ordinateur (Windows, Mac, Linux), tablette (iPad, Android), smartphone.
+                                Tu peux le consulter à tout moment, même hors ligne.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                L'ebook est-il adapté aux débutants?
+                            </button>
+                        </h3>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Oui! L'ebook est conçu pour être accessible à tous les niveaux.
+                                Les concepts sont expliqués clairement avec des exemples concrets.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                Y a-t-il une garantie de remboursement?
+                            </button>
+                        </h3>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Oui! Nous offrons une garantie satisfait ou remboursé de 30 jours.
+                                Si l'ebook ne répond pas à tes attentes, contacte-nous pour un remboursement complet.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA Section -->
+<section class="ebook-final-cta">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="final-cta-title">
+                    PRÊT À TRANSFORMER<br>
+                    <span class="text-danger">TES CONNAISSANCES?</span>
+                </h2>
+                <p class="final-cta-subtitle">
+                    Rejoins les centaines de personnes qui ont déjà amélioré leurs résultats grâce à cet ebook
+                </p>
+                <div class="final-cta-price">
+                    <span class="price-big">{{ ebook.prix }}€</span>
+                    <span class="price-info">Accès à vie • Téléchargement immédiat</span>
+                </div>
+                {% if has_purchased %}
+                    <a href="{{ url_for('main.download_ebook', id=ebook.id) }}" class="btn btn-final-cta-success">
+                        <i class="bi bi-download me-2"></i>
+                        Télécharger Mon Ebook
+                    </a>
+                {% elif current_user.is_authenticated %}
+                    <a href="{{ url_for('main.checkout', item_type='ebook', item_id=ebook.id) }}" class="btn btn-final-cta">
+                        <i class="bi bi-lightning-charge-fill me-2"></i>
+                        Acheter Maintenant
+                    </a>
+                    <p class="final-cta-guarantee">
+                        <i class="bi bi-shield-check"></i>
+                        Paiement 100% sécurisé • Satisfait ou remboursé 30 jours
+                    </p>
+                {% else %}
+                    <a href="{{ url_for('main.login') }}" class="btn btn-final-cta">
+                        <i class="bi bi-lock-fill me-2"></i>
+                        Se connecter pour acheter
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Badges -->
+<section class="trust-section">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 col-6 mb-3">
+                <div class="trust-badge">
+                    <i class="bi bi-shield-check"></i>
+                    <p>Paiement<br>Sécurisé</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="trust-badge">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <p>Remboursement<br>30 jours</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="trust-badge">
+                    <i class="bi bi-download"></i>
+                    <p>Téléchargement<br>Instantané</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="trust-badge">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <p>Mises à jour<br>Gratuites</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+/* Ebook Hero Section */
+.ebook-hero {
+    position: relative;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    margin-bottom: 4rem;
+}
+
+.ebook-hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(237, 47, 47, 0.9), rgba(0, 0, 0, 0.8));
+    z-index: 1;
+}
+
+.ebook-hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.4);
+}
+
+.ebook-hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.ebook-hero-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 8px 24px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 1.5rem;
+}
+
+.ebook-hero-title {
+    color: white;
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    line-height: 1.2;
+}
+
+.ebook-hero-subtitle {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Other sections use same styles as programme_detail.html */
+</style>
+{% endblock %}

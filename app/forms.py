@@ -102,3 +102,13 @@ class EbookForm(FlaskForm):
     nombre_pages = IntegerField('Nombre de pages', validators=[Optional(), NumberRange(min=1, max=9999)])
     actif = BooleanField('Ebook actif')
     submit = SubmitField('Enregistrer')
+
+
+class SeanceForm(FlaskForm):
+    """Formulaire de création/modification de séance de programme"""
+    semaine = IntegerField('Semaine', validators=[DataRequired(), NumberRange(min=1, max=52)])
+    jour = IntegerField('Jour', validators=[DataRequired(), NumberRange(min=1, max=7)])
+    titre = StringField('Titre de la séance', validators=[DataRequired(), Length(max=200)])
+    exercices = TextAreaField('Exercices détaillés', validators=[DataRequired(), Length(max=5000)])
+    notes = TextAreaField('Instructions/Notes', validators=[Optional(), Length(max=2000)])
+    submit = SubmitField('Enregistrer')

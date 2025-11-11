@@ -171,3 +171,50 @@ class Photo(db.Model):
 
     def __repr__(self):
         return f'<Photo {self.type} User #{self.user_id}>'
+
+
+class ProgrammeSeance(db.Model):
+    """
+    Modèle séance de programme
+    Représente une séance d'entraînement dans un programme structuré
+    """
+    __tablename__ = 'programme_seances'
+
+    id = db.Column(db.Integer, primary_key=True)
+    programme_id = db.Column(db.Integer, db.ForeignKey('programmes.id'), nullable=False)
+    semaine = db.Column(db.Integer, nullable=False)  # Numéro de semaine (1, 2, 3...)
+    jour = db.Column(db.Integer, nullable=False)  # Jour dans la semaine (1-7)
+    titre = db.Column(db.String(200), nullable=False)  # Ex: "Push - Pectoraux / Épaules"
+    exercices = db.Column(db.Text, nullable=False)  # Liste détaillée des exercices
+    notes = db.Column(db.Text)  # Instructions ou notes pour la séance
+    ordre = db.Column(db.Integer, default=0)  # Pour l'ordre d'affichage
+    date_creation = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relation
+    programme = db.relationship('Programme', backref=db.backref('seances', lazy='dynamic', cascade='all, delete-orphan'))
+
+    def __repr__(self):
+        return f'<ProgrammeSeance {self.titre} - Semaine {self.semaine}>'
+
+
+class ProgrammeProgression(db.Model):
+    """
+    Modèle progression dans un programme
+    Suit les séances complétées par les utilisateurs dans leurs programmes achetés
+    """
+    __tablename__ = 'programme_progressions'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    programme_seance_id = db.Column(db.Integer, db.ForeignKey('programme_seances.id'), nullable=False)
+    completed = db.Column(db.Boolean, default=True)
+    date_completed = db.Column(db.DateTime, default=datetime.utcnow)
+    poids = db.Column(db.Float)  # Poids du jour (optionnel)
+    notes_perso = db.Column(db.Text)  # Notes personnelles de l'utilisateur sur cette séance
+
+    # Relations
+    utilisateur = db.relationship('User', backref=db.backref('programme_progressions', lazy='dynamic'))
+    seance = db.relationship('ProgrammeSeance', backref=db.backref('progressions', lazy='dynamic'))
+
+    def __repr__(self):
+        return f'<ProgrammeProgression User #{self.user_id} - Seance #{self.programme_seance_id}>'

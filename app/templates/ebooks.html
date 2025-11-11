@@ -57,13 +57,13 @@
                                 </button>
                             {% endif %}
                         {% else %}
-                            <a href="{{ url_for('main.checkout', item_type='ebook', item_id=ebook.id) }}" class="btn btn-danger w-100">
-                                <i class="bi bi-cart-plus"></i> Acheter
+                            <a href="{{ url_for('main.ebook_detail', id=ebook.id) }}" class="btn btn-danger w-100">
+                                <i class="bi bi-eye"></i> Voir Détails
                             </a>
                         {% endif %}
                     {% else %}
-                        <a href="{{ url_for('main.login') }}" class="btn btn-danger w-100">
-                            <i class="bi bi-cart-plus"></i> Acheter
+                        <a href="{{ url_for('main.ebook_detail', id=ebook.id) }}" class="btn btn-danger w-100">
+                            <i class="bi bi-eye"></i> Voir Détails
                         </a>
                     {% endif %}
                 </div>

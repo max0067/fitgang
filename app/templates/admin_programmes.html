@@ -45,11 +45,14 @@
                             <td>{{ programme.date_creation.strftime('%d/%m/%Y') }}</td>
                             <td>
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{{ url_for('main.admin_edit_programme', id=programme.id) }}" class="btn btn-warning">
+                                    <a href="{{ url_for('main.admin_programme_seances', id=programme.id) }}" class="btn btn-info" title="Gérer les séances">
+                                        <i class="bi bi-list-check"></i>
+                                    </a>
+                                    <a href="{{ url_for('main.admin_edit_programme', id=programme.id) }}" class="btn btn-warning" title="Modifier">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     <form method="POST" action="{{ url_for('main.admin_delete_programme', id=programme.id) }}" style="display:inline;">
-                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Supprimer ce programme?')">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Supprimer ce programme?')" title="Supprimer">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>

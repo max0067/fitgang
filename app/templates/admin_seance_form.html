@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - {{ programme.titre }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <h1 class="mb-4">
+                <i class="bi bi-journal-plus text-danger"></i> {{ title }}
+            </h1>
+            <h5 class="text-muted mb-4">Programme: {{ programme.titre }}</h5>
+
+            <div class="card card-custom shadow">
+                <div class="card-body p-4">
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    {{ form.semaine.label }}
+                                </label>
+                                {{ form.semaine(class="form-control form-control-lg") }}
+                                <div class="form-text">Numéro de la semaine dans le programme</div>
+                                {% if form.semaine.errors %}
+                                    {% for error in form.semaine.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    {{ form.jour.label }}
+                                </label>
+                                {{ form.jour(class="form-control form-control-lg") }}
+                                <div class="form-text">Jour dans la semaine (1=Lundi, 7=Dimanche)</div>
+                                {% if form.jour.errors %}
+                                    {% for error in form.jour.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                {{ form.titre.label }}
+                            </label>
+                            {{ form.titre(class="form-control form-control-lg", placeholder="Ex: Push - Pectoraux / Épaules / Triceps") }}
+                            {% if form.titre.errors %}
+                                {% for error in form.titre.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                {{ form.exercices.label }}
+                            </label>
+                            {{ form.exercices(class="form-control", rows="12", placeholder="Ex:\nDéveloppé couché: 4 x 10 reps @ 80kg\nDéveloppé incliné: 3 x 12 reps @ 60kg\nÉcartés poulie: 3 x 15 reps @ 15kg\nDips: 3 x échec\n\nDéveloppé épaules: 4 x 10 reps @ 50kg\nÉlévations latérales: 3 x 15 reps @ 12kg\n\nExtensions triceps: 3 x 12 reps @ 30kg\nPushdowns corde: 3 x 15 reps @ 25kg") }}
+                            <div class="form-text">
+                                <i class="bi bi-lightbulb"></i>
+                                Liste détaillée des exercices avec séries, répétitions et poids recommandés
+                            </div>
+                            {% if form.exercices.errors %}
+                                {% for error in form.exercices.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                {{ form.notes.label }}
+                            </label>
+                            {{ form.notes(class="form-control", rows="4", placeholder="Ex: Échauffement de 10 minutes obligatoire. Focus sur la technique plutôt que les charges lourdes. Temps de repos: 90 secondes entre les séries.") }}
+                            <div class="form-text">Instructions ou conseils pour cette séance (optionnel)</div>
+                            {% if form.notes.errors %}
+                                {% for error in form.notes.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-danger btn-lg") }}
+                            <a href="{{ url_for('main.admin_programme_seances', id=programme.id) }}"
+                               class="btn btn-outline-secondary btn-lg">
+                                Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
