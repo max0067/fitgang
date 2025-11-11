@@ -14,7 +14,7 @@ from functools import wraps
 from app import db
 from app.models import User, Programme, Ebook, Achat, Progression, Photo, ProgrammeSeance, ProgrammeProgression, Complement, Newsletter, PageContent, EmailCampaign
 from app.forms import (LoginForm, RegistrationForm, ProfileForm, ChangePasswordForm,
-                       ProgressionForm, ProgrammeForm, EbookForm, SeanceForm, ComplementForm, HomepageContentForm, EmailCampaignForm, EmailImportForm)
+                       ProgressionForm, ProgrammeForm, EbookForm, SeanceForm, ComplementForm, HomepageContentForm, HomepageProgrammesForm, EmailCampaignForm, EmailImportForm)
 from app.email import send_welcome_email, send_purchase_confirmation_email, send_admin_notification_email
 from app.email_bulk import send_test_email, send_bulk_emails, preview_campaign_recipients, get_campaign_stats
 
@@ -1042,12 +1042,13 @@ def admin_homepage_content():
         form.cta_texte.data = content.contenu if content else ''
 
     return render_template('admin_homepage_content.html', form=form)
+
+
 @bp.route('/admin/homepage-programmes', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def admin_homepage_programmes():
     """Gestion de la section programmes de la page d'accueil"""
-    from app.forms import HomepageProgrammesForm
     form = HomepageProgrammesForm()
 
     if form.validate_on_submit():
