@@ -138,6 +138,27 @@ def programme_detail(id):
     return render_template('programme_detail.html', programme=programme, has_purchased=has_purchased)
 
 
+@bp.route('/programme/<int:id>/access')
+@login_required
+def programme_access(id):
+    """Page d'accès au contenu complet d'un programme acheté"""
+    programme = Programme.query.get_or_404(id)
+
+    # Vérifier que l'utilisateur a acheté ce programme
+    if not current_user.has_purchased(id, 'programme'):
+        flash('Vous devez acheter ce programme pour y accéder.', 'warning')
+        return redirect(url_for('main.programme_detail', id=id))
+
+    # Récupérer l'achat pour obtenir la date
+    achat = Achat.query.filter_by(
+        user_id=current_user.id,
+        item_id=id,
+        type='programme'
+    ).first()
+
+    return render_template('programme_access.html', programme=programme, achat=achat)
+
+
 @bp.route('/ebooks')
 def ebooks():
     """Page listant tous les ebooks"""
@@ -369,14 +390,68 @@ def checkout_cancel():
 @admin_required
 def admin_dashboard():
     """Dashboard administrateur"""
-    # Statistiques
+    from datetime import timedelta
+    from sqlalchemy import func
+
+    # Statistiques générales
     nb_users = User.query.count()
     nb_programmes = Programme.query.count()
     nb_ebooks = Ebook.query.count()
     nb_achats = Achat.query.count()
 
     # Revenus totaux
-    revenus = db.session.query(db.func.sum(Achat.prix_paye)).scalar() or 0
+    revenus_total = db.session.query(db.func.sum(Achat.prix_paye)).scalar() or 0
+
+    # Date actuelle
+    now = datetime.utcnow()
+    today_start = datetime(now.year, now.month, now.day)
+    week_start = now - timedelta(days=7)
+    month_start = datetime(now.year, now.month, 1)
+
+    # Revenus par période
+    revenus_today = db.session.query(db.func.sum(Achat.prix_paye))\
+        .filter(Achat.date_achat >= today_start).scalar() or 0
+    revenus_week = db.session.query(db.func.sum(Achat.prix_paye))\
+        .filter(Achat.date_achat >= week_start).scalar() or 0
+    revenus_month = db.session.query(db.func.sum(Achat.prix_paye))\
+        .filter(Achat.date_achat >= month_start).scalar() or 0
+
+    # Nouveaux utilisateurs par période
+    new_users_today = User.query.filter(User.date_inscription >= today_start).count()
+    new_users_week = User.query.filter(User.date_inscription >= week_start).count()
+    new_users_month = User.query.filter(User.date_inscription >= month_start).count()
+
+    # Achats par période
+    achats_today = Achat.query.filter(Achat.date_achat >= today_start).count()
+    achats_week = Achat.query.filter(Achat.date_achat >= week_start).count()
+    achats_month = Achat.query.filter(Achat.date_achat >= month_start).count()
+
+    # Programmes les plus vendus
+    top_programmes = db.session.query(
+        Programme.titre,
+        Programme.prix,
+        func.count(Achat.id).label('ventes')
+    ).join(Achat, (Achat.item_id == Programme.id) & (Achat.type == 'programme'))\
+     .group_by(Programme.id)\
+     .order_by(func.count(Achat.id).desc())\
+     .limit(5).all()
+
+    # Ebooks les plus vendus
+    top_ebooks = db.session.query(
+        Ebook.titre,
+        Ebook.prix,
+        func.count(Achat.id).label('ventes')
+    ).join(Achat, (Achat.item_id == Ebook.id) & (Achat.type == 'ebook'))\
+     .group_by(Ebook.id)\
+     .order_by(func.count(Achat.id).desc())\
+     .limit(5).all()
+
+    # Taux de conversion (utilisateurs qui ont acheté au moins 1 fois)
+    users_with_purchase = db.session.query(Achat.user_id).distinct().count()
+    conversion_rate = (users_with_purchase / nb_users * 100) if nb_users > 0 else 0
+
+    # Valeur moyenne par client
+    average_order_value = (revenus_total / nb_achats) if nb_achats > 0 else 0
 
     # Achats récents
     achats_recents = Achat.query.order_by(Achat.date_achat.desc()).limit(10).all()
@@ -386,7 +461,20 @@ def admin_dashboard():
                          nb_programmes=nb_programmes,
                          nb_ebooks=nb_ebooks,
                          nb_achats=nb_achats,
-                         revenus=revenus,
+                         revenus_total=revenus_total,
+                         revenus_today=revenus_today,
+                         revenus_week=revenus_week,
+                         revenus_month=revenus_month,
+                         new_users_today=new_users_today,
+                         new_users_week=new_users_week,
+                         new_users_month=new_users_month,
+                         achats_today=achats_today,
+                         achats_week=achats_week,
+                         achats_month=achats_month,
+                         top_programmes=top_programmes,
+                         top_ebooks=top_ebooks,
+                         conversion_rate=conversion_rate,
+                         average_order_value=average_order_value,
                          achats_recents=achats_recents)
 
 
@@ -578,3 +666,98 @@ def admin_delete_ebook(id):
 
     flash('Ebook supprimé.', 'info')
     return redirect(url_for('main.admin_ebooks'))
+
+
+@bp.route('/admin/users')
+@login_required
+@admin_required
+def admin_users():
+    """Liste des utilisateurs (admin)"""
+    all_users = User.query.order_by(User.date_inscription.desc()).all()
+
+    # Calculer des stats pour chaque utilisateur
+    users_data = []
+    for user in all_users:
+        nb_achats = Achat.query.filter_by(user_id=user.id).count()
+        total_depense = db.session.query(db.func.sum(Achat.prix_paye))\
+            .filter_by(user_id=user.id).scalar() or 0
+
+        users_data.append({
+            'user': user,
+            'nb_achats': nb_achats,
+            'total_depense': total_depense
+        })
+
+    return render_template('admin_users.html', users_data=users_data)
+
+
+@bp.route('/admin/user/<int:id>')
+@login_required
+@admin_required
+def admin_user_detail(id):
+    """Détail d'un utilisateur (admin)"""
+    user = User.query.get_or_404(id)
+
+    # Récupérer tous les achats de l'utilisateur
+    achats = Achat.query.filter_by(user_id=user.id)\
+        .order_by(Achat.date_achat.desc()).all()
+
+    # Récupérer les progressions
+    progressions = Progression.query.filter_by(user_id=user.id)\
+        .order_by(Progression.date.desc()).limit(10).all()
+
+    # Stats
+    total_depense = db.session.query(db.func.sum(Achat.prix_paye))\
+        .filter_by(user_id=user.id).scalar() or 0
+    nb_progressions = Progression.query.filter_by(user_id=user.id).count()
+
+    return render_template('admin_user_detail.html',
+                         user=user,
+                         achats=achats,
+                         progressions=progressions,
+                         total_depense=total_depense,
+                         nb_progressions=nb_progressions)
+
+
+@bp.route('/admin/user/<int:id>/toggle-admin', methods=['POST'])
+@login_required
+@admin_required
+def admin_toggle_admin(id):
+    """Basculer le statut admin d'un utilisateur"""
+    user = User.query.get_or_404(id)
+
+    # Empêcher de se retirer soi-même les droits admin
+    if user.id == current_user.id:
+        flash('Vous ne pouvez pas modifier vos propres droits administrateur.', 'warning')
+        return redirect(url_for('main.admin_user_detail', id=id))
+
+    user.is_admin = not user.is_admin
+    db.session.commit()
+
+    status = "administrateur" if user.is_admin else "utilisateur normal"
+    flash(f'{user.prenom} {user.nom} est maintenant {status}.', 'success')
+
+    return redirect(url_for('main.admin_user_detail', id=id))
+
+
+@bp.route('/admin/user/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_delete_user(id):
+    """Supprimer un utilisateur"""
+    user = User.query.get_or_404(id)
+
+    # Empêcher de se supprimer soi-même
+    if user.id == current_user.id:
+        flash('Vous ne pouvez pas supprimer votre propre compte.', 'danger')
+        return redirect(url_for('main.admin_users'))
+
+    # Supprimer d'abord les achats et progressions associés
+    Achat.query.filter_by(user_id=user.id).delete()
+    Progression.query.filter_by(user_id=user.id).delete()
+
+    db.session.delete(user)
+    db.session.commit()
+
+    flash(f'L\'utilisateur {user.prenom} {user.nom} a été supprimé.', 'info')
+    return redirect(url_for('main.admin_users'))

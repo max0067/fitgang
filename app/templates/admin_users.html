@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Gestion Utilisateurs - Admin - FitGang{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="bi bi-people-fill text-primary"></i> Gestion des Utilisateurs
+    </h1>
+    <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Retour Dashboard
+    </a>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card card-custom text-center">
+            <div class="card-body">
+                <i class="bi bi-people text-primary" style="font-size: 3rem;"></i>
+                <h3 class="mt-3">{{ users_data|length }}</h3>
+                <p class="text-muted mb-0">Total Utilisateurs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-custom text-center">
+            <div class="card-body">
+                <i class="bi bi-shield-check text-warning" style="font-size: 3rem;"></i>
+                <h3 class="mt-3">{{ users_data|selectattr('user.is_admin')|list|length }}</h3>
+                <p class="text-muted mb-0">Administrateurs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-custom text-center">
+            <div class="card-body">
+                <i class="bi bi-cart-check text-success" style="font-size: 3rem;"></i>
+                <h3 class="mt-3">{{ users_data|selectattr('nb_achats', 'gt', 0)|list|length }}</h3>
+                <p class="text-muted mb-0">Clients Actifs</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Bar -->
+<div class="card card-custom mb-4">
+    <div class="card-body">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text" class="form-control" id="searchInput" placeholder="Rechercher un utilisateur par nom, prénom ou email...">
+        </div>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card card-custom">
+    <div class="card-body">
+        <h5 class="card-title mb-3">
+            <i class="bi bi-list-ul"></i> Liste des Utilisateurs
+        </h5>
+
+        {% if users_data %}
+            <div class="table-responsive">
+                <table class="table table-hover" id="usersTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th width="5%">ID</th>
+                            <th width="20%">Nom Complet</th>
+                            <th width="20%">Email</th>
+                            <th width="12%">Date Inscription</th>
+                            <th width="8%" class="text-center">Achats</th>
+                            <th width="10%" class="text-end">Dépensé</th>
+                            <th width="10%" class="text-center">Rôle</th>
+                            <th width="15%" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in users_data %}
+                        <tr>
+                            <td>{{ data.user.id }}</td>
+                            <td>
+                                <strong>{{ data.user.prenom }} {{ data.user.nom }}</strong>
+                            </td>
+                            <td>
+                                <a href="mailto:{{ data.user.email }}" class="text-decoration-none">
+                                    {{ data.user.email }}
+                                </a>
+                            </td>
+                            <td>{{ data.user.date_inscription.strftime('%d/%m/%Y') }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-primary">{{ data.nb_achats }}</span>
+                            </td>
+                            <td class="text-end">
+                                <strong class="text-success">{{ "%.2f"|format(data.total_depense) }}€</strong>
+                            </td>
+                            <td class="text-center">
+                                {% if data.user.is_admin %}
+                                    <span class="badge bg-warning">
+                                        <i class="bi bi-shield-fill"></i> Admin
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">User</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ url_for('main.admin_user_detail', id=data.user.id) }}"
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Voir détails">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                {% if data.user.id != current_user.id %}
+                                    <form method="POST"
+                                          action="{{ url_for('main.admin_delete_user', id=data.user.id) }}"
+                                          style="display:inline;">
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Supprimer {{ data.user.prenom }} {{ data.user.nom }}? Cette action est irréversible.')"
+                                                title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info mb-0">
+                <i class="bi bi-info-circle"></i> Aucun utilisateur inscrit.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Simple client-side search
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    const searchValue = this.value.toLowerCase();
+    const table = document.getElementById('usersTable');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+    for (let i = 0; i < rows.length; i++) {
+        const rowText = rows[i].textContent.toLowerCase();
+        if (rowText.includes(searchValue)) {
+            rows[i].style.display = '';
+        } else {
+            rows[i].style.display = 'none';
+        }
+    }
+});
+</script>
+{% endblock %}

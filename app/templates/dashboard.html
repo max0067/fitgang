@@ -62,9 +62,12 @@
                         <span class="badge bg-danger mb-2">{{ programme.niveau }}</span>
                         <h5 class="card-title">{{ programme.titre }}</h5>
                         <p class="card-text">{{ programme.description }}</p>
-                        <p class="text-muted small">
+                        <p class="text-muted small mb-3">
                             <i class="bi bi-clock"></i> {{ programme.duree }}
                         </p>
+                        <a href="{{ url_for('main.programme_access', id=programme.id) }}" class="btn btn-danger w-100">
+                            <i class="bi bi-play-circle-fill"></i> ACCÉDER AU PROGRAMME
+                        </a>
                     </div>
                 </div>
             </div>
