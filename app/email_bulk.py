@@ -42,12 +42,14 @@ def send_bulk_emails(campaign_id, batch_size=50, delay_between_batches=5):
     campaign.statut = 'en_cours'
     campaign.date_envoi = datetime.utcnow()
     db.session.commit()
+    print(f"[CAMPAGNE] Début de l'envoi de la campagne #{campaign_id}: {campaign.nom}")
 
     # Récupérer tous les emails actifs de la newsletter
     all_subscribers = Newsletter.query.filter_by(actif=True).all()
     total_emails = len(all_subscribers)
     campaign.emails_total = total_emails
     db.session.commit()
+    print(f"[CAMPAGNE] {total_emails} destinataires trouvés")
 
     sent_count = 0
     error_count = 0
@@ -59,9 +61,11 @@ def send_bulk_emails(campaign_id, batch_size=50, delay_between_batches=5):
         # Envoyer par batch
         for i in range(0, total_emails, batch_size):
             batch = all_subscribers[i:i + batch_size]
+            print(f"[CAMPAGNE] Envoi du batch {i//batch_size + 1} ({len(batch)} emails)")
 
             for subscriber in batch:
                 try:
+                    print(f"[CAMPAGNE] Envoi à {subscriber.email}...")
                     success = send_email(
                         campaign.sujet,
                         subscriber.email,
@@ -71,11 +75,15 @@ def send_bulk_emails(campaign_id, batch_size=50, delay_between_batches=5):
 
                     if success:
                         sent_count += 1
+                        print(f"[CAMPAGNE] ✓ Envoyé à {subscriber.email} ({sent_count}/{total_emails})")
                     else:
                         error_count += 1
+                        print(f"[CAMPAGNE] ✗ Échec pour {subscriber.email} ({error_count} erreurs)")
 
                 except Exception as e:
-                    print(f"Erreur lors de l'envoi à {subscriber.email}: {e}")
+                    print(f"[CAMPAGNE] ✗ EXCEPTION lors de l'envoi à {subscriber.email}: {e}")
+                    import traceback
+                    traceback.print_exc()
                     error_count += 1
 
                 # Mettre à jour la progression tous les 10 emails
@@ -95,12 +103,17 @@ def send_bulk_emails(campaign_id, batch_size=50, delay_between_batches=5):
         campaign.date_fin_envoi = datetime.utcnow()
         db.session.commit()
 
+        print(f"[CAMPAGNE] ✓ Envoi terminé!")
+        print(f"[CAMPAGNE] Résumé: {sent_count} envoyés, {error_count} erreurs sur {total_emails} total")
+
     except Exception as e:
         campaign.statut = 'erreur'
         campaign.emails_envoyes = sent_count
         campaign.emails_erreurs = error_count
         db.session.commit()
-        print(f"Erreur critique lors de l'envoi de la campagne: {e}")
+        print(f"[CAMPAGNE] ✗ ERREUR CRITIQUE lors de l'envoi de la campagne: {e}")
+        import traceback
+        traceback.print_exc()
 
     return {
         'sent': sent_count,
