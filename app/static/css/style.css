@@ -146,40 +146,37 @@ h3 { font-size: 1.5rem; font-weight: 600; }
 
 /* ===== HERO SECTION ===== */
 .hero-section {
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
                 url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1600') center/cover;
-    min-height: 600px;
+    min-height: 70vh;
     display: flex;
     align-items: center;
-    margin-top: 76px;
+    margin: 0;
+    padding: 0;
+    width: 100%;
     position: relative;
-    border-bottom: 5px solid var(--red);
+    margin-top: 0 !important;
 }
 
-.hero-section::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 5px;
-    background: var(--red);
-    box-shadow: 0 0 20px var(--red);
+.hero-section .container {
+    margin-top: 80px;
 }
 
 .hero-section h1 {
     color: var(--white);
     font-size: 4rem;
     font-weight: 900;
-    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+    text-shadow: 2px 2px 20px rgba(0, 0, 0, 0.5);
     margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
 }
 
 .hero-section .lead {
     font-size: 1.3rem;
-    color: var(--gray-light);
+    color: rgba(255, 255, 255, 0.95);
     font-weight: 400;
     margin-bottom: 2rem;
+    text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.5);
 }
 
 /* ===== CARDS ===== */
@@ -517,7 +514,11 @@ footer i {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .hero-section {
-        min-height: 500px;
+        min-height: 60vh;
+    }
+
+    .hero-section .container {
+        margin-top: 70px;
     }
 
     .hero-section h1 {
@@ -532,8 +533,9 @@ footer i {
         height: 250px;
     }
 
-    h1 { font-size: 2.5rem; }
-    h2 { font-size: 2rem; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.25rem; }
 }
 
 /* ===== EXTRAS ===== */
@@ -577,8 +579,21 @@ a:hover {
 
 /* ===== MAIN ===== */
 main {
-    padding-top: 3rem;
+    padding-top: 2rem;
     padding-bottom: 3rem;
+}
+
+/* Pour les pages avec hero, pas de padding top */
+body:has(.hero-section) main {
+    padding-top: 0 !important;
+}
+
+/* Flash messages sur pages avec hero */
+body:has(.hero-section) .container.mt-5.pt-5 {
+    margin-top: 1rem !important;
+    padding-top: 1rem !important;
+    position: relative;
+    z-index: 10;
 }
 
 /* ===== CARD GÉNÉRIQUE ===== */
