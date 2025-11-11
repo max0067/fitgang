@@ -39,6 +39,11 @@
                 <!-- Admin Actions -->
                 <div class="d-grid gap-2">
                     {% if user.id != current_user.id %}
+                        <!-- Grant Access Button -->
+                        <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#grantAccessModal">
+                            <i class="bi bi-gift-fill"></i> Offrir Programme/Ebook
+                        </button>
+
                         <!-- Reset Password Form -->
                         <button type="button" class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
                             <i class="bi bi-key-fill"></i> Réinitialiser Mot de Passe
@@ -265,6 +270,70 @@
     </div>
 </div>
 
+<!-- Grant Access Modal -->
+<div class="modal fade" id="grantAccessModal" tabindex="-1" aria-labelledby="grantAccessModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="grantAccessModalLabel">
+                    <i class="bi bi-gift-fill"></i> Offrir Programme/Ebook
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('main.admin_grant_access', id=user.id) }}">
+                <div class="modal-body">
+                    <div class="alert alert-success">
+                        <i class="bi bi-info-circle"></i>
+                        Offrir un accès gratuit à <strong>{{ user.prenom }} {{ user.nom }}</strong>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Type *</label>
+                        <select class="form-select" id="item_type" name="item_type" required onchange="updateItemList()">
+                            <option value="">-- Sélectionner --</option>
+                            <option value="programme">Programme</option>
+                            <option value="ebook">Ebook</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="programmeSelect" style="display: none;">
+                        <label class="form-label">Programme *</label>
+                        <select class="form-select" name="item_id_programme" id="item_id_programme">
+                            <option value="">-- Sélectionner un programme --</option>
+                            {% for prog in all_programmes %}
+                                <option value="{{ prog.id }}">{{ prog.titre }} ({{ prog.prix }}€)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="ebookSelect" style="display: none;">
+                        <label class="form-label">Ebook *</label>
+                        <select class="form-select" name="item_id_ebook" id="item_id_ebook">
+                            <option value="">-- Sélectionner un ebook --</option>
+                            {% for ebook in all_ebooks %}
+                                <option value="{{ ebook.id }}">{{ ebook.titre }} ({{ ebook.prix }}€)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="item_id" id="item_id_hidden">
+
+                    <div class="alert alert-warning small">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        L'accès sera offert <strong>gratuitement</strong> (prix = 0€). L'utilisateur aura un accès permanent.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success" onclick="setItemId()">
+                        <i class="bi bi-check-circle"></i> Offrir
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Reset Password Modal -->
 <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -312,6 +381,39 @@ function generatePassword() {
         password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     document.getElementById('new_password').value = password;
+}
+
+// Grant Access Modal functions
+function updateItemList() {
+    const itemType = document.getElementById('item_type').value;
+    const programmeSelect = document.getElementById('programmeSelect');
+    const ebookSelect = document.getElementById('ebookSelect');
+
+    if (itemType === 'programme') {
+        programmeSelect.style.display = 'block';
+        ebookSelect.style.display = 'none';
+        document.getElementById('item_id_ebook').value = '';
+    } else if (itemType === 'ebook') {
+        programmeSelect.style.display = 'none';
+        ebookSelect.style.display = 'block';
+        document.getElementById('item_id_programme').value = '';
+    } else {
+        programmeSelect.style.display = 'none';
+        ebookSelect.style.display = 'none';
+    }
+}
+
+function setItemId() {
+    const itemType = document.getElementById('item_type').value;
+    let itemId;
+
+    if (itemType === 'programme') {
+        itemId = document.getElementById('item_id_programme').value;
+    } else if (itemType === 'ebook') {
+        itemId = document.getElementById('item_id_ebook').value;
+    }
+
+    document.getElementById('item_id_hidden').value = itemId;
 }
 </script>
 {% endblock %}

@@ -711,12 +711,18 @@ def admin_user_detail(id):
         .filter_by(user_id=user.id).scalar() or 0
     nb_progressions = Progression.query.filter_by(user_id=user.id).count()
 
+    # Récupérer tous les programmes et ebooks (pour offrir)
+    all_programmes = Programme.query.filter_by(actif=True).all()
+    all_ebooks = Ebook.query.filter_by(actif=True).all()
+
     return render_template('admin_user_detail.html',
                          user=user,
                          achats=achats,
                          progressions=progressions,
                          total_depense=total_depense,
-                         nb_progressions=nb_progressions)
+                         nb_progressions=nb_progressions,
+                         all_programmes=all_programmes,
+                         all_ebooks=all_ebooks)
 
 
 @bp.route('/admin/user/<int:id>/toggle-admin', methods=['POST'])
@@ -781,6 +787,53 @@ def admin_delete_user(id):
 
     flash(f'L\'utilisateur {user.prenom} {user.nom} a été supprimé.', 'info')
     return redirect(url_for('main.admin_users'))
+
+
+@bp.route('/admin/user/<int:id>/grant-access', methods=['POST'])
+@login_required
+@admin_required
+def admin_grant_access(id):
+    """Donner accès gratuit à un programme ou ebook à un utilisateur"""
+    user = User.query.get_or_404(id)
+
+    item_type = request.form.get('item_type')  # 'programme' ou 'ebook'
+    item_id = request.form.get('item_id')
+
+    if not item_type or not item_id:
+        flash('Informations manquantes.', 'danger')
+        return redirect(url_for('main.admin_user_detail', id=id))
+
+    # Vérifier si l'utilisateur a déjà cet article
+    existing = Achat.query.filter_by(
+        user_id=user.id,
+        item_id=item_id,
+        type=item_type
+    ).first()
+
+    if existing:
+        flash('L\'utilisateur possède déjà cet article.', 'warning')
+        return redirect(url_for('main.admin_user_detail', id=id))
+
+    # Récupérer l'article
+    if item_type == 'programme':
+        item = Programme.query.get_or_404(item_id)
+    else:
+        item = Ebook.query.get_or_404(item_id)
+
+    # Créer l'achat gratuit (prix = 0)
+    achat = Achat(
+        user_id=user.id,
+        item_id=item_id,
+        type=item_type,
+        prix_paye=0.0,  # Gratuit
+        stripe_session_id=f'admin_grant_{secrets.token_hex(8)}'
+    )
+
+    db.session.add(achat)
+    db.session.commit()
+
+    flash(f'{item.titre} offert à {user.prenom} {user.nom} avec succès!', 'success')
+    return redirect(url_for('main.admin_user_detail', id=id))
 
 
 # ===== ROUTES PHOTOS =====
