@@ -669,6 +669,24 @@ def admin_dashboard():
     # Achats récents
     achats_recents = Achat.query.order_by(Achat.date_achat.desc()).limit(10).all()
 
+    # Statistiques de visiteurs / Analytics
+    try:
+        from app.analytics import get_visitor_stats
+        visitor_stats = get_visitor_stats()
+    except Exception as e:
+        print(f"Erreur chargement stats visiteurs: {e}")
+        visitor_stats = {
+            'visitors_live': 0,
+            'pageviews_live': 0,
+            'visitors_today': 0,
+            'pageviews_today': 0,
+            'visitors_yesterday': 0,
+            'visitors_week': 0,
+            'visitors_month': 0,
+            'top_pages_today': [],
+            'visitors_trend': []
+        }
+
     return render_template('admin_dashboard.html',
                          nb_users=nb_users,
                          nb_programmes=nb_programmes,
@@ -688,7 +706,8 @@ def admin_dashboard():
                          top_ebooks=top_ebooks,
                          conversion_rate=conversion_rate,
                          average_order_value=average_order_value,
-                         achats_recents=achats_recents)
+                         achats_recents=achats_recents,
+                         visitor_stats=visitor_stats)
 
 
 @bp.route('/admin/programmes')

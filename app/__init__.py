@@ -58,6 +58,17 @@ def create_app(config_name='default'):
     from app import routes
     app.register_blueprint(routes.bp)
 
+    # Tracking automatique des visites
+    @app.before_request
+    def before_request():
+        """Track chaque visite pour les analytics"""
+        try:
+            from app.analytics import track_visit
+            track_visit()
+        except Exception as e:
+            # Ne pas bloquer l'app si le tracking échoue
+            pass
+
     # Ne pas utiliser db.create_all() en production avec des migrations
     # Les tables sont gérées par Flask-Migrate (flask db upgrade)
     # with app.app_context():
