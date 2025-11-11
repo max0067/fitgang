@@ -3,183 +3,164 @@
 {% block title %}{{ campaign.nom }} - FitGang Admin{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid px-4">
+    <!-- Header avec titre et bouton retour -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>
-                <i class="bi bi-envelope text-primary"></i> {{ campaign.nom }}
-            </h1>
-            <a href="{{ url_for('main.admin_email_campaigns') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Retour
-            </a>
-        </div>
+        <h1><i class="bi bi-envelope text-primary"></i> {{ campaign.nom }}</h1>
+        <a href="{{ url_for('main.admin_email_campaigns') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
 
-        <!-- Statut de la campagne -->
-        <div class="card card-custom mb-4">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <h5 class="mb-2">Statut:
-                            {% if campaign.statut == 'brouillon' %}
-                                <span class="badge bg-secondary">Brouillon</span>
-                            {% elif campaign.statut == 'en_cours' %}
-                                <span class="badge bg-warning">En cours d'envoi...</span>
-                            {% elif campaign.statut == 'terminee' %}
-                                <span class="badge bg-success">Terminée</span>
-                            {% elif campaign.statut == 'erreur' %}
-                                <span class="badge bg-danger">Erreur</span>
-                            {% endif %}
-                        </h5>
-
-                        {% if campaign.emails_total > 0 %}
-                        <div class="progress mb-2" style="height: 25px;">
-                            <div class="progress-bar" role="progressbar"
-                                 style="width: {{ (campaign.emails_envoyes / campaign.emails_total * 100)|int }}%"
-                                 aria-valuenow="{{ campaign.emails_envoyes }}"
-                                 aria-valuemin="0"
-                                 aria-valuemax="{{ campaign.emails_total }}">
-                                {{ campaign.emails_envoyes }} / {{ campaign.emails_total }}
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        <p class="mb-0 text-muted">
-                            <i class="bi bi-people"></i> {{ total_subscribers }} destinataires actifs
-                            {% if campaign.emails_total > 0 %}
-                                | <i class="bi bi-check-circle"></i> {{ campaign.emails_envoyes }} envoyés
-                                {% if campaign.emails_erreurs > 0 %}
-                                    | <i class="bi bi-x-circle text-danger"></i> {{ campaign.emails_erreurs }} erreurs
-                                {% endif %}
-                            {% endif %}
-                        </p>
-                    </div>
-                    <div class="col-md-4 text-end">
-                        {% if campaign.statut == 'brouillon' or campaign.statut == 'erreur' %}
-                            <form method="POST" action="{{ url_for('main.admin_email_campaign_send', id=campaign.id) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir envoyer cette campagne à {{ total_subscribers }} abonnés?');">
-                                <button type="submit" class="btn btn-success btn-lg">
-                                    <i class="bi bi-send-fill"></i> Envoyer à {{ total_subscribers }} abonnés
-                                </button>
-                            </form>
+    <!-- Statut et actions principales en ligne -->
+    <div class="card card-custom mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h5 class="mb-2">Statut:
+                        {% if campaign.statut == 'brouillon' %}
+                            <span class="badge bg-secondary">Brouillon</span>
+                        {% elif campaign.statut == 'en_cours' %}
+                            <span class="badge bg-warning">En cours d'envoi...</span>
                         {% elif campaign.statut == 'terminee' %}
-                            <p class="text-success mb-0">
-                                <i class="bi bi-check-circle-fill"></i> Campagne envoyée
-                                <br><small>{{ campaign.date_fin_envoi.strftime('%d/%m/%Y à %H:%M') }}</small>
-                            </p>
+                            <span class="badge bg-success">Terminée</span>
+                        {% elif campaign.statut == 'erreur' %}
+                            <span class="badge bg-danger">Erreur</span>
                         {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Actions rapides -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <!-- Envoyer un test -->
-                <div class="card card-custom mb-4">
-                    <div class="card-header bg-warning">
-                        <h5 class="mb-0"><i class="bi bi-envelope-check"></i> Envoyer un test</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="{{ url_for('main.admin_email_campaign_test', id=campaign.id) }}">
-                            <div class="mb-3">
-                                <label class="form-label">Email de test</label>
-                                <input type="email" name="test_email" class="form-control" value="{{ current_user.email }}" required>
-                                <small class="text-muted">L'email sera envoyé à cette adresse</small>
-                            </div>
-                            <button type="submit" class="btn btn-warning w-100">
-                                <i class="bi bi-send"></i> Envoyer un test
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <!-- Aperçu des destinataires -->
-                <div class="card card-custom mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-people"></i> Aperçu destinataires</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted mb-2">{{ total_subscribers }} abonnés actifs</p>
-                        <div class="list-group list-group-flush">
-                            {% for email in preview_emails %}
-                            <div class="list-group-item px-0 py-1">
-                                <small>{{ email }}</small>
-                            </div>
-                            {% endfor %}
-                            {% if total_subscribers > preview_emails|length %}
-                            <div class="list-group-item px-0 py-1 text-muted">
-                                <small>...et {{ total_subscribers - preview_emails|length }} autres</small>
-                            </div>
+                    </h5>
+                    <p class="mb-0 text-muted">
+                        <i class="bi bi-people"></i> {{ total_subscribers }} destinataires actifs
+                        {% if campaign.emails_total > 0 %}
+                            | <i class="bi bi-check-circle"></i> {{ campaign.emails_envoyes }} envoyés
+                            {% if campaign.emails_erreurs > 0 %}
+                                | <i class="bi bi-x-circle text-danger"></i> {{ campaign.emails_erreurs }} erreurs
                             {% endif %}
-                        </div>
-                    </div>
+                        {% endif %}
+                    </p>
                 </div>
-            </div>
-
-            <div class="col-md-4">
-                <!-- Actions -->
-                <div class="card card-custom">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-gear"></i> Actions</h5>
-                    </div>
-                    <div class="card-body">
-                        {% if campaign.statut != 'en_cours' %}
-                        <form method="POST" action="{{ url_for('main.admin_email_campaign_delete', id=campaign.id) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette campagne?');">
-                            <button type="submit" class="btn btn-danger w-100">
-                                <i class="bi bi-trash"></i> Supprimer la campagne
+                <div class="col-lg-6 text-end">
+                    {% if campaign.statut == 'brouillon' or campaign.statut == 'erreur' %}
+                        <form method="POST" action="{{ url_for('main.admin_email_campaign_send', id=campaign.id) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir envoyer cette campagne à {{ total_subscribers }} abonnés?');" class="d-inline">
+                            <button type="submit" class="btn btn-success btn-lg me-2">
+                                <i class="bi bi-send-fill"></i> Envoyer à {{ total_subscribers }} abonnés
                             </button>
                         </form>
-                        {% else %}
-                        <p class="text-warning mb-0">
-                            <i class="bi bi-exclamation-triangle"></i> Campagne en cours d'envoi...
-                        </p>
+                    {% endif %}
+                    <button type="button" class="btn btn-warning btn-lg" data-bs-toggle="modal" data-bs-target="#testEmailModal">
+                        <i class="bi bi-envelope-check"></i> Test
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENU PRINCIPAL EN TRÈS LARGE -->
+    <div class="card card-custom mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="bi bi-envelope-open"></i> Sujet de l'email</h4>
+        </div>
+        <div class="card-body">
+            <h3 class="text-primary">{{ campaign.sujet }}</h3>
+        </div>
+    </div>
+
+    <!-- APERÇU DU CONTENU HTML EN TRÈS LARGE -->
+    <div class="card card-custom mb-4">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0"><i class="bi bi-code-square"></i> Aperçu du contenu HTML</h4>
+        </div>
+        <div class="card-body" style="min-height: 400px; font-size: 16px;">
+            <div style="border: 2px solid #dee2e6; padding: 30px; background: white; border-radius: 8px;">
+                {{ campaign.contenu_html|safe }}
+            </div>
+        </div>
+    </div>
+
+    {% if campaign.contenu_texte %}
+    <div class="card card-custom mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h4 class="mb-0"><i class="bi bi-file-text"></i> Version texte</h4>
+        </div>
+        <div class="card-body">
+            <pre class="bg-light p-4 rounded" style="font-size: 14px;">{{ campaign.contenu_texte }}</pre>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Actions secondaires en bas -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card card-custom">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-people"></i> Destinataires ({{ total_subscribers }})</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for email in preview_emails %}
+                        <div class="list-group-item">{{ email }}</div>
+                        {% endfor %}
+                        {% if total_subscribers > preview_emails|length %}
+                        <div class="list-group-item text-muted">
+                            ...et {{ total_subscribers - preview_emails|length }} autres
+                        </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Détails de la campagne (pleine largeur) -->
-        <div class="card card-custom mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Détails de la campagne</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <strong>Sujet:</strong>
-                    <p class="text-muted">{{ campaign.sujet }}</p>
+        <div class="col-lg-6">
+            <div class="card card-custom">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informations</h5>
                 </div>
-
-                <div class="mb-3">
-                    <strong>Contenu HTML:</strong>
-                    <div class="border rounded p-3 bg-light">
-                        {{ campaign.contenu_html|safe }}
-                    </div>
-                </div>
-
-                {% if campaign.contenu_texte %}
-                <div class="mb-0">
-                    <strong>Contenu texte:</strong>
-                    <pre class="bg-light p-3 rounded">{{ campaign.contenu_texte }}</pre>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Informations -->
-        <div class="card card-custom mt-4 bg-light">
-            <div class="card-body">
-                <small class="text-muted">
-                    <i class="bi bi-calendar"></i> Créée le {{ campaign.date_creation.strftime('%d/%m/%Y à %H:%M') }}
+                <div class="card-body">
+                    <p><i class="bi bi-calendar"></i> <strong>Créée le:</strong> {{ campaign.date_creation.strftime('%d/%m/%Y à %H:%M') }}</p>
                     {% if campaign.date_envoi %}
-                    | <i class="bi bi-send"></i> Envoi lancé le {{ campaign.date_envoi.strftime('%d/%m/%Y à %H:%M') }}
+                    <p><i class="bi bi-send"></i> <strong>Envoi lancé le:</strong> {{ campaign.date_envoi.strftime('%d/%m/%Y à %H:%M') }}</p>
                     {% endif %}
                     {% if campaign.date_fin_envoi %}
-                    | <i class="bi bi-check-circle"></i> Terminée le {{ campaign.date_fin_envoi.strftime('%d/%m/%Y à %H:%M') }}
+                    <p><i class="bi bi-check-circle text-success"></i> <strong>Terminée le:</strong> {{ campaign.date_fin_envoi.strftime('%d/%m/%Y à %H:%M') }}</p>
                     {% endif %}
-                </small>
+
+                    {% if campaign.statut != 'en_cours' %}
+                    <hr>
+                    <form method="POST" action="{{ url_for('main.admin_email_campaign_delete', id=campaign.id) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette campagne?');">
+                        <button type="submit" class="btn btn-danger w-100">
+                            <i class="bi bi-trash"></i> Supprimer la campagne
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Modal pour envoyer un test -->
+<div class="modal fade" id="testEmailModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title"><i class="bi bi-envelope-check"></i> Envoyer un email de test</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('main.admin_email_campaign_test', id=campaign.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Adresse email de test</label>
+                        <input type="email" name="test_email" class="form-control" value="{{ current_user.email }}" required>
+                        <small class="text-muted">L'email sera envoyé à cette adresse pour vérifier le rendu</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-send"></i> Envoyer le test
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}
