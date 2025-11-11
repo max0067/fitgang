@@ -6,9 +6,18 @@ from datetime import datetime, timedelta
 from flask import request, session
 from flask_login import current_user
 from app import db
-from app.models import Visit
 from sqlalchemy import func
 import uuid
+
+
+def check_visits_table_exists():
+    """Vérifie si la table visits existe dans la DB"""
+    try:
+        from sqlalchemy import inspect
+        inspector = inspect(db.engine)
+        return 'visits' in inspector.get_table_names()
+    except:
+        return False
 
 
 def track_visit():
@@ -17,6 +26,13 @@ def track_visit():
     Appelé automatiquement via before_request
     """
     try:
+        # Vérifier si la table visits existe
+        if not check_visits_table_exists():
+            return
+
+        # Import ici pour éviter les erreurs si la table n'existe pas
+        from app.models import Visit
+
         # Ne pas tracker les requêtes statiques et AJAX
         if request.endpoint and (
             request.endpoint.startswith('static') or
@@ -53,6 +69,29 @@ def get_visitor_stats():
     Récupère les statistiques de visiteurs
     Retourne un dictionnaire avec les stats
     """
+    # Vérifier si la table visits existe
+    if not check_visits_table_exists():
+        return {
+            'visitors_live': 0,
+            'pageviews_live': 0,
+            'visitors_today': 0,
+            'pageviews_today': 0,
+            'visitors_yesterday': 0,
+            'pageviews_yesterday': 0,
+            'visitors_week': 0,
+            'pageviews_week': 0,
+            'visitors_month': 0,
+            'pageviews_month': 0,
+            'visitors_total': 0,
+            'pageviews_total': 0,
+            'top_pages_today': [],
+            'top_referers_today': [],
+            'visitors_trend': []
+        }
+
+    # Import ici pour éviter les erreurs si la table n'existe pas
+    from app.models import Visit
+
     now = datetime.utcnow()
     today_start = datetime(now.year, now.month, now.day)
     yesterday_start = today_start - timedelta(days=1)
@@ -161,6 +200,13 @@ def get_hourly_stats_today():
     Retourne les stats par heure pour aujourd'hui
     Utile pour voir les pics d'activité
     """
+    # Vérifier si la table visits existe
+    if not check_visits_table_exists():
+        return []
+
+    # Import ici pour éviter les erreurs si la table n'existe pas
+    from app.models import Visit
+
     now = datetime.utcnow()
     today_start = datetime(now.year, now.month, now.day)
 
@@ -187,6 +233,13 @@ def cleanup_old_visits(days=90):
     Nettoie les anciennes visites pour ne pas surcharger la DB
     Par défaut, garde 90 jours d'historique
     """
+    # Vérifier si la table visits existe
+    if not check_visits_table_exists():
+        return 0
+
+    # Import ici pour éviter les erreurs si la table n'existe pas
+    from app.models import Visit
+
     cutoff_date = datetime.utcnow() - timedelta(days=days)
 
     try:
