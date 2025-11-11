@@ -2,6 +2,7 @@
 Initialisation de l'application Flask FitGang
 Configure les extensions et les blueprints
 """
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -21,6 +22,14 @@ def create_app(config_name='default'):
     """
     app = Flask(__name__)
     app.config.from_object(config[config_name])
+
+    # Configuration pour l'upload de fichiers
+    app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'uploads')
+    app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB max
+    app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'epub'}
+
+    # Créer le dossier uploads s'il n'existe pas
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     # Initialiser les extensions avec l'app
     db.init_app(app)

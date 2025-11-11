@@ -11,7 +11,7 @@
 
         <div class="card card-custom">
             <div class="card-body p-4">
-                <form method="POST" action="">
+                <form method="POST" action="" enctype="multipart/form-data">
                     {{ form.hidden_tag() }}
 
                     <div class="mb-3">
@@ -71,9 +71,25 @@
                     </div>
 
                     <div class="mb-3">
+                        {{ form.fichier.label(class="form-label fw-bold") }}
+                        {{ form.fichier(class="form-control") }}
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle"></i> Uploader un fichier PDF ou EPUB (max 50 MB)
+                            {% if ebook and ebook.fichier %}
+                                <br><i class="bi bi-check-circle text-success"></i> Fichier actuel: <strong>{{ ebook.fichier }}</strong>
+                            {% endif %}
+                        </small>
+                        {% if form.fichier.errors %}
+                            {% for error in form.fichier.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
                         {{ form.lien.label(class="form-label fw-bold") }}
                         {{ form.lien(class="form-control", placeholder="https://drive.google.com/...") }}
-                        <small class="text-muted">Lien Google Drive, Dropbox, etc. pour le téléchargement</small>
+                        <small class="text-muted">Ou utiliser un lien externe (Google Drive, Dropbox, etc.)</small>
                         {% if form.lien.errors %}
                             {% for error in form.lien.errors %}
                                 <div class="text-danger small">{{ error }}</div>

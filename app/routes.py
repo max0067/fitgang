@@ -4,10 +4,12 @@ Gère toutes les vues utilisateur et administrateur
 """
 import os
 import stripe
+import secrets
 from datetime import datetime
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app, session
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app, session, send_from_directory
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash
+from werkzeug.utils import secure_filename
 from functools import wraps
 from app import db
 from app.models import User, Programme, Ebook, Achat, Progression
@@ -32,6 +34,25 @@ def admin_required(f):
             return redirect(url_for('main.index'))
         return f(*args, **kwargs)
     return decorated_function
+
+
+def save_ebook_file(file):
+    """
+    Sauvegarde un fichier ebook uploadé de manière sécurisée
+    Retourne le nom du fichier sauvegardé
+    """
+    if file:
+        # Générer un nom de fichier unique et sécurisé
+        random_hex = secrets.token_hex(8)
+        _, file_ext = os.path.splitext(secure_filename(file.filename))
+        filename = f"ebook_{random_hex}{file_ext}"
+
+        # Sauvegarder le fichier
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        return filename
+    return None
 
 
 # ===== ROUTES PUBLIQUES =====
@@ -109,6 +130,38 @@ def ebooks():
     """Page listant tous les ebooks"""
     all_ebooks = Ebook.query.filter_by(actif=True).all()
     return render_template('ebooks.html', ebooks=all_ebooks)
+
+
+@bp.route('/ebook/<int:id>/download')
+@login_required
+def download_ebook(id):
+    """
+    Télécharger un ebook acheté
+    Vérifie que l'utilisateur a bien acheté l'ebook avant de permettre le téléchargement
+    """
+    ebook = Ebook.query.get_or_404(id)
+
+    # Vérifier que l'utilisateur a acheté cet ebook
+    if not current_user.has_purchased(id, 'ebook'):
+        flash('Vous devez acheter cet ebook avant de le télécharger.', 'warning')
+        return redirect(url_for('main.ebooks'))
+
+    # Vérifier que le fichier existe
+    if not ebook.fichier:
+        flash('Ce fichier n\'est pas disponible au téléchargement.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    # Envoyer le fichier
+    try:
+        return send_from_directory(
+            current_app.config['UPLOAD_FOLDER'],
+            ebook.fichier,
+            as_attachment=True,
+            download_name=f"{ebook.titre}.pdf"
+        )
+    except FileNotFoundError:
+        flash('Le fichier n\'a pas été trouvé.', 'danger')
+        return redirect(url_for('main.dashboard'))
 
 
 # ===== ROUTES UTILISATEUR =====
@@ -429,11 +482,17 @@ def admin_add_ebook():
     form = EbookForm()
 
     if form.validate_on_submit():
+        # Gérer l'upload du fichier ebook
+        fichier_name = None
+        if form.fichier.data:
+            fichier_name = save_ebook_file(form.fichier.data)
+
         ebook = Ebook(
             titre=form.titre.data,
             description=form.description.data,
             prix=form.prix.data,
             image=form.image.data,
+            fichier=fichier_name,
             lien=form.lien.data,
             nombre_pages=form.nombre_pages.data,
             actif=form.actif.data
@@ -458,6 +517,17 @@ def admin_edit_ebook(id):
     form = EbookForm()
 
     if form.validate_on_submit():
+        # Gérer l'upload d'un nouveau fichier
+        if form.fichier.data:
+            # Supprimer l'ancien fichier si il existe
+            if ebook.fichier:
+                old_file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], ebook.fichier)
+                if os.path.exists(old_file_path):
+                    os.remove(old_file_path)
+
+            # Sauvegarder le nouveau fichier
+            ebook.fichier = save_ebook_file(form.fichier.data)
+
         ebook.titre = form.titre.data
         ebook.description = form.description.data
         ebook.prix = form.prix.data
@@ -480,7 +550,7 @@ def admin_edit_ebook(id):
         form.nombre_pages.data = ebook.nombre_pages
         form.actif.data = ebook.actif
 
-    return render_template('admin_ebook_form.html', form=form, title='Modifier l\'ebook')
+    return render_template('admin_ebook_form.html', form=form, title='Modifier l\'ebook', ebook=ebook)
 
 
 @bp.route('/admin/ebook/<int:id>/delete', methods=['POST'])
