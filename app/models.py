@@ -280,3 +280,31 @@ class PageContent(db.Model):
 
     def __repr__(self):
         return f'<PageContent {self.section}>'
+
+
+class EmailCampaign(db.Model):
+    """
+    Modèle campagne d'email
+    Permet d'envoyer des emails en masse à la base de newsletter
+    """
+    __tablename__ = 'email_campaigns'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nom = db.Column(db.String(200), nullable=False)
+    sujet = db.Column(db.String(300), nullable=False)
+    contenu_html = db.Column(db.Text, nullable=False)
+    contenu_texte = db.Column(db.Text)  # Version texte de l'email
+    statut = db.Column(db.String(50), default='brouillon')  # brouillon, en_cours, terminee, erreur
+    emails_total = db.Column(db.Integer, default=0)
+    emails_envoyes = db.Column(db.Integer, default=0)
+    emails_erreurs = db.Column(db.Integer, default=0)
+    date_creation = db.Column(db.DateTime, default=datetime.utcnow)
+    date_envoi = db.Column(db.DateTime)
+    date_fin_envoi = db.Column(db.DateTime)
+    created_by_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    # Relation
+    created_by = db.relationship('User', backref=db.backref('email_campaigns', lazy='dynamic'))
+
+    def __repr__(self):
+        return f'<EmailCampaign {self.nom}>'

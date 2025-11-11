@@ -12,10 +12,11 @@ from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
 from app import db
-from app.models import User, Programme, Ebook, Achat, Progression, Photo, ProgrammeSeance, ProgrammeProgression, Complement, Newsletter, PageContent
+from app.models import User, Programme, Ebook, Achat, Progression, Photo, ProgrammeSeance, ProgrammeProgression, Complement, Newsletter, PageContent, EmailCampaign
 from app.forms import (LoginForm, RegistrationForm, ProfileForm, ChangePasswordForm,
-                       ProgressionForm, ProgrammeForm, EbookForm, SeanceForm, ComplementForm, HomepageContentForm)
+                       ProgressionForm, ProgrammeForm, EbookForm, SeanceForm, ComplementForm, HomepageContentForm, EmailCampaignForm, EmailImportForm)
 from app.email import send_welcome_email, send_purchase_confirmation_email, send_admin_notification_email
+from app.email_bulk import send_test_email, send_bulk_emails, preview_campaign_recipients, get_campaign_stats
 
 # Créer le blueprint
 bp = Blueprint('main', __name__)
@@ -66,8 +67,12 @@ def index():
 
     # Charger le contenu personnalisable de la page
     def get_content(section, default=''):
-        content = PageContent.query.filter_by(section=section).first()
-        return content.contenu if content else default
+        try:
+            content = PageContent.query.filter_by(section=section).first()
+            return content.contenu if content else default
+        except Exception as e:
+            print(f"Erreur lors du chargement de PageContent: {e}")
+            return default
 
     page_content = {
         'hero_titre': get_content('hero_titre', 'TRANSFORME TON CORPS, DÉPASSE TES LIMITES'),
@@ -1543,4 +1548,171 @@ def newsletter_subscribe():
 def admin_newsletter():
     """Liste des abonnés à la newsletter (admin)"""
     abonnes = Newsletter.query.filter_by(actif=True).order_by(Newsletter.date_inscription.desc()).all()
-    return render_template('admin_newsletter.html', abonnes=abonnes)
+    total_abonnes = Newsletter.query.filter_by(actif=True).count()
+    return render_template('admin_newsletter.html', abonnes=abonnes, total_abonnes=total_abonnes)
+
+
+@bp.route('/admin/newsletter/import', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_newsletter_import():
+    """Import d'emails en masse via CSV"""
+    form = EmailImportForm()
+    if form.validate_on_submit():
+        try:
+            file = form.fichier_csv.data
+            # Lire le fichier
+            content = file.read().decode('utf-8')
+            emails = []
+
+            # Parser le CSV (un email par ligne)
+            for line in content.split('\n'):
+                line = line.strip()
+                if line and '@' in line:
+                    # Extraire l'email (gérer les formats: email, "nom,email", etc.)
+                    if ',' in line:
+                        parts = line.split(',')
+                        email = parts[-1].strip().strip('"')
+                    else:
+                        email = line
+
+                    if email and '@' in email:
+                        emails.append(email.lower())
+
+            # Ajouter les emails à la base de données
+            added = 0
+            duplicates = 0
+            for email in set(emails):  # set() pour éviter les doublons dans le fichier
+                existing = Newsletter.query.filter_by(email=email).first()
+                if existing:
+                    if not existing.actif:
+                        existing.actif = True
+                        added += 1
+                    else:
+                        duplicates += 1
+                else:
+                    newsletter = Newsletter(email=email)
+                    db.session.add(newsletter)
+                    added += 1
+
+            db.session.commit()
+            flash(f'{added} emails importés avec succès! ({duplicates} doublons ignorés)', 'success')
+            return redirect(url_for('main.admin_newsletter'))
+
+        except Exception as e:
+            flash(f'Erreur lors de l\'import: {str(e)}', 'danger')
+
+    return render_template('admin_newsletter_import.html', form=form)
+
+
+@bp.route('/admin/email-campaigns')
+@login_required
+@admin_required
+def admin_email_campaigns():
+    """Liste des campagnes d'emails"""
+    campaigns = EmailCampaign.query.order_by(EmailCampaign.date_creation.desc()).all()
+    total_subscribers = Newsletter.query.filter_by(actif=True).count()
+    return render_template('admin_email_campaigns.html', campaigns=campaigns, total_subscribers=total_subscribers)
+
+
+@bp.route('/admin/email-campaigns/create', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_email_campaign_create():
+    """Créer une nouvelle campagne d'email"""
+    form = EmailCampaignForm()
+    if form.validate_on_submit():
+        campaign = EmailCampaign(
+            nom=form.nom.data,
+            sujet=form.sujet.data,
+            contenu_html=form.contenu_html.data,
+            contenu_texte=form.contenu_texte.data,
+            created_by_user_id=current_user.id,
+            statut='brouillon'
+        )
+        db.session.add(campaign)
+        db.session.commit()
+        flash('Campagne créée avec succès!', 'success')
+        return redirect(url_for('main.admin_email_campaign_detail', id=campaign.id))
+
+    return render_template('admin_email_campaign_form.html', form=form, title='Créer une campagne d\'email')
+
+
+@bp.route('/admin/email-campaigns/<int:id>')
+@login_required
+@admin_required
+def admin_email_campaign_detail(id):
+    """Détails d'une campagne d'email"""
+    campaign = EmailCampaign.query.get_or_404(id)
+    preview_emails = preview_campaign_recipients(id, limit=10)
+    total_subscribers = Newsletter.query.filter_by(actif=True).count()
+    return render_template('admin_email_campaign_detail.html',
+                         campaign=campaign,
+                         preview_emails=preview_emails,
+                         total_subscribers=total_subscribers)
+
+
+@bp.route('/admin/email-campaigns/<int:id>/test', methods=['POST'])
+@login_required
+@admin_required
+def admin_email_campaign_test(id):
+    """Envoyer un email de test"""
+    campaign = EmailCampaign.query.get_or_404(id)
+    test_email = request.form.get('test_email', current_user.email)
+
+    try:
+        text_body = campaign.contenu_texte or campaign.contenu_html.replace('<br>', '\n')
+        success = send_test_email(test_email, campaign.sujet, campaign.contenu_html, text_body)
+
+        if success:
+            flash(f'Email de test envoyé avec succès à {test_email}!', 'success')
+        else:
+            flash(f'Erreur lors de l\'envoi de l\'email de test. Vérifiez la configuration SMTP.', 'warning')
+    except Exception as e:
+        flash(f'Erreur: {str(e)}', 'danger')
+
+    return redirect(url_for('main.admin_email_campaign_detail', id=id))
+
+
+@bp.route('/admin/email-campaigns/<int:id>/send', methods=['POST'])
+@login_required
+@admin_required
+def admin_email_campaign_send(id):
+    """Lancer l'envoi en masse d'une campagne"""
+    campaign = EmailCampaign.query.get_or_404(id)
+
+    if campaign.statut == 'en_cours':
+        flash('Cette campagne est déjà en cours d\'envoi!', 'warning')
+        return redirect(url_for('main.admin_email_campaign_detail', id=id))
+
+    if campaign.statut == 'terminee':
+        flash('Cette campagne a déjà été envoyée!', 'info')
+        return redirect(url_for('main.admin_email_campaign_detail', id=id))
+
+    try:
+        # Lancer l'envoi en arrière-plan (pour un vrai serveur, utiliser Celery ou RQ)
+        # Pour l'instant, on lance de manière synchrone avec un petit batch
+        stats = send_bulk_emails(campaign.id, batch_size=50, delay_between_batches=2)
+
+        flash(f'Campagne envoyée! {stats["sent"]} emails envoyés, {stats["errors"]} erreurs sur {stats["total"]} destinataires.', 'success')
+    except Exception as e:
+        flash(f'Erreur lors du lancement de la campagne: {str(e)}', 'danger')
+
+    return redirect(url_for('main.admin_email_campaign_detail', id=id))
+
+
+@bp.route('/admin/email-campaigns/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_email_campaign_delete(id):
+    """Supprimer une campagne d'email"""
+    campaign = EmailCampaign.query.get_or_404(id)
+
+    if campaign.statut == 'en_cours':
+        flash('Impossible de supprimer une campagne en cours d\'envoi!', 'danger')
+        return redirect(url_for('main.admin_email_campaign_detail', id=id))
+
+    db.session.delete(campaign)
+    db.session.commit()
+    flash('Campagne supprimée avec succès!', 'info')
+    return redirect(url_for('main.admin_email_campaigns'))

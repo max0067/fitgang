@@ -155,3 +155,18 @@ class HomepageContentForm(FlaskForm):
     cta_texte = TextAreaField('Texte appel à l\'action final', validators=[DataRequired(), Length(max=500)])
 
     submit = SubmitField('Enregistrer les modifications')
+
+
+class EmailCampaignForm(FlaskForm):
+    """Formulaire de création de campagne d'email"""
+    nom = StringField('Nom de la campagne', validators=[DataRequired(), Length(max=200)])
+    sujet = StringField('Sujet de l\'email', validators=[DataRequired(), Length(max=300)])
+    contenu_html = TextAreaField('Contenu HTML', validators=[DataRequired()], render_kw={"rows": 15})
+    contenu_texte = TextAreaField('Contenu texte (optionnel)', validators=[Optional()], render_kw={"rows": 10})
+    submit = SubmitField('Créer la campagne')
+
+
+class EmailImportForm(FlaskForm):
+    """Formulaire d'import de liste d'emails"""
+    fichier_csv = FileField('Fichier CSV d\'emails', validators=[DataRequired(), FileAllowed(['csv', 'txt'], 'Seulement les fichiers CSV et TXT!')])
+    submit = SubmitField('Importer les emails')
