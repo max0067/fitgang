@@ -32,6 +32,10 @@ def create_app(config_name='default'):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
+    # Force template reloading in development
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
     # Configuration pour l'upload de fichiers
     app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'uploads')
     app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB max
