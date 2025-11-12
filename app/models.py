@@ -83,27 +83,8 @@ class Programme(db.Model):
     actif = db.Column(db.Boolean, default=True)
     date_creation = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Contenu de la page (JSON) - éditable depuis l'admin
-    content_json = db.Column(db.Text)  # Stocke le contenu structuré en JSON
-
     def __repr__(self):
         return f'<Programme {self.titre}>'
-
-    def get_content_data(self):
-        """Retourne le contenu structuré, ou des valeurs par défaut"""
-        import json
-        if self.content_json:
-            try:
-                return json.loads(self.content_json)
-            except:
-                pass
-        # Valeurs par défaut si pas de contenu
-        return {
-            'included_items': [],
-            'program_content': '',
-            'transformations': [],
-            'benefits': []
-        }
 
 
 class Ebook(db.Model):
