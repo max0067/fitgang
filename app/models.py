@@ -310,6 +310,45 @@ class EmailCampaign(db.Model):
         return f'<EmailCampaign {self.nom}>'
 
 
+class BlogPost(db.Model):
+    """
+    Modèle article de blog
+    Gestion des articles de blog avec SEO optimisé
+    """
+    __tablename__ = 'blog_posts'
+
+    id = db.Column(db.Integer, primary_key=True)
+    titre = db.Column(db.String(300), nullable=False)
+    slug = db.Column(db.String(350), unique=True, nullable=False, index=True)
+    meta_description = db.Column(db.String(160), nullable=False)
+    contenu = db.Column(db.Text, nullable=False)
+    image = db.Column(db.String(300))  # URL ou chemin de l'image principale
+    auteur = db.Column(db.String(100), default="FitGang Team")
+    publie = db.Column(db.Boolean, default=False)
+    featured = db.Column(db.Boolean, default=False)  # Article mis en avant
+    date_publication = db.Column(db.DateTime, default=datetime.utcnow)
+    date_modification = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    vues = db.Column(db.Integer, default=0)
+
+    # Tags et catégories
+    tags = db.Column(db.String(500))  # Tags séparés par des virgules
+    categorie = db.Column(db.String(100))  # Nutrition, Entraînement, Suppléments, etc.
+
+    def __repr__(self):
+        return f'<BlogPost {self.titre}>'
+
+    def increment_views(self):
+        """Incrémente le nombre de vues"""
+        self.vues += 1
+        db.session.commit()
+
+    def get_tags_list(self):
+        """Retourne les tags sous forme de liste"""
+        if self.tags:
+            return [tag.strip() for tag in self.tags.split(',')]
+        return []
+
+
 # TEMPORAIREMENT DÉSACTIVÉ - Analytics en cours de développement
 # class Visit(db.Model):
 #     """

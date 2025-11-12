@@ -46,6 +46,9 @@ class Config:
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER') or 'admin@fitgang.fr'
     ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL') or 'admin@fitgang.fr'
 
+    # Force le rechargement des templates (utile pour le développement et test)
+    TEMPLATES_AUTO_RELOAD = True
+
 
 class DevelopmentConfig(Config):
     """Configuration pour le développement"""
