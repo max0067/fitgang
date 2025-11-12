@@ -213,5 +213,54 @@ class HomepageProgrammesForm(FlaskForm):
     prog4_features = TextAreaField('Caractéristiques (une par ligne)', validators=[DataRequired()])
     prog4_prix = StringField('Prix', validators=[DataRequired(), Length(max=20)])
     prog4_image = StringField('URL de l\'image', validators=[DataRequired(), Length(max=500)])
-    
+
     submit = SubmitField('Sauvegarder les modifications')
+
+
+class BlogPostForm(FlaskForm):
+    """Formulaire pour créer/éditer un article de blog"""
+    titre = StringField('Titre de l\'article', validators=[
+        DataRequired(message='Le titre est obligatoire'),
+        Length(max=300, message='Le titre ne peut pas dépasser 300 caractères')
+    ])
+
+    meta_description = TextAreaField('Meta Description (SEO)', validators=[
+        DataRequired(message='La meta description est obligatoire'),
+        Length(min=50, max=160, message='La meta description doit faire entre 50 et 160 caractères')
+    ], description='Description affichée dans les résultats Google (50-160 caractères)')
+
+    contenu = TextAreaField('Contenu de l\'article', validators=[
+        DataRequired(message='Le contenu est obligatoire')
+    ], description='Utilisez HTML pour formater le contenu')
+
+    image = FileField('Image principale', validators=[
+        Optional(),
+        FileAllowed(['jpg', 'jpeg', 'png', 'gif', 'webp'], 'Seulement les images (JPG, PNG, GIF, WebP)')
+    ])
+
+    auteur = StringField('Auteur', validators=[
+        DataRequired(message='L\'auteur est obligatoire'),
+        Length(max=100)
+    ], default='FitGang Team')
+
+    categorie = SelectField('Catégorie', choices=[
+        ('', 'Sélectionner une catégorie'),
+        ('nutrition', 'Nutrition'),
+        ('entrainement', 'Entraînement'),
+        ('supplements', 'Suppléments'),
+        ('mindset', 'Mindset'),
+        ('motivation', 'Motivation'),
+        ('recettes', 'Recettes'),
+        ('conseils', 'Conseils'),
+        ('transformation', 'Transformations')
+    ], validators=[DataRequired(message='La catégorie est obligatoire')])
+
+    tags = StringField('Tags', validators=[
+        Optional(),
+        Length(max=500)
+    ], description='Tags séparés par des virgules (ex: protéines, musculation, perte de poids)')
+
+    publie = BooleanField('Publier l\'article', default=False)
+    featured = BooleanField('Mettre en avant sur la page blog', default=False)
+
+    submit = SubmitField('Enregistrer l\'article')

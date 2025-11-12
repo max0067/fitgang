@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.titre }} - Blog FitGang{% endblock %}
+
+{% block meta_description %}{{ article.meta_description }}{% endblock %}
+
+{% block content %}
+<!-- Article Header -->
+<article class="blog-article">
+    <header class="py-5 bg-dark text-white">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    {% if article.categorie %}
+                    <span class="badge bg-primary mb-3">{{ article.categorie|upper }}</span>
+                    {% endif %}
+
+                    <h1 class="display-4 fw-bold mb-4">{{ article.titre }}</h1>
+
+                    <div class="d-flex flex-wrap gap-4 align-items-center text-muted">
+                        <span><i class="bi bi-person-circle"></i> {{ article.auteur }}</span>
+                        <span><i class="bi bi-calendar3"></i> {{ article.date_publication.strftime('%d %B %Y') }}</span>
+                        <span><i class="bi bi-eye"></i> {{ article.vues }} vues</span>
+                        {% if article.tags %}
+                        <span><i class="bi bi-tags"></i> {{ article.tags }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Article Image -->
+    {% if article.image %}
+    <section class="article-image">
+        <div class="container py-4">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <img src="{{ url_for('static', filename='uploads/' + article.image) }}" alt="{{ article.titre }}" class="img-fluid rounded shadow-lg w-100">
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Article Content -->
+    <section class="article-content py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="content-body fs-5 lh-lg">
+                        {{ article.contenu|safe }}
+                    </div>
+
+                    <!-- Article Tags -->
+                    {% if article.tags %}
+                    <div class="mt-5 pt-4 border-top">
+                        <h5 class="mb-3">Tags:</h5>
+                        {% for tag in article.get_tags_list() %}
+                        <span class="badge bg-secondary me-2 mb-2">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Share Buttons -->
+                    <div class="mt-4 pt-4 border-top">
+                        <h5 class="mb-3">Partager cet article:</h5>
+                        <div class="d-flex gap-2">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-facebook"></i> Facebook
+                            </a>
+                            <a href="https://twitter.com/intent/tweet?url={{ request.url }}&text={{ article.titre }}" target="_blank" class="btn btn-outline-info btn-sm">
+                                <i class="bi bi-twitter"></i> Twitter
+                            </a>
+                            <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-linkedin"></i> LinkedIn
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Articles Similaires -->
+    {% if articles_similaires %}
+    <section class="related-articles py-5 bg-light">
+        <div class="container">
+            <h3 class="text-center mb-4 fw-bold">ARTICLES SIMILAIRES</h3>
+            <div class="row g-4">
+                {% for related in articles_similaires %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm">
+                        {% if related.image %}
+                        <img src="{{ url_for('static', filename='uploads/' + related.image) }}" class="card-img-top" alt="{{ related.titre }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=200&fit=crop" class="card-img-top" alt="{{ related.titre }}" style="height: 200px; object-fit: cover;">
+                        {% endif %}
+
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">{{ related.titre }}</h5>
+                            <p class="card-text text-muted small">{{ related.meta_description[:100] }}...</p>
+                            <a href="{{ url_for('main.blog_article', slug=related.slug) }}" class="btn btn-outline-primary btn-sm">
+                                Lire <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- CTA Section -->
+    <section class="py-5 text-white" style="background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);">
+        <div class="container text-center">
+            <h3 class="fw-bold mb-3">PRÊT À TRANSFORMER TON CORPS ?</h3>
+            <p class="lead mb-4">Découvre nos programmes exclusifs et rejoins la FitGang</p>
+            <a href="{{ url_for('main.programmes') }}" class="btn btn-warning btn-lg">
+                VOIR LES PROGRAMMES
+            </a>
+        </div>
+    </section>
+</article>
+
+<style>
+.content-body {
+    color: #333;
+}
+
+.content-body h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.content-body h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: bold;
+}
+
+.content-body p {
+    margin-bottom: 1.25rem;
+}
+
+.content-body ul, .content-body ol {
+    margin-bottom: 1.25rem;
+    padding-left: 2rem;
+}
+
+.content-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1.5rem 0;
+}
+
+.content-body blockquote {
+    border-left: 4px solid #007bff;
+    padding-left: 1.5rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    color: #666;
+}
+
+.content-body code {
+    background: #f4f4f4;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.25rem;
+    font-family: monospace;
+}
+
+.content-body pre {
+    background: #f4f4f4;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+}
+</style>
+{% endblock %}

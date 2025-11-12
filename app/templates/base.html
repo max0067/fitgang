@@ -26,47 +26,91 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
+                    <!-- Accueil -->
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.index') }}">Accueil</a>
+                        <a class="nav-link" href="{{ url_for('main.index') }}">
+                            <i class="bi bi-house"></i> Accueil
+                        </a>
                     </li>
+
+                    <!-- Programmes -->
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.programmes') }}">Programmes</a>
+                        <a class="nav-link" href="{{ url_for('main.programmes') }}">
+                            <i class="bi bi-lightning-charge"></i> Programmes
+                        </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.ebooks') }}">Ebooks</a>
+
+                    <!-- Ebooks Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="ebooksDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-book"></i> Ebooks
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="ebooksDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('main.ebooks') }}">Tous les Ebooks</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.ebooks') }}">Nutrition</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.ebooks') }}">Entraînement</a></li>
+                        </ul>
                     </li>
+
+                    <!-- Compléments Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="complementsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-capsule"></i> Compléments
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="complementsDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('main.complements') }}">Tous</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.complements') }}">Protéines</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.complements') }}">Créatine</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.complements') }}">Vitamines</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Blog -->
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.complements') }}">Compléments</a>
+                        <a class="nav-link" href="{{ url_for('main.blog') }}">
+                            <i class="bi bi-newspaper"></i> Blog
+                        </a>
                     </li>
 
                     {% if current_user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.dashboard') }}">Mon Tableau de Bord</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.profile') }}">Mon Profil</a>
+                        <!-- Mon Profil Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="profilDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle"></i> Mon Profil
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="profilDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('main.dashboard') }}"><i class="bi bi-speedometer2"></i> Tableau de Bord</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.profile') }}"><i class="bi bi-person"></i> Modifier Profil</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.change_password') }}"><i class="bi bi-key"></i> Changer Mot de Passe</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('main.logout') }}"><i class="bi bi-box-arrow-right"></i> Déconnexion</a></li>
+                            </ul>
                         </li>
 
+                        <!-- Admin Dropdown (si admin) -->
                         {% if current_user.is_admin %}
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-warning" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                <a class="nav-link dropdown-toggle text-warning" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-shield-fill"></i> Admin
                                 </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ url_for('main.admin_dashboard') }}">Dashboard</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('main.admin_programmes') }}">Gérer Programmes</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('main.admin_ebooks') }}">Gérer Ebooks</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('main.admin_complements') }}">Gérer Compléments</a></li>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" href="{{ url_for('main.admin_dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('main.admin_programmes') }}"><i class="bi bi-lightning"></i> Programmes</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('main.admin_ebooks') }}"><i class="bi bi-book"></i> Ebooks</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('main.admin_complements') }}"><i class="bi bi-capsule"></i> Compléments</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('main.admin_blog') }}"><i class="bi bi-newspaper"></i> Blog</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('main.admin_newsletter') }}"><i class="bi bi-envelope"></i> Newsletter</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('main.admin_email_campaigns') }}"><i class="bi bi-megaphone"></i> Campagnes Email</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('main.admin_homepage_content') }}"><i class="bi bi-pencil-square"></i> Contenu Homepage</a></li>
                                 </ul>
                             </li>
                         {% endif %}
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.logout') }}">
-                                <i class="bi bi-box-arrow-right"></i> Déconnexion
-                            </a>
-                        </li>
                     {% else %}
+                        <!-- Connexion / Inscription -->
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('main.login') }}">Connexion</a>
                         </li>

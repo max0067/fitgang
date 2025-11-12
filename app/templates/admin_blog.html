@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Gestion du Blog - Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">📝 GESTION DU BLOG</h1>
+        <a href="{{ url_for('main.admin_blog_new') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nouvel Article
+        </a>
+    </div>
+
+    <!-- Statistiques rapides -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h3 class="card-title">{{ articles|length }}</h3>
+                    <p class="card-text">Total Articles</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h3 class="card-title">{{ articles|selectattr('publie')|list|length }}</h3>
+                    <p class="card-text">Publiés</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h3 class="card-title">{{ articles|rejectattr('publie')|list|length }}</h3>
+                    <p class="card-text">Brouillons</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h3 class="card-title">{{ articles|sum(attribute='vues') }}</h3>
+                    <p class="card-text">Vues Totales</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des articles -->
+    <div class="card shadow">
+        <div class="card-body">
+            {% if articles %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Titre</th>
+                            <th>Catégorie</th>
+                            <th>Auteur</th>
+                            <th>Date</th>
+                            <th>Vues</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for article in articles %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if article.image %}
+                                    <img src="{{ url_for('static', filename='uploads/' + article.image) }}" alt="{{ article.titre }}" class="rounded me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="bg-secondary rounded me-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <i class="bi bi-file-text text-white"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <strong>{{ article.titre }}</strong>
+                                        {% if article.featured %}
+                                        <span class="badge bg-warning text-dark">⭐ Featured</span>
+                                        {% endif %}
+                                        <br>
+                                        <small class="text-muted">/blog/{{ article.slug }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if article.categorie %}
+                                <span class="badge bg-primary">{{ article.categorie }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ article.auteur }}</td>
+                            <td>{{ article.date_publication.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                <i class="bi bi-eye"></i> {{ article.vues }}
+                            </td>
+                            <td>
+                                {% if article.publie %}
+                                <span class="badge bg-success">Publié</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Brouillon</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ url_for('main.blog_article', slug=article.slug) }}" class="btn btn-outline-info" title="Voir" target="_blank">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('main.admin_blog_edit', id=article.id) }}" class="btn btn-outline-primary" title="Modifier">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger" title="Supprimer" onclick="deleteArticle({{ article.id }}, '{{ article.titre }}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Formulaire de suppression caché -->
+                                <form id="delete-form-{{ article.id }}" action="{{ url_for('main.admin_blog_delete', id=article.id) }}" method="POST" style="display: none;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-file-text" style="font-size: 4rem;"></i>
+                <p class="lead mt-3">Aucun article pour le moment</p>
+                <a href="{{ url_for('main.admin_blog_new') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Créer le premier article
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Boutons d'action -->
+    <div class="mt-4 d-flex gap-2">
+        <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour au Dashboard
+        </a>
+        <a href="{{ url_for('main.blog') }}" class="btn btn-outline-primary" target="_blank">
+            <i class="bi bi-box-arrow-up-right"></i> Voir le Blog Public
+        </a>
+    </div>
+</div>
+
+<script>
+function deleteArticle(id, titre) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer l'article "${titre}" ?\n\nCette action est irréversible.`)) {
+        document.getElementById('delete-form-' + id).submit();
+    }
+}
+</script>
+{% endblock %}

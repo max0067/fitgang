@@ -12,9 +12,9 @@ from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
 from app import db
-from app.models import User, Programme, Ebook, Achat, Progression, Photo, ProgrammeSeance, ProgrammeProgression, Complement, Newsletter, PageContent, EmailCampaign
+from app.models import User, Programme, Ebook, Achat, Progression, Photo, ProgrammeSeance, ProgrammeProgression, Complement, Newsletter, PageContent, EmailCampaign, BlogPost
 from app.forms import (LoginForm, RegistrationForm, ProfileForm, ChangePasswordForm,
-                       ProgressionForm, ProgrammeForm, EbookForm, SeanceForm, ComplementForm, HomepageContentForm, HomepageProgrammesForm, EmailCampaignForm, EmailImportForm)
+                       ProgressionForm, ProgrammeForm, EbookForm, SeanceForm, ComplementForm, HomepageContentForm, HomepageProgrammesForm, EmailCampaignForm, EmailImportForm, BlogPostForm)
 from app.email import send_welcome_email, send_purchase_confirmation_email, send_admin_notification_email
 from app.email_bulk import send_test_email, send_bulk_emails, preview_campaign_recipients, get_campaign_stats
 
@@ -1965,3 +1965,179 @@ def admin_email_campaign_delete(id):
     db.session.commit()
     flash('Campagne supprimée avec succès!', 'info')
     return redirect(url_for('main.admin_email_campaigns'))
+
+
+# ===== ROUTES BLOG =====
+
+@bp.route('/blog')
+def blog():
+    """Liste des articles de blog"""
+    # Pagination
+    page = request.args.get('page', 1, type=int)
+    per_page = 9
+
+    # Récupérer les articles publiés, triés par date
+    articles = BlogPost.query.filter_by(publie=True).order_by(BlogPost.date_publication.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
+    # Article featured (mis en avant)
+    featured_article = BlogPost.query.filter_by(publie=True, featured=True).first()
+
+    return render_template('blog.html', articles=articles, featured_article=featured_article)
+
+
+@bp.route('/blog/<slug>')
+def blog_article(slug):
+    """Afficher un article de blog"""
+    article = BlogPost.query.filter_by(slug=slug).first_or_404()
+
+    # Vérifier si l'article est publié (sauf pour les admins)
+    if not article.publie and (not current_user.is_authenticated or not current_user.is_admin):
+        flash('Cet article n\'est pas disponible.', 'warning')
+        return redirect(url_for('main.blog'))
+
+    # Incrémenter le compteur de vues
+    article.increment_views()
+
+    # Articles similaires (même catégorie, excluant l'article actuel)
+    articles_similaires = BlogPost.query.filter_by(
+        publie=True,
+        categorie=article.categorie
+    ).filter(BlogPost.id != article.id).limit(3).all()
+
+    return render_template('blog_article.html', article=article, articles_similaires=articles_similaires)
+
+
+# ===== ROUTES ADMIN BLOG =====
+
+@bp.route('/admin/blog')
+@login_required
+@admin_required
+def admin_blog():
+    """Page d'administration du blog"""
+    articles = BlogPost.query.order_by(BlogPost.date_publication.desc()).all()
+    return render_template('admin_blog.html', articles=articles)
+
+
+@bp.route('/admin/blog/new', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_blog_new():
+    """Créer un nouvel article de blog"""
+    form = BlogPostForm()
+
+    if form.validate_on_submit():
+        # Créer le slug à partir du titre
+        slug = form.titre.data.lower().replace(' ', '-')
+        # Retirer les caractères spéciaux
+        import re
+        slug = re.sub(r'[^a-z0-9-]', '', slug)
+
+        # Vérifier que le slug est unique
+        existing = BlogPost.query.filter_by(slug=slug).first()
+        counter = 1
+        original_slug = slug
+        while existing:
+            slug = f"{original_slug}-{counter}"
+            existing = BlogPost.query.filter_by(slug=slug).first()
+            counter += 1
+
+        # Gérer l'upload d'image
+        image_url = None
+        if form.image.data:
+            file = form.image.data
+            random_hex = secrets.token_hex(8)
+            _, file_ext = os.path.splitext(secure_filename(file.filename))
+            filename = f"blog_{random_hex}{file_ext}"
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            image_url = filename
+
+        article = BlogPost(
+            titre=form.titre.data,
+            slug=slug,
+            meta_description=form.meta_description.data,
+            contenu=form.contenu.data,
+            image=image_url,
+            auteur=form.auteur.data,
+            publie=form.publie.data,
+            featured=form.featured.data,
+            tags=form.tags.data,
+            categorie=form.categorie.data
+        )
+
+        db.session.add(article)
+        db.session.commit()
+
+        flash(f'Article "{article.titre}" créé avec succès!', 'success')
+        return redirect(url_for('main.admin_blog'))
+
+    return render_template('admin_blog_form.html', form=form, title='Nouvel Article')
+
+
+@bp.route('/admin/blog/<int:id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_blog_edit(id):
+    """Modifier un article de blog"""
+    article = BlogPost.query.get_or_404(id)
+    form = BlogPostForm(obj=article)
+
+    if form.validate_on_submit():
+        # Mettre à jour le slug si le titre a changé
+        if form.titre.data != article.titre:
+            slug = form.titre.data.lower().replace(' ', '-')
+            import re
+            slug = re.sub(r'[^a-z0-9-]', '', slug)
+
+            # Vérifier l'unicité
+            existing = BlogPost.query.filter(BlogPost.slug == slug, BlogPost.id != article.id).first()
+            counter = 1
+            original_slug = slug
+            while existing:
+                slug = f"{original_slug}-{counter}"
+                existing = BlogPost.query.filter(BlogPost.slug == slug, BlogPost.id != article.id).first()
+                counter += 1
+            article.slug = slug
+
+        # Gérer l'upload d'image
+        if form.image.data:
+            file = form.image.data
+            random_hex = secrets.token_hex(8)
+            _, file_ext = os.path.splitext(secure_filename(file.filename))
+            filename = f"blog_{random_hex}{file_ext}"
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            article.image = filename
+
+        article.titre = form.titre.data
+        article.meta_description = form.meta_description.data
+        article.contenu = form.contenu.data
+        article.auteur = form.auteur.data
+        article.publie = form.publie.data
+        article.featured = form.featured.data
+        article.tags = form.tags.data
+        article.categorie = form.categorie.data
+        article.date_modification = datetime.utcnow()
+
+        db.session.commit()
+
+        flash(f'Article "{article.titre}" mis à jour!', 'success')
+        return redirect(url_for('main.admin_blog'))
+
+    return render_template('admin_blog_form.html', form=form, article=article, title='Modifier Article')
+
+
+@bp.route('/admin/blog/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_blog_delete(id):
+    """Supprimer un article de blog"""
+    article = BlogPost.query.get_or_404(id)
+
+    db.session.delete(article)
+    db.session.commit()
+
+    flash(f'Article "{article.titre}" supprimé!', 'info')
+    return redirect(url_for('main.admin_blog'))

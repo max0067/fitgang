@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">{{ title }}</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+
+                        <!-- Titre -->
+                        <div class="mb-4">
+                            {{ form.titre.label(class="form-label fw-bold") }}
+                            {{ form.titre(class="form-control form-control-lg" + (" is-invalid" if form.titre.errors else "")) }}
+                            {% if form.titre.errors %}
+                                {% for error in form.titre.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Meta Description (SEO) -->
+                        <div class="mb-4">
+                            {{ form.meta_description.label(class="form-label fw-bold") }}
+                            {{ form.meta_description(class="form-control" + (" is-invalid" if form.meta_description.errors else ""), rows="3", id="metaDescription") }}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i> {{ form.meta_description.description }}
+                                <br>
+                                <span id="charCount" class="badge bg-secondary">0 caractères</span>
+                            </div>
+                            {% if form.meta_description.errors %}
+                                {% for error in form.meta_description.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Contenu -->
+                        <div class="mb-4">
+                            {{ form.contenu.label(class="form-label fw-bold") }}
+                            {{ form.contenu(class="form-control" + (" is-invalid" if form.contenu.errors else ""), rows="15", id="contenu") }}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i> {{ form.contenu.description }}
+                            </div>
+                            {% if form.contenu.errors %}
+                                {% for error in form.contenu.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <!-- Image -->
+                            <div class="col-md-6 mb-4">
+                                {{ form.image.label(class="form-label fw-bold") }}
+                                {{ form.image(class="form-control" + (" is-invalid" if form.image.errors else "")) }}
+                                {% if article and article.image %}
+                                <div class="mt-2">
+                                    <p class="small text-muted">Image actuelle:</p>
+                                    <img src="{{ url_for('static', filename='uploads/' + article.image) }}" alt="Image actuelle" class="img-thumbnail" style="max-width: 200px;">
+                                </div>
+                                {% endif %}
+                                {% if form.image.errors %}
+                                    {% for error in form.image.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <!-- Auteur -->
+                            <div class="col-md-6 mb-4">
+                                {{ form.auteur.label(class="form-label fw-bold") }}
+                                {{ form.auteur(class="form-control" + (" is-invalid" if form.auteur.errors else "")) }}
+                                {% if form.auteur.errors %}
+                                    {% for error in form.auteur.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Catégorie -->
+                            <div class="col-md-6 mb-4">
+                                {{ form.categorie.label(class="form-label fw-bold") }}
+                                {{ form.categorie(class="form-select" + (" is-invalid" if form.categorie.errors else "")) }}
+                                {% if form.categorie.errors %}
+                                    {% for error in form.categorie.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <!-- Tags -->
+                            <div class="col-md-6 mb-4">
+                                {{ form.tags.label(class="form-label fw-bold") }}
+                                {{ form.tags(class="form-control" + (" is-invalid" if form.tags.errors else "")) }}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle"></i> {{ form.tags.description }}
+                                </div>
+                                {% if form.tags.errors %}
+                                    {% for error in form.tags.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Options de publication -->
+                        <div class="mb-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">Options de Publication</h5>
+                                    <div class="form-check mb-2">
+                                        {{ form.publie(class="form-check-input") }}
+                                        {{ form.publie.label(class="form-check-label fw-bold") }}
+                                        <p class="small text-muted ms-4 mb-0">L'article sera visible sur le blog public</p>
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.featured(class="form-check-input") }}
+                                        {{ form.featured.label(class="form-check-label fw-bold") }}
+                                        <p class="small text-muted ms-4 mb-0">L'article sera affiché en grand en haut de la page blog</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="d-flex gap-2 justify-content-between">
+                            <a href="{{ url_for('main.admin_blog') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Annuler
+                            </a>
+                            <div class="d-flex gap-2">
+                                {% if article %}
+                                <a href="{{ url_for('main.blog_article', slug=article.slug) }}" class="btn btn-outline-info" target="_blank">
+                                    <i class="bi bi-eye"></i> Aperçu
+                                </a>
+                                {% endif %}
+                                {{ form.submit(class="btn btn-primary") }}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Compteur de caractères pour la meta description
+document.addEventListener('DOMContentLoaded', function() {
+    const metaDescInput = document.getElementById('metaDescription');
+    const charCount = document.getElementById('charCount');
+
+    function updateCharCount() {
+        const length = metaDescInput.value.length;
+        charCount.textContent = length + ' caractères';
+
+        if (length < 50) {
+            charCount.className = 'badge bg-danger';
+        } else if (length > 160) {
+            charCount.className = 'badge bg-warning text-dark';
+        } else {
+            charCount.className = 'badge bg-success';
+        }
+    }
+
+    metaDescInput.addEventListener('input', updateCharCount);
+    updateCharCount(); // Initial count
+});
+</script>
+{% endblock %}
