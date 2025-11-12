@@ -20,8 +20,8 @@ cp passenger_wsgi.py emergency_backup_$(date +%Y%m%d_%H%M%S)/ 2>/dev/null || ech
 # Téléchargement de la version stable depuis GitHub
 echo ""
 echo "2. Téléchargement de la version stable depuis GitHub..."
-echo "   (commit 503eff5 - version stable AVANT le blog)"
-curl -L https://github.com/max0067/fitgang/archive/503eff5.tar.gz -o recovery_stable.tar.gz
+echo "   (commit a848463 - FINAL WORKING VERSION avant le blog)"
+curl -L https://github.com/max0067/fitgang/archive/a848463.tar.gz -o recovery_stable.tar.gz
 
 echo ""
 echo "3. Extraction des fichiers..."
@@ -31,14 +31,14 @@ tar -xzf recovery_stable.tar.gz
 echo ""
 echo "4. Restauration du dossier app/..."
 rm -rf app 2>/dev/null || true
-cp -r fitgang-503eff5/app .
+cp -r fitgang-a848463/app .
 echo "   ✅ app/ restauré"
 
 # Restauration des fichiers critiques
 echo ""
 echo "5. Restauration des fichiers critiques..."
-cp fitgang-503eff5/config.py .
-cp fitgang-503eff5/passenger_wsgi.py .
+cp fitgang-a848463/config.py .
+cp fitgang-a848463/passenger_wsgi.py .
 echo "   ✅ config.py et passenger_wsgi.py restaurés"
 
 # Vérifier que .env existe
@@ -59,7 +59,7 @@ fi
 # Nettoyage
 echo ""
 echo "7. Nettoyage des fichiers temporaires..."
-rm -rf fitgang-503eff5 recovery_stable.tar.gz
+rm -rf fitgang-a848463 recovery_stable.tar.gz
 echo "   ✅ Nettoyé"
 
 # RESTART AGRESSIF de Passenger
