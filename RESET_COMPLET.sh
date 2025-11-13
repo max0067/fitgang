@@ -53,7 +53,7 @@ echo "   ✅ Code installé"
 echo ""
 echo "6. Création virtualenv propre..."
 python3 -m venv venv --without-pip
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+curl https://bootstrap.pypa.io/pip/3.6/get-pip.py -o get-pip.py
 venv/bin/python get-pip.py
 rm get-pip.py
 
