@@ -170,3 +170,27 @@ class EmailImportForm(FlaskForm):
     """Formulaire d'import de liste d'emails"""
     fichier_csv = FileField('Fichier CSV d\'emails', validators=[DataRequired(), FileAllowed(['csv', 'txt'], 'Seulement les fichiers CSV et TXT!')])
     submit = SubmitField('Importer les emails')
+
+
+class BlogPostForm(FlaskForm):
+    """Formulaire de création/modification d'article de blog"""
+    titre = StringField('Titre de l\'article', validators=[DataRequired(), Length(max=300)])
+    slug = StringField('Slug (URL)', validators=[DataRequired(), Length(max=350)])
+    extrait = TextAreaField('Extrait (résumé court)', validators=[Optional(), Length(max=500)], render_kw={"rows": 3})
+    contenu = TextAreaField('Contenu de l\'article (HTML supporté)', validators=[DataRequired()], render_kw={"rows": 20})
+    image_principale = StringField('URL de l\'image principale', validators=[Optional(), Length(max=500)])
+    categorie = SelectField('Catégorie', choices=[
+        ('', 'Sélectionner...'),
+        ('Nutrition', 'Nutrition'),
+        ('Entraînement', 'Entraînement'),
+        ('Mindset', 'Mindset'),
+        ('Supplémentation', 'Supplémentation'),
+        ('Récupération', 'Récupération'),
+        ('Cardio', 'Cardio'),
+        ('Musculation', 'Musculation'),
+        ('Transformation', 'Transformation'),
+        ('Conseils', 'Conseils')
+    ], validators=[Optional()])
+    tags = StringField('Tags (séparés par des virgules)', validators=[Optional(), Length(max=500)])
+    publie = BooleanField('Publier l\'article', default=True)
+    submit = SubmitField('Enregistrer')

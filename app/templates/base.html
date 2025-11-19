@@ -30,6 +30,9 @@
                         <a class="nav-link" href="{{ url_for('main.index') }}">Accueil</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.blog') }}">Blog</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('main.programmes') }}">Programmes</a>
                     </li>
                     <li class="nav-item">
@@ -54,6 +57,8 @@
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="{{ url_for('main.admin_dashboard') }}">Dashboard</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('main.admin_blog') }}">Gérer Blog</a></li>
                                     <li><a class="dropdown-item" href="{{ url_for('main.admin_programmes') }}">Gérer Programmes</a></li>
                                     <li><a class="dropdown-item" href="{{ url_for('main.admin_ebooks') }}">Gérer Ebooks</a></li>
                                     <li><a class="dropdown-item" href="{{ url_for('main.admin_complements') }}">Gérer Compléments</a></li>

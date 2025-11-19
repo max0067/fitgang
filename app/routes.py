@@ -12,9 +12,9 @@ from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
 from app import db
-from app.models import User, Programme, Ebook, Achat, Progression, Photo, ProgrammeSeance, ProgrammeProgression, Complement, Newsletter, PageContent, EmailCampaign
+from app.models import User, Programme, Ebook, Achat, Progression, Photo, ProgrammeSeance, ProgrammeProgression, Complement, Newsletter, PageContent, EmailCampaign, BlogPost
 from app.forms import (LoginForm, RegistrationForm, ProfileForm, ChangePasswordForm,
-                       ProgressionForm, ProgrammeForm, EbookForm, SeanceForm, ComplementForm, HomepageContentForm, EmailCampaignForm, EmailImportForm)
+                       ProgressionForm, ProgrammeForm, EbookForm, SeanceForm, ComplementForm, HomepageContentForm, EmailCampaignForm, EmailImportForm, BlogPostForm)
 from app.email import send_welcome_email, send_purchase_confirmation_email, send_admin_notification_email
 from app.email_bulk import send_test_email, send_bulk_emails, preview_campaign_recipients, get_campaign_stats
 
@@ -331,6 +331,51 @@ def complements():
 
     return render_template('complements.html',
                          complements_par_categorie=complements_par_categorie)
+
+
+# ===== ROUTES BLOG =====
+
+@bp.route('/blog')
+def blog():
+    """Page listant tous les articles de blog"""
+    page = request.args.get('page', 1, type=int)
+    categorie = request.args.get('categorie', None)
+
+    # Requête de base
+    query = BlogPost.query.filter_by(publie=True)
+
+    # Filtrer par catégorie si spécifiée
+    if categorie:
+        query = query.filter_by(categorie=categorie)
+
+    # Pagination
+    posts = query.order_by(BlogPost.date_publication.desc(), BlogPost.date_creation.desc())\
+        .paginate(page=page, per_page=9, error_out=False)
+
+    # Récupérer les catégories pour le filtre
+    categories = db.session.query(BlogPost.categorie).filter(BlogPost.categorie.isnot(None), BlogPost.publie==True).distinct().all()
+    categories = [cat[0] for cat in categories if cat[0]]
+
+    return render_template('blog.html', posts=posts, categories=categories, current_categorie=categorie)
+
+
+@bp.route('/blog/<slug>')
+def blog_detail(slug):
+    """Page de détail d'un article de blog"""
+    post = BlogPost.query.filter_by(slug=slug, publie=True).first_or_404()
+
+    # Incrémenter le compteur de vues
+    post.vues += 1
+    db.session.commit()
+
+    # Récupérer 3 articles similaires (même catégorie)
+    articles_similaires = BlogPost.query.filter(
+        BlogPost.id != post.id,
+        BlogPost.categorie == post.categorie,
+        BlogPost.publie == True
+    ).order_by(BlogPost.date_publication.desc()).limit(3).all()
+
+    return render_template('blog_detail.html', post=post, articles_similaires=articles_similaires)
 
 
 @bp.route('/complement/<int:id>')
@@ -1785,3 +1830,111 @@ def admin_email_campaign_delete(id):
     db.session.commit()
     flash('Campagne supprimée avec succès!', 'info')
     return redirect(url_for('main.admin_email_campaigns'))
+
+
+# ===== ROUTES ADMIN BLOG =====
+
+@bp.route('/admin/blog')
+@login_required
+@admin_required
+def admin_blog():
+    """Liste de tous les articles de blog (admin)"""
+    posts = BlogPost.query.order_by(BlogPost.date_creation.desc()).all()
+    return render_template('admin_blog.html', posts=posts)
+
+
+@bp.route('/admin/blog/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_add_blog_post():
+    """Ajouter un nouvel article de blog"""
+    form = BlogPostForm()
+
+    if form.validate_on_submit():
+        # Créer le slug à partir du titre si vide
+        import re
+        slug = form.slug.data
+        if not slug:
+            slug = re.sub(r'[^a-z0-9]+', '-', form.titre.data.lower()).strip('-')
+
+        post = BlogPost(
+            titre=form.titre.data,
+            slug=slug,
+            extrait=form.extrait.data,
+            contenu=form.contenu.data,
+            image_principale=form.image_principale.data,
+            categorie=form.categorie.data,
+            tags=form.tags.data,
+            publie=form.publie.data,
+            auteur_id=current_user.id,
+            date_publication=datetime.utcnow() if form.publie.data else None
+        )
+
+        db.session.add(post)
+        db.session.commit()
+
+        flash('Article créé avec succès!', 'success')
+        return redirect(url_for('main.admin_blog'))
+
+    return render_template('admin_blog_form.html', form=form, title='Créer un article')
+
+
+@bp.route('/admin/blog/<int:id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edit_blog_post(id):
+    """Modifier un article de blog"""
+    post = BlogPost.query.get_or_404(id)
+    form = BlogPostForm()
+
+    if form.validate_on_submit():
+        # Créer le slug à partir du titre si vide
+        import re
+        slug = form.slug.data
+        if not slug:
+            slug = re.sub(r'[^a-z0-9]+', '-', form.titre.data.lower()).strip('-')
+
+        post.titre = form.titre.data
+        post.slug = slug
+        post.extrait = form.extrait.data
+        post.contenu = form.contenu.data
+        post.image_principale = form.image_principale.data
+        post.categorie = form.categorie.data
+        post.tags = form.tags.data
+
+        # Mettre à jour la date de publication si on passe de brouillon à publié
+        if form.publie.data and not post.publie:
+            post.date_publication = datetime.utcnow()
+
+        post.publie = form.publie.data
+
+        db.session.commit()
+
+        flash('Article mis à jour!', 'success')
+        return redirect(url_for('main.admin_blog'))
+
+    elif request.method == 'GET':
+        form.titre.data = post.titre
+        form.slug.data = post.slug
+        form.extrait.data = post.extrait
+        form.contenu.data = post.contenu
+        form.image_principale.data = post.image_principale
+        form.categorie.data = post.categorie
+        form.tags.data = post.tags
+        form.publie.data = post.publie
+
+    return render_template('admin_blog_form.html', form=form, title='Modifier l\'article', post=post)
+
+
+@bp.route('/admin/blog/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_delete_blog_post(id):
+    """Supprimer un article de blog"""
+    post = BlogPost.query.get_or_404(id)
+
+    db.session.delete(post)
+    db.session.commit()
+
+    flash('Article supprimé.', 'info')
+    return redirect(url_for('main.admin_blog'))

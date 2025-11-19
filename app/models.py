@@ -308,3 +308,32 @@ class EmailCampaign(db.Model):
 
     def __repr__(self):
         return f'<EmailCampaign {self.nom}>'
+
+
+class BlogPost(db.Model):
+    """
+    Modèle article de blog
+    Représente un article de blog avec titre, contenu, images
+    """
+    __tablename__ = 'blog_posts'
+
+    id = db.Column(db.Integer, primary_key=True)
+    titre = db.Column(db.String(300), nullable=False)
+    slug = db.Column(db.String(350), unique=True, nullable=False, index=True)  # URL-friendly title
+    contenu = db.Column(db.Text, nullable=False)  # Contenu HTML de l'article
+    extrait = db.Column(db.Text)  # Court extrait pour la liste des articles
+    image_principale = db.Column(db.String(500))  # URL de l'image principale
+    auteur_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    categorie = db.Column(db.String(100))  # Ex: Nutrition, Entraînement, Mindset
+    tags = db.Column(db.String(500))  # Tags séparés par des virgules
+    vues = db.Column(db.Integer, default=0)  # Nombre de vues
+    publie = db.Column(db.Boolean, default=True)  # Publié ou brouillon
+    date_creation = db.Column(db.DateTime, default=datetime.utcnow)
+    date_modification = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    date_publication = db.Column(db.DateTime)
+
+    # Relation
+    auteur = db.relationship('User', backref=db.backref('blog_posts', lazy='dynamic'))
+
+    def __repr__(self):
+        return f'<BlogPost {self.titre}>'
