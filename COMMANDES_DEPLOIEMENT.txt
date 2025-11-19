@@ -1,0 +1,43 @@
+# COMMANDES DE DÉPLOIEMENT MANUEL
+# Copiez-collez ces commandes une par une dans votre terminal SSH
+
+# 1. Vérifier la branche actuelle
+git branch
+
+# 2. Récupérer la bonne branche
+git fetch origin
+git checkout claude/fix-blog-layout-cache-01BREgfFyut2YeX3GdQanxWK
+git pull origin claude/fix-blog-layout-cache-01BREgfFyut2YeX3GdQanxWK
+
+# 3. Créer la table blog_posts
+python3 << 'EOF'
+import sys
+sys.path.insert(0, '/home/wrbh3411/fitgang_app/saas')
+from app import create_app, db
+from app.models import BlogPost
+
+app = create_app('production')
+with app.app_context():
+    db.create_all()
+    print("✓ Table blog_posts créée")
+EOF
+
+# 4. Redémarrer l'application
+mkdir -p tmp
+touch tmp/restart.txt
+
+# 5. Vérifier que tout fonctionne
+python3 << 'EOF'
+import sys
+sys.path.insert(0, '/home/wrbh3411/fitgang_app/saas')
+from app import create_app, db
+from app.models import BlogPost
+
+app = create_app('production')
+with app.app_context():
+    count = BlogPost.query.count()
+    print(f"✓ Vérification OK - {count} articles dans la base")
+EOF
+
+# 6. TERMINÉ !
+# Testez: https://fitgang.fr/blog
