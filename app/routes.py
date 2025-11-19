@@ -1363,6 +1363,13 @@ def photos():
                          photos_apres=photos_apres)
 
 
+@bp.route('/profile/photos')
+@login_required
+def profile_photos():
+    """Redirection vers /photos pour compatibilité"""
+    return redirect(url_for('main.photos'))
+
+
 @bp.route('/photo/upload', methods=['POST'])
 @login_required
 def upload_photo():
